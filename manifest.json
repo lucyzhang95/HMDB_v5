@@ -1,0 +1,22 @@
+{
+  "version": "5.0",
+  "__metadata__": {
+    "url": "https://hmdb.ca/",
+    "description": "The Human Metabolome Database",
+    "License": "CC BY 4.0"
+  },
+  "display_name": "HMDBv5",
+  "biothing_type": "association",
+  "requires": [
+  ],
+  "dumper": {
+    "data_url": [
+      "https://hmdb.ca/system/downloads/current/hmdb_metabolites.zip"
+    ],
+    "release": "version:get_release"
+  },
+  "uploader": {
+    "parser": "HMDB_v5:load_hmdbv5_data",
+    "on_duplicates": "error"
+  }
+}

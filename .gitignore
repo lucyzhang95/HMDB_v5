@@ -1,3 +1,5 @@
+.idea
 .venv
 downloads
 parse_xml.ipynb
+temp_dir

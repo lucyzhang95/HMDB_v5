@@ -74,4 +74,5 @@ def get_ncit_taxon_description(taxon_names):
                 }
                 if ncit_output["name"] == name:
                     mapping_result[name] = ncit_output
+                    del mapping_result[name]["name"]
     return mapping_result

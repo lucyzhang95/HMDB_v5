@@ -1,9 +1,11 @@
-from lxml import etree as ET
 import os
 import zipfile
 
+from lxml import etree as ET
+
 CACHE_DIR = os.path.join(os.getcwd(), "cache")
-os.makedirs(CACHE_DIR, exist_ok = True)
+os.makedirs(CACHE_DIR, exist_ok=True)
+
 
 def strip_tag_namespace(tag: str) -> str:
     """Strip namespace from main element tag

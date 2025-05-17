@@ -4,6 +4,5 @@ downloads
 temp_dir
 cache
 
-parse_xml.ipynb
 pyproject.toml
 .flake8

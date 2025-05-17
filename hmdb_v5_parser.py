@@ -2,6 +2,7 @@ import os
 import ssl
 import zipfile
 
+import requests
 from ete3 import NCBITaxa
 from lxml import etree as ET
 
@@ -47,3 +48,30 @@ def ete3_taxon_name2taxid(taxon_names: list) -> dict:
         if taxid:
             ete3_mapped[name] = {"taxid": int(taxid[0])}
     return ete3_mapped
+
+
+def get_ncit_taxon_description(taxon_names):
+    API_KEY = "efd61c1d-74a2-4877-b4ff-37ba827a96bc"
+    search_url = "https://data.bioontology.org/search"
+    taxon_names = set(taxon_names)
+    mapping_result = {}
+    for name in taxon_names:
+        params = {
+            "q": name,
+            "ontologies": "NCIT",
+            "apikey": API_KEY,
+        }
+        response = requests.get(search_url, params=params)
+        data = response.json()
+        for result in data.get("collection", []):
+            if result:
+                ncit_output = {
+                    "ncit": result.get("@id").split("#")[1],
+                    "name": result.get("prefLabel").lower(),
+                    "description": f"{result.get('definition')[0]} [NCIT]"
+                    if "definition" in result
+                    else "",
+                }
+                if ncit_output["name"] == name:
+                    mapping_result[name] = ncit_output
+    return mapping_result

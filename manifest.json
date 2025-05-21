@@ -3,7 +3,9 @@
   "__metadata__": {
     "url": "https://hmdb.ca/",
     "description": "The Human Metabolome Database",
-    "License": "CC BY 4.0"
+    "license": "CC BY 4.0",
+    "source_last_modified": "02/16/2022",
+    "source_download_date": "05/13/2025"
   },
   "display_name": "HMDBv5",
   "biothing_type": "association",

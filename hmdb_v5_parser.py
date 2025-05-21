@@ -1,6 +1,8 @@
 import os
+import pathlib
 import ssl
 import zipfile
+from typing import Iterator
 
 import requests
 from ete3 import NCBITaxa
@@ -26,13 +28,41 @@ def strip_tag_namespace(tag: str) -> str:
     return tag
 
 
+def get_all_microbe_names(input_xml: str | pathlib.Path) -> Iterator[str]:
+    """Extracts microbe taxon names
+    metabolite > ontology > root (2nd) > Disposition > descendants > descendant > Microbe
+    <term>Microbe</term> is in the 2nd root under ontology
+
+    :param input_xml: "downloads/hmdb_metabolites.xml"
+    :return: yields all microbe taxon names
+    """
+    ns_uri = "http://www.hmdb.ca"
+    term_tag = f"{{{ns_uri}}}term"
+    descendant_tag = f"{{{ns_uri}}}descendant"
+    ontology_tag = f"{{{ns_uri}}}ontology"
+
+    for event, elem in ET.iterparse(str(input_xml), events=("end",), tag=f"{{{ns_uri}}}metabolite"):
+        ontology = elem.find(ontology_tag)
+        if ontology is not None:
+            for root in ontology.findall(f"{f'{{{ns_uri}}}root'}"):
+                term_elem = root.find(term_tag)
+                if term_elem is not None and term_elem.text == "Disposition":
+                    for descendant in root.findall(f".//{descendant_tag}"):
+                        term = descendant.find(term_tag)
+                        if term is not None and term.text == "Microbe":
+                            microbe_terms = descendant.findall(f".//{term_tag}")
+                            for mt in microbe_terms[1:]:  # skip first term == Microbe
+                                if mt.text:
+                                    yield mt.text.strip().lower()
+        elem.clear()
+
+
 def ete3_taxon_name2taxid(taxon_names: list) -> dict:
     """Use ete3 to map taxonomy names to NCBI taxonomy ids
     ete3 is good at mapping exact taxonomy names and fast without accessing API
 
-    :param taxon_names: a list of taxon names (the values of the output of preprocess_taxon_name)
-    :return: a dictionary mapping taxon names to taxid numbers
-    {'human papillomavirus 11': 10580, 'veillonella sp.': 1926307, ...}
+    :param taxon_names: a list of taxon names
+    :return: a dictionary mapping taxon names to taxids
     """
     ete3_mapped = {}
     taxon_names = set(taxon_names)

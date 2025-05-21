@@ -1,0 +1,1928 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<metabolite xmlns="http://www.hmdb.ca">
+  <version>5.0</version>
+  <creation_date>2006-08-13 16:50:24 UTC</creation_date>
+  <update_date>2021-09-07 16:45:36 UTC</update_date>
+  <accession>HMDB0004327</accession>
+  <status>quantified</status>
+  <secondary_accessions>
+    <accession>HMDB04327</accession>
+  </secondary_accessions>
+  <name>1-Butanol</name>
+  <description>1-Butanol, which is also known as n-butanol or 1-butanol or butyl alcohol (sometimes also called biobutanol when produced biologically), is an alcohol with a 4 carbon structure and the molecular formula of C4H10O. It is primarily used as a solvent, as an intermediate in chemical synthesis, and as a fuel. There are four isomeric structures for butanol. The straight chain isomer with the alcohol at an internal carbon is sec-butanol or 2-butanol. The branched isomer with the alcohol at a terminal carbon is isobutanol, and the branched isomer with the alcohol at the internal carbon is tert-butanol. 1-Butanol is produced in small amounts by gut microbial fermenetation through the butanoate metabolic pathway. It has been found in Bacillus, Clostridium, Escherichia, Lactobacillus, Pseudomonas, Saccharomyces, Synechococcus and Thermoanaerobacterium.</description>
+  <synonyms>
+    <synonym>1-Butyl alcohol</synonym>
+    <synonym>1-Hydroxybutane</synonym>
+    <synonym>BuOH</synonym>
+    <synonym>N-Butan-1-ol</synonym>
+    <synonym>N-Butanol</synonym>
+    <synonym>N-Butyl alcohol</synonym>
+    <synonym>N-Butylalkohol</synonym>
+    <synonym>Propyl carbinol</synonym>
+    <synonym>Butan-1-ol</synonym>
+    <synonym>Butanol</synonym>
+    <synonym>Butyl alcohol</synonym>
+    <synonym>Butyl hydroxide</synonym>
+    <synonym>Hemostyp</synonym>
+    <synonym>Methylolpropane</synonym>
+    <synonym>Propylcarbinol</synonym>
+    <synonym>Alcohol, N-butyl</synonym>
+    <synonym>N Butyl alcohol</synonym>
+    <synonym>Alcohol, butyl</synonym>
+    <synonym>1 Butanol</synonym>
+    <synonym>N Butanol</synonym>
+    <synonym>1-Butanol</synonym>
+  </synonyms>
+  <chemical_formula>C4H10O</chemical_formula>
+  <average_molecular_weight>74.1216</average_molecular_weight>
+  <monisotopic_molecular_weight>74.073164942</monisotopic_molecular_weight>
+  <iupac_name>butan-1-ol</iupac_name>
+  <traditional_iupac>butanol</traditional_iupac>
+  <cas_registry_number>71-36-3</cas_registry_number>
+  <smiles>CCCCO</smiles>
+  <inchi>InChI=1S/C4H10O/c1-2-3-4-5/h5H,2-4H2,1H3</inchi>
+  <inchikey>LRHPLDYGYMQRHN-UHFFFAOYSA-N</inchikey>
+  <taxonomy>
+    <description> belongs to the class of organic compounds known as primary alcohols. Primary alcohols are compounds comprising the primary alcohol functional group, with the general structure RCOH (R=alkyl, aryl).</description>
+    <direct_parent>Primary alcohols</direct_parent>
+    <kingdom>Organic compounds</kingdom>
+    <super_class>Organic oxygen compounds</super_class>
+    <class>Organooxygen compounds</class>
+    <sub_class>Alcohols and polyols</sub_class>
+    <molecular_framework>Aliphatic acyclic compounds</molecular_framework>
+    <alternative_parents>
+      <alternative_parent>Hydrocarbon derivatives</alternative_parent>
+    </alternative_parents>
+    <substituents>
+      <substituent>Aliphatic acyclic compound</substituent>
+      <substituent>Hydrocarbon derivative</substituent>
+      <substituent>Primary alcohol</substituent>
+    </substituents>
+    <external_descriptors>
+      <external_descriptor>Fatty alcohols</external_descriptor>
+      <external_descriptor>a primary alcohol</external_descriptor>
+      <external_descriptor>alkyl alcohol</external_descriptor>
+      <external_descriptor>primary alcohol</external_descriptor>
+    </external_descriptors>
+  </taxonomy>
+  <ontology>
+    <root>
+      <term>Physiological effect</term>
+      <definition>The effect on an organism physiology, resulting from its exposure to a chemical.</definition>
+      <parent_id/>
+      <level>1</level>
+      <type>parent</type>
+      <descendants>
+        <descendant>
+          <term>Health effect</term>
+          <definition>A health condition or observation associated with a stimuli or with a biological activity of a chemical.</definition>
+          <parent_id>7693</parent_id>
+          <level>2</level>
+          <type>parent</type>
+          <synonyms>
+          </synonyms>
+          <descendants>
+            <descendant>
+              <term>Health condition</term>
+              <definition>A health effect that consists on short or long-term disease, condition, disorder, syndrome or constant abnormality.</definition>
+              <parent_id>7694</parent_id>
+              <level>3</level>
+              <type>parent</type>
+              <synonyms>
+              </synonyms>
+              <descendants>
+                <descendant>
+                  <term>Diabetes mellitus type 2</term>
+                  <definition/>
+                  <parent_id>7695</parent_id>
+                  <level>4</level>
+                  <type>child</type>
+                  <synonyms>
+                    <synonym>Non-insulin-dependent diabetes mellitus</synonym>
+                    <synonym>Niddm</synonym>
+                    <synonym>Adult-onset diabetes</synonym>
+                  </synonyms>
+                </descendant>
+              </descendants>
+            </descendant>
+          </descendants>
+        </descendant>
+      </descendants>
+    </root>
+    <root>
+      <term>Disposition</term>
+      <definition>A concept that describes the origin of a chemical, its location within an organism, or its route of exposure.</definition>
+      <parent_id/>
+      <level>1</level>
+      <type>parent</type>
+      <descendants>
+        <descendant>
+          <term>Route of exposure</term>
+          <definition>A mean by which a chemical agent comes in contact with an organism, either under intended or unintended circumstances.</definition>
+          <parent_id>7724</parent_id>
+          <level>2</level>
+          <type>parent</type>
+          <synonyms>
+          </synonyms>
+          <descendants>
+            <descendant>
+              <term>Enteral</term>
+              <definition>Chemical exposure via the alimentary canal (mouth to anus).</definition>
+              <parent_id>7743</parent_id>
+              <level>3</level>
+              <type>parent</type>
+              <synonyms>
+              </synonyms>
+              <descendants>
+                <descendant>
+                  <term>Ingestion</term>
+                  <definition>Chemical exposure facilitated by entry through the mouth.</definition>
+                  <parent_id>7744</parent_id>
+                  <level>4</level>
+                  <type>child</type>
+                  <synonyms>
+                    <synonym>Digestion</synonym>
+                  </synonyms>
+                </descendant>
+              </descendants>
+            </descendant>
+          </descendants>
+        </descendant>
+        <descendant>
+          <term>Source</term>
+          <definition>Natural or synthetic origin of a chemical.</definition>
+          <parent_id>7724</parent_id>
+          <level>2</level>
+          <type>parent</type>
+          <synonyms>
+          </synonyms>
+          <descendants>
+            <descendant>
+              <term>Endogenous</term>
+              <definition/>
+              <parent_id>7735</parent_id>
+              <level>3</level>
+              <type>child</type>
+              <synonyms>
+              </synonyms>
+            </descendant>
+            <descendant>
+              <term>Food</term>
+              <definition/>
+              <parent_id>7735</parent_id>
+              <level>3</level>
+              <type>child</type>
+              <synonyms>
+              </synonyms>
+            </descendant>
+            <descendant>
+              <term>Biological</term>
+              <definition>A living organism (species or a higher taxonomy rank), in which a chemical can be found.</definition>
+              <parent_id>7735</parent_id>
+              <level>3</level>
+              <type>parent</type>
+              <synonyms>
+              </synonyms>
+              <descendants>
+                <descendant>
+                  <term>Animal</term>
+                  <definition>A living organism belonging to the kingdom animalia. it feeds on organic matter, typically having specialized sense organs and nervous system and able to respond rapidly to stimuli.</definition>
+                  <parent_id>7736</parent_id>
+                  <level>4</level>
+                  <type>child</type>
+                  <synonyms>
+                    <synonym>Fauna</synonym>
+                  </synonyms>
+                </descendant>
+                <descendant>
+                  <term>Saccharomyces cerevisiae</term>
+                  <definition/>
+                  <parent_id>7736</parent_id>
+                  <level>4</level>
+                  <type>child</type>
+                  <synonyms>
+                    <synonym>Baker's yeast</synonym>
+                  </synonyms>
+                </descendant>
+                <descendant>
+                  <term>Microbe</term>
+                  <definition>A living organism that is of a microscopic scale, either single-celled or a cluster of cells.</definition>
+                  <parent_id>7736</parent_id>
+                  <level>4</level>
+                  <type>parent</type>
+                  <synonyms>
+                  </synonyms>
+                  <descendants>
+                    <descendant>
+                      <term>Thermoanaerobacterium</term>
+                      <definition/>
+                      <parent_id>7739</parent_id>
+                      <level>5</level>
+                      <type>parent</type>
+                      <synonyms>
+                      </synonyms>
+                      <descendants>
+                        <descendant>
+                          <term>Thermoanaerobacterium saccharolyticum</term>
+                          <definition/>
+                          <parent_id>11389</parent_id>
+                          <level>6</level>
+                          <type>child</type>
+                          <synonyms>
+                          </synonyms>
+                        </descendant>
+                      </descendants>
+                    </descendant>
+                    <descendant>
+                      <term>Synechococcus</term>
+                      <definition/>
+                      <parent_id>7739</parent_id>
+                      <level>5</level>
+                      <type>parent</type>
+                      <synonyms>
+                      </synonyms>
+                      <descendants>
+                        <descendant>
+                          <term>Synechococcus elongatus</term>
+                          <definition/>
+                          <parent_id>11387</parent_id>
+                          <level>6</level>
+                          <type>child</type>
+                          <synonyms>
+                          </synonyms>
+                        </descendant>
+                      </descendants>
+                    </descendant>
+                    <descendant>
+                      <term>Pseudomonas</term>
+                      <definition/>
+                      <parent_id>7739</parent_id>
+                      <level>5</level>
+                      <type>parent</type>
+                      <synonyms>
+                      </synonyms>
+                      <descendants>
+                        <descendant>
+                          <term>Pseudomonas putida</term>
+                          <definition/>
+                          <parent_id>11365</parent_id>
+                          <level>6</level>
+                          <type>child</type>
+                          <synonyms>
+                          </synonyms>
+                        </descendant>
+                      </descendants>
+                    </descendant>
+                    <descendant>
+                      <term>Lactobacillus</term>
+                      <definition/>
+                      <parent_id>7739</parent_id>
+                      <level>5</level>
+                      <type>parent</type>
+                      <synonyms>
+                      </synonyms>
+                      <descendants>
+                        <descendant>
+                          <term>Lactobacillus brevis</term>
+                          <definition/>
+                          <parent_id>11319</parent_id>
+                          <level>6</level>
+                          <type>child</type>
+                          <synonyms>
+                          </synonyms>
+                        </descendant>
+                      </descendants>
+                    </descendant>
+                    <descendant>
+                      <term>Escherichia</term>
+                      <definition/>
+                      <parent_id>7739</parent_id>
+                      <level>5</level>
+                      <type>parent</type>
+                      <synonyms>
+                      </synonyms>
+                      <descendants>
+                        <descendant>
+                          <term>Escherichia coli</term>
+                          <definition/>
+                          <parent_id>11296</parent_id>
+                          <level>6</level>
+                          <type>child</type>
+                          <synonyms>
+                          </synonyms>
+                        </descendant>
+                      </descendants>
+                    </descendant>
+                    <descendant>
+                      <term>Bacillus</term>
+                      <definition/>
+                      <parent_id>7739</parent_id>
+                      <level>5</level>
+                      <type>parent</type>
+                      <synonyms>
+                      </synonyms>
+                      <descendants>
+                        <descendant>
+                          <term>Bacillus cereus </term>
+                          <definition/>
+                          <parent_id>11263</parent_id>
+                          <level>6</level>
+                          <type>child</type>
+                          <synonyms>
+                          </synonyms>
+                        </descendant>
+                        <descendant>
+                          <term>Bacillus subtilis</term>
+                          <definition/>
+                          <parent_id>11263</parent_id>
+                          <level>6</level>
+                          <type>child</type>
+                          <synonyms>
+                          </synonyms>
+                        </descendant>
+                      </descendants>
+                    </descendant>
+                    <descendant>
+                      <term>Clostridium</term>
+                      <definition/>
+                      <parent_id>7739</parent_id>
+                      <level>5</level>
+                      <type>parent</type>
+                      <synonyms>
+                      </synonyms>
+                      <descendants>
+                        <descendant>
+                          <term>Clostridium acetobutylicum</term>
+                          <definition/>
+                          <parent_id>11279</parent_id>
+                          <level>6</level>
+                          <type>child</type>
+                          <synonyms>
+                          </synonyms>
+                        </descendant>
+                        <descendant>
+                          <term>Clostridium beijerinckii</term>
+                          <definition/>
+                          <parent_id>11279</parent_id>
+                          <level>6</level>
+                          <type>child</type>
+                          <synonyms>
+                          </synonyms>
+                        </descendant>
+                        <descendant>
+                          <term>Clostridium butylicum</term>
+                          <definition/>
+                          <parent_id>11279</parent_id>
+                          <level>6</level>
+                          <type>child</type>
+                          <synonyms>
+                          </synonyms>
+                        </descendant>
+                        <descendant>
+                          <term>Clostridium carboxidivorans</term>
+                          <definition/>
+                          <parent_id>11279</parent_id>
+                          <level>6</level>
+                          <type>child</type>
+                          <synonyms>
+                          </synonyms>
+                        </descendant>
+                        <descendant>
+                          <term>Clostridium cellulovorans</term>
+                          <definition/>
+                          <parent_id>11279</parent_id>
+                          <level>6</level>
+                          <type>child</type>
+                          <synonyms>
+                          </synonyms>
+                        </descendant>
+                        <descendant>
+                          <term>Clostridium pasteurianum </term>
+                          <definition/>
+                          <parent_id>11279</parent_id>
+                          <level>6</level>
+                          <type>child</type>
+                          <synonyms>
+                          </synonyms>
+                        </descendant>
+                        <descendant>
+                          <term>Clostridium tyrobutyricum</term>
+                          <definition/>
+                          <parent_id>11279</parent_id>
+                          <level>6</level>
+                          <type>child</type>
+                          <synonyms>
+                          </synonyms>
+                        </descendant>
+                      </descendants>
+                    </descendant>
+                  </descendants>
+                </descendant>
+                <descendant>
+                  <term>Plant</term>
+                  <definition>A living organism belonging to the kingdom plantea. typically, it grows in a permanent site, absorbs water and inorganic substances through its roots, and synthesizes nutrients in its leaves by photosynthesis using the green pigment chlorophyll. examples incude trees, shrubs, herbs, grasses, ferns, and mosses.</definition>
+                  <parent_id>7736</parent_id>
+                  <level>4</level>
+                  <type>parent</type>
+                  <synonyms>
+                    <synonym>Flora</synonym>
+                  </synonyms>
+                  <descendants>
+                    <descendant>
+                      <term>Poaceae</term>
+                      <definition/>
+                      <parent_id>7738</parent_id>
+                      <level>5</level>
+                      <type>child</type>
+                      <synonyms>
+                        <synonym>Gramineae</synonym>
+                      </synonyms>
+                    </descendant>
+                    <descendant>
+                      <term>Fabaceae</term>
+                      <definition/>
+                      <parent_id>7738</parent_id>
+                      <level>5</level>
+                      <type>child</type>
+                      <synonyms>
+                        <synonym>Papilionoideae</synonym>
+                        <synonym>Legume</synonym>
+                      </synonyms>
+                    </descendant>
+                    <descendant>
+                      <term>Glycine max</term>
+                      <definition/>
+                      <parent_id>7738</parent_id>
+                      <level>5</level>
+                      <type>child</type>
+                      <synonyms>
+                        <synonym>Soy</synonym>
+                        <synonym>Soya</synonym>
+                        <synonym>Soybean</synonym>
+                        <synonym>Soya bean</synonym>
+                      </synonyms>
+                    </descendant>
+                    <descendant>
+                      <term>Cucurbitaceae</term>
+                      <definition/>
+                      <parent_id>7738</parent_id>
+                      <level>5</level>
+                      <type>child</type>
+                      <synonyms>
+                        <synonym>Cucurbits</synonym>
+                        <synonym>Gourds</synonym>
+                      </synonyms>
+                    </descendant>
+                    <descendant>
+                      <term>Theobroma cacao</term>
+                      <definition/>
+                      <parent_id>7738</parent_id>
+                      <level>5</level>
+                      <type>child</type>
+                      <synonyms>
+                      </synonyms>
+                    </descendant>
+                  </descendants>
+                </descendant>
+              </descendants>
+            </descendant>
+          </descendants>
+        </descendant>
+        <descendant>
+          <term>Biological location</term>
+          <definition>The physiological origin within an organism, including anatomical compnents, biofluids and excreta.</definition>
+          <parent_id>7724</parent_id>
+          <level>2</level>
+          <type>parent</type>
+          <synonyms>
+          </synonyms>
+          <descendants>
+            <descendant>
+              <term>Cell and elements</term>
+              <definition>An anatomical organizational level comprising of a single cell (or a fragment in some exceptions). a cell is defined by its type or function. it is the smallest unit of living structure capable of independent existence, composed of a membrane-enclosed mass of protoplasm and containing a nucleus or nucleoid.</definition>
+              <parent_id>7725</parent_id>
+              <level>3</level>
+              <type>parent</type>
+              <synonyms>
+              </synonyms>
+              <descendants>
+                <descendant>
+                  <term>Cell</term>
+                  <definition/>
+                  <parent_id>7732</parent_id>
+                  <level>4</level>
+                  <type>parent</type>
+                  <synonyms>
+                  </synonyms>
+                  <descendants>
+                    <descendant>
+                      <term>Fibroblast</term>
+                      <definition>A cell in the connective tissue, that makes and secretes collagen proteins.</definition>
+                      <parent_id>7734</parent_id>
+                      <level>5</level>
+                      <type>child</type>
+                      <synonyms>
+                      </synonyms>
+                    </descendant>
+                  </descendants>
+                </descendant>
+              </descendants>
+            </descendant>
+            <descendant>
+              <term>Tissue and substructures</term>
+              <definition>An anatomical organizational level including multiple cells yet not comprising a complete organ .</definition>
+              <parent_id>7725</parent_id>
+              <level>3</level>
+              <type>parent</type>
+              <synonyms>
+              </synonyms>
+              <descendants>
+                <descendant>
+                  <term>Epidermis</term>
+                  <definition>The epithelial portion of the skin (cutis). it consists of the following layers: stratum corneum (horny layer), stratum granulosum (granular layer), stratum spinosum (prickle cell layer), and stratum basale (basal cell layer). (nci).</definition>
+                  <parent_id>7729</parent_id>
+                  <level>4</level>
+                  <type>child</type>
+                  <synonyms>
+                  </synonyms>
+                </descendant>
+              </descendants>
+            </descendant>
+            <descendant>
+              <term>Biofluid and excreta</term>
+              <definition>A liquid, semi-solid or solid material originating in the body.</definition>
+              <parent_id>7725</parent_id>
+              <level>3</level>
+              <type>parent</type>
+              <synonyms>
+              </synonyms>
+              <descendants>
+                <descendant>
+                  <term>Feces</term>
+                  <definition>The material discharged from the bowel during defecation. It consists of undigested food, intestinal mucus, epithelial cells, and bacteria.</definition>
+                  <parent_id>7731</parent_id>
+                  <level>4</level>
+                  <type>child</type>
+                  <synonyms>
+                    <synonym>Fecal</synonym>
+                    <synonym>Stool</synonym>
+                    <synonym>Faecal</synonym>
+                    <synonym>Faeces</synonym>
+                  </synonyms>
+                </descendant>
+                <descendant>
+                  <term>Saliva</term>
+                  <definition>The watery fluid in the mouth made by the salivary glands. saliva moistens food to help digestion and it helps protect the mouth against infections. (nci).</definition>
+                  <parent_id>7731</parent_id>
+                  <level>4</level>
+                  <type>child</type>
+                  <synonyms>
+                  </synonyms>
+                </descendant>
+                <descendant>
+                  <term>Blood</term>
+                  <definition>A liquid tissue with the primary function of transporting oxygen and carbon dioxide (nci). it supplies the tissues with nutrients, removes waste products, and contains various components of the immune system defending the body against infection.</definition>
+                  <parent_id>7731</parent_id>
+                  <level>4</level>
+                  <type>child</type>
+                  <synonyms>
+                  </synonyms>
+                </descendant>
+              </descendants>
+            </descendant>
+            <descendant>
+              <term>Organ and components</term>
+              <definition>An anatomical organizational level including multiple tissues or substructures, which enables a common biological function.</definition>
+              <parent_id>7725</parent_id>
+              <level>3</level>
+              <type>parent</type>
+              <synonyms>
+              </synonyms>
+              <descendants>
+                <descendant>
+                  <term>Spleen</term>
+                  <definition>An abdominal organ that is part of the hematopoietic and immune systems. it is composed of the white pulp and the red pulp and is surrounded by a capsule. (nci).</definition>
+                  <parent_id>7727</parent_id>
+                  <level>4</level>
+                  <type>child</type>
+                  <synonyms>
+                  </synonyms>
+                </descendant>
+                <descendant>
+                  <term>Liver</term>
+                  <definition>An abdominal organ that has variable lobation which are composed mainly of hepatic lobules. (nci).</definition>
+                  <parent_id>7727</parent_id>
+                  <level>4</level>
+                  <type>child</type>
+                  <synonyms>
+                  </synonyms>
+                </descendant>
+                <descendant>
+                  <term>Kidney</term>
+                  <definition>The organs of the urinary tract located in the retroperitoneal cavity adjacent to the spine and composed of the renal cortex and the renal medulla. (nci).</definition>
+                  <parent_id>7727</parent_id>
+                  <level>4</level>
+                  <type>child</type>
+                  <synonyms>
+                    <synonym>Kidneys</synonym>
+                  </synonyms>
+                </descendant>
+                <descendant>
+                  <term>Pancreas</term>
+                  <definition>A digestive organ in the abdomen that has both endocrine and exocrine functions. (nci).</definition>
+                  <parent_id>7727</parent_id>
+                  <level>4</level>
+                  <type>child</type>
+                  <synonyms>
+                  </synonyms>
+                </descendant>
+              </descendants>
+            </descendant>
+          </descendants>
+        </descendant>
+      </descendants>
+    </root>
+    <root>
+      <term>Role</term>
+      <definition>The purpose or function assumed by a chemical, either naturally or as intended by humans .</definition>
+      <parent_id/>
+      <level>1</level>
+      <type>parent</type>
+      <descendants>
+        <descendant>
+          <term>Industrial application</term>
+          <definition>The assumed function of a chemical utilized by human.</definition>
+          <parent_id>7671</parent_id>
+          <level>2</level>
+          <type>parent</type>
+          <synonyms>
+          </synonyms>
+          <descendants>
+            <descendant>
+              <term>Pharmaceutical industry</term>
+              <definition>A pharmacologic activity for which a chemical substance is utilized owing to its biological role.</definition>
+              <parent_id>7678</parent_id>
+              <level>3</level>
+              <type>parent</type>
+              <synonyms>
+              </synonyms>
+              <descendants>
+                <descendant>
+                  <term>Pharmaceutical</term>
+                  <definition/>
+                  <parent_id>7679</parent_id>
+                  <level>4</level>
+                  <type>child</type>
+                  <synonyms>
+                  </synonyms>
+                </descendant>
+              </descendants>
+            </descendant>
+          </descendants>
+        </descendant>
+      </descendants>
+    </root>
+  </ontology>
+  <state>Liquid</state>
+  <experimental_properties>
+    <property>
+      <kind>water_solubility</kind>
+      <value>63.2 mg/mL at 25 °C</value>
+      <source/>
+    </property>
+    <property>
+      <kind>logp</kind>
+      <value>0.88</value>
+      <source>HANSCH,C ET AL. (1995)</source>
+    </property>
+    <property>
+      <kind>melting_point</kind>
+      <value>-89.8 °C</value>
+      <source/>
+    </property>
+  </experimental_properties>
+  <predicted_properties>
+    <property>
+      <kind>logp</kind>
+      <value>0.84</value>
+      <source>ALOGPS</source>
+    </property>
+    <property>
+      <kind>logs</kind>
+      <value>0.33</value>
+      <source>ALOGPS</source>
+    </property>
+    <property>
+      <kind>solubility</kind>
+      <value>158 g/L</value>
+      <source>ALOGPS</source>
+    </property>
+    <property>
+      <kind>logp</kind>
+      <value>0.81</value>
+      <source>ChemAxon</source>
+    </property>
+    <property>
+      <kind>pka_strongest_acidic</kind>
+      <value>16.95</value>
+      <source>ChemAxon</source>
+    </property>
+    <property>
+      <kind>pka_strongest_basic</kind>
+      <value>-1.9</value>
+      <source>ChemAxon</source>
+    </property>
+    <property>
+      <kind>iupac</kind>
+      <value>butan-1-ol</value>
+      <source>ChemAxon</source>
+    </property>
+    <property>
+      <kind>average_mass</kind>
+      <value>74.1216</value>
+      <source>ChemAxon</source>
+    </property>
+    <property>
+      <kind>mono_mass</kind>
+      <value>74.073164942</value>
+      <source>ChemAxon</source>
+    </property>
+    <property>
+      <kind>smiles</kind>
+      <value>CCCCO</value>
+      <source>ChemAxon</source>
+    </property>
+    <property>
+      <kind>formula</kind>
+      <value>C4H10O</value>
+      <source>ChemAxon</source>
+    </property>
+    <property>
+      <kind>inchi</kind>
+      <value>InChI=1S/C4H10O/c1-2-3-4-5/h5H,2-4H2,1H3</value>
+      <source>ChemAxon</source>
+    </property>
+    <property>
+      <kind>inchikey</kind>
+      <value>LRHPLDYGYMQRHN-UHFFFAOYSA-N</value>
+      <source>ChemAxon</source>
+    </property>
+    <property>
+      <kind>polar_surface_area</kind>
+      <value>20.23</value>
+      <source>ChemAxon</source>
+    </property>
+    <property>
+      <kind>refractivity</kind>
+      <value>22.13</value>
+      <source>ChemAxon</source>
+    </property>
+    <property>
+      <kind>polarizability</kind>
+      <value>9.21</value>
+      <source>ChemAxon</source>
+    </property>
+    <property>
+      <kind>rotatable_bond_count</kind>
+      <value>2</value>
+      <source>ChemAxon</source>
+    </property>
+    <property>
+      <kind>acceptor_count</kind>
+      <value>1</value>
+      <source>ChemAxon</source>
+    </property>
+    <property>
+      <kind>donor_count</kind>
+      <value>1</value>
+      <source>ChemAxon</source>
+    </property>
+    <property>
+      <kind>physiological_charge</kind>
+      <value>0</value>
+      <source>ChemAxon</source>
+    </property>
+    <property>
+      <kind>formal_charge</kind>
+      <value>0</value>
+      <source>ChemAxon</source>
+    </property>
+    <property>
+      <kind>number_of_rings</kind>
+      <value>0</value>
+      <source>ChemAxon</source>
+    </property>
+    <property>
+      <kind>bioavailability</kind>
+      <value>Yes</value>
+      <source>ChemAxon</source>
+    </property>
+    <property>
+      <kind>rule_of_five</kind>
+      <value>Yes</value>
+      <source>ChemAxon</source>
+    </property>
+    <property>
+      <kind>ghose_filter</kind>
+      <value>No</value>
+      <source>ChemAxon</source>
+    </property>
+    <property>
+      <kind>veber_rule</kind>
+      <value>Yes</value>
+      <source>ChemAxon</source>
+    </property>
+    <property>
+      <kind>mddr_like_rule</kind>
+      <value>No</value>
+      <source>ChemAxon</source>
+    </property>
+  </predicted_properties>
+  <spectra>
+  </spectra>
+  <biological_properties>
+    <cellular_locations>
+    </cellular_locations>
+    <biospecimen_locations>
+      <biospecimen>Blood</biospecimen>
+      <biospecimen>Feces</biospecimen>
+      <biospecimen>Saliva</biospecimen>
+    </biospecimen_locations>
+    <tissue_locations>
+      <tissue>Epidermis</tissue>
+      <tissue>Fibroblasts</tissue>
+      <tissue>Kidney</tissue>
+      <tissue>Liver</tissue>
+      <tissue>Pancreas</tissue>
+      <tissue>Spleen</tissue>
+    </tissue_locations>
+    <pathways>
+    </pathways>
+  </biological_properties>
+  <normal_concentrations>
+    <concentration>
+      <biospecimen>Blood</biospecimen>
+      <concentration_value>0.08 (0.00 - 0.27)</concentration_value>
+      <concentration_units>uM</concentration_units>
+      <subject_age>Adult (&gt;18 years old)</subject_age>
+      <subject_sex>Both</subject_sex>
+      <subject_condition>Normal</subject_condition>
+      <references>
+        <reference>
+          <reference_text>Liebich HM, Buelow HJ, Kallmayer R: Quantification of endogenous aliphatic alcohols in serum and urine. J Chromatogr. 1982 Apr 30;239:343-9.</reference_text>
+          <pubmed_id>7096503</pubmed_id>
+        </reference>
+      </references>
+    </concentration>
+    <concentration>
+      <biospecimen>Feces</biospecimen>
+      <concentration_value/>
+      <concentration_units/>
+      <subject_age>Adult (&gt;18 years old)</subject_age>
+      <subject_sex>Both</subject_sex>
+      <subject_condition>Normal</subject_condition>
+      <references>
+        <reference>
+          <reference_text>De Angelis M, Montemurno E, Piccolo M, Vannini L, Lauriero G, Maranzano V, Gozzi G, Serrazanetti D, Dalfino G, Gobbetti M, Gesualdo L: Microbiota and metabolome associated with immunoglobulin A nephropathy (IgAN). PLoS One. 2014 Jun 12;9(6):e99006. doi: 10.1371/journal.pone.0099006. eCollection 2014.</reference_text>
+          <pubmed_id>24922509</pubmed_id>
+        </reference>
+      </references>
+    </concentration>
+    <concentration>
+      <biospecimen>Feces</biospecimen>
+      <concentration_value/>
+      <concentration_units/>
+      <subject_age>Adult (&gt;18 years old)</subject_age>
+      <subject_sex>Both</subject_sex>
+      <subject_condition>Normal</subject_condition>
+      <comment>By GC-MS on fecal samples. This is a volatile organic compound.</comment>
+      <references>
+        <reference>
+          <reference_text>Raman M, Ahmed I, Gillevet PM, Probert CS, Ratcliffe NM, Smith S, Greenwood R, Sikaroodi M, Lam V, Crotty P, Bailey J, Myers RP, Rioux KP: Fecal microbiome and volatile organic compound metabolome in obese humans with nonalcoholic fatty liver disease. Clin Gastroenterol Hepatol. 2013 Jul;11(7):868-75.e1-3. doi: 10.1016/j.cgh.2013.02.015. Epub 2013 Feb 27.</reference_text>
+          <pubmed_id>23454028</pubmed_id>
+        </reference>
+      </references>
+    </concentration>
+    <concentration>
+      <biospecimen>Feces</biospecimen>
+      <concentration_value/>
+      <concentration_units/>
+      <subject_age>Adult (&gt;18 years old)</subject_age>
+      <subject_sex>Both</subject_sex>
+      <subject_condition>Normal</subject_condition>
+      <references>
+        <reference>
+          <reference_text>Vitali B, Ndagijimana M, Cruciani F, Carnevali P, Candela M, Guerzoni ME, Brigidi P: Impact of a synbiotic food on the gut microbial ecology and metabolic profiles. BMC Microbiol. 2010 Jan 7;10:4. doi: 10.1186/1471-2180-10-4.</reference_text>
+          <pubmed_id>20055983</pubmed_id>
+        </reference>
+      </references>
+    </concentration>
+    <concentration>
+      <biospecimen>Feces</biospecimen>
+      <concentration_value/>
+      <concentration_units/>
+      <subject_age>Adult (&gt;18 years old)</subject_age>
+      <subject_sex>Both</subject_sex>
+      <subject_condition>Normal</subject_condition>
+      <references>
+        <reference>
+          <reference_text>Ahmed I, Greenwood R, Costello B, Ratcliffe N, Probert CS: Investigation of faecal volatile organic metabolites as novel diagnostic biomarkers in inflammatory bowel disease. Aliment Pharmacol Ther. 2016 Mar;43(5):596-611. doi: 10.1111/apt.13522. Epub 2016 Jan 25.</reference_text>
+          <pubmed_id>26806034</pubmed_id>
+        </reference>
+      </references>
+    </concentration>
+    <concentration>
+      <biospecimen>Feces</biospecimen>
+      <concentration_value/>
+      <concentration_units/>
+      <subject_age>Adult (&gt;18 years old)</subject_age>
+      <subject_sex>Both</subject_sex>
+      <subject_condition>Normal</subject_condition>
+      <comment>Volatile Organic Compound (VOC)</comment>
+      <references>
+        <reference>
+          <reference_text>De Preter V, Machiels K, Joossens M, Arijs I, Matthys C, Vermeire S, Rutgeerts P, Verbeke K: Faecal metabolite profiling identifies medium-chain fatty acids as discriminating compounds in IBD. Gut. 2015 Mar;64(3):447-58. doi: 10.1136/gutjnl-2013-306423. Epub 2014 May 8.</reference_text>
+          <pubmed_id>24811995</pubmed_id>
+        </reference>
+      </references>
+    </concentration>
+    <concentration>
+      <biospecimen>Feces</biospecimen>
+      <concentration_value>0-299732.692</concentration_value>
+      <concentration_units>nmol/g wet feces</concentration_units>
+      <subject_age>Children (1-13 years old)</subject_age>
+      <subject_sex>Not Specified</subject_sex>
+      <subject_condition>Normal</subject_condition>
+      <comment>By gas-chromatography mass spectrometry/solid-phase microextraction (GC-MS/SPME) analysis. This is a volatile organic compound. The original concentration was reported as 0 - 66.65 ppm of wet feces.</comment>
+      <references>
+        <reference>
+          <reference_text>Di Cagno R, De Angelis M, De Pasquale I, Ndagijimana M, Vernocchi P, Ricciuti P, Gagliardi F, Laghi L, Crecchio C, Guerzoni ME, Gobbetti M, Francavilla R: Duodenal and faecal microbiota of celiac children: molecular, phenotype and metabolome characterization. BMC Microbiol. 2011 Oct 4;11:219. doi: 10.1186/1471-2180-11-219.</reference_text>
+          <pubmed_id>21970810</pubmed_id>
+        </reference>
+      </references>
+    </concentration>
+    <concentration>
+      <biospecimen>Feces</biospecimen>
+      <concentration_value/>
+      <concentration_units/>
+      <subject_age>Newborn (0-30 days old)</subject_age>
+      <subject_sex>Both</subject_sex>
+      <subject_condition>Normal</subject_condition>
+      <comment>By ATD and SPME GC-MS on faecal samples from preterm neonates. This is a volatile organic compound.</comment>
+      <references>
+        <reference>
+          <reference_text>De Lacy Costello B, Ewen R, Ewer AK, Garner CE, Probert CS, Ratcliffe NM, Smith S: An analysis of volatiles in the headspace of the faeces of neonates. J Breath Res. 2008 Sep;2(3):037023. doi: 10.1088/1752-7155/2/3/037023. Epub 2008  Sep 8.</reference_text>
+          <pubmed_id>21386183</pubmed_id>
+        </reference>
+      </references>
+    </concentration>
+    <concentration>
+      <biospecimen>Feces</biospecimen>
+      <concentration_value/>
+      <concentration_units/>
+      <subject_age>Adult (&gt;18 years old)</subject_age>
+      <subject_sex>Both</subject_sex>
+      <subject_condition>Normal</subject_condition>
+      <comment>Purge and trap GC-TOF-MS on fecal samples. This is a volatile organic compound.</comment>
+      <references>
+        <reference>
+          <reference_text>De Preter V, Van Staeyen G, Esser D, Rutgeerts P, Verbeke K: Development of a screening method to determine the pattern of fermentation metabolites in faecal samples using on-line purge-and-trap gas chromatographic-mass spectrometric analysis. J Chromatogr A. 2009 Feb 27;1216(9):1476-83. doi: 10.1016/j.chroma.2008.12.095. Epub 2009 Jan 8.</reference_text>
+          <pubmed_id>19167006</pubmed_id>
+        </reference>
+      </references>
+    </concentration>
+    <concentration>
+      <biospecimen>Feces</biospecimen>
+      <concentration_value/>
+      <concentration_units/>
+      <subject_age>Adult (&gt;18 years old)</subject_age>
+      <subject_sex>Both</subject_sex>
+      <subject_condition>Normal</subject_condition>
+      <comment>SPME, GC-MS on feces samples. This is a volatile organic compound.</comment>
+      <references>
+        <reference>
+          <reference_text>Garner CE, Smith S, de Lacy Costello B, White P, Spencer R, Probert CS, Ratcliffe NM: Volatile organic compounds from feces and their potential for diagnosis of gastrointestinal disease. FASEB J. 2007 Jun;21(8):1675-88. Epub 2007 Feb 21.</reference_text>
+          <pubmed_id>17314143</pubmed_id>
+        </reference>
+      </references>
+    </concentration>
+    <concentration>
+      <biospecimen>Saliva</biospecimen>
+      <concentration_value/>
+      <concentration_units/>
+      <subject_age>Adult (&gt;18 years old)</subject_age>
+      <subject_sex>Not Specified</subject_sex>
+      <subject_condition>Normal</subject_condition>
+      <references>
+        <reference>
+          <reference_text>de Lacy Costello B, Amann A, Al-Kateb H, Flynn C, Filipiak W, Khalid T, Osborne D, Ratcliffe NM: A review of the volatiles from the healthy human body. J Breath Res. 2014 Mar;8(1):014001. doi: 10.1088/1752-7155/8/1/014001. Epub 2014  Jan 13.</reference_text>
+          <pubmed_id>24421258</pubmed_id>
+        </reference>
+      </references>
+    </concentration>
+  </normal_concentrations>
+  <abnormal_concentrations>
+    <concentration>
+      <biospecimen>Blood</biospecimen>
+      <concentration_value>0.11 (0 - 2.43)</concentration_value>
+      <concentration_units>uM</concentration_units>
+      <patient_age>Adult (&gt;18 years old)</patient_age>
+      <patient_sex>Both</patient_sex>
+      <patient_information>Diabetes </patient_information>
+      <references>
+        <reference>
+          <reference_text>Liebich HM, Buelow HJ, Kallmayer R: Quantification of endogenous aliphatic alcohols in serum and urine. J Chromatogr. 1982 Apr 30;239:343-9.</reference_text>
+          <pubmed_id>7096503</pubmed_id>
+        </reference>
+      </references>
+    </concentration>
+    <concentration>
+      <biospecimen>Feces</biospecimen>
+      <concentration_value/>
+      <concentration_units/>
+      <patient_age>Adult (&gt;18 years old)</patient_age>
+      <patient_sex>Both</patient_sex>
+      <patient_information>Immunoglobulin A nephropathy (IgAN) non progressor</patient_information>
+      <references>
+        <reference>
+          <reference_text>De Angelis M, Montemurno E, Piccolo M, Vannini L, Lauriero G, Maranzano V, Gozzi G, Serrazanetti D, Dalfino G, Gobbetti M, Gesualdo L: Microbiota and metabolome associated with immunoglobulin A nephropathy (IgAN). PLoS One. 2014 Jun 12;9(6):e99006. doi: 10.1371/journal.pone.0099006. eCollection 2014.</reference_text>
+          <pubmed_id>24922509</pubmed_id>
+        </reference>
+      </references>
+    </concentration>
+    <concentration>
+      <biospecimen>Feces</biospecimen>
+      <concentration_value/>
+      <concentration_units/>
+      <patient_age>Adult (&gt;18 years old)</patient_age>
+      <patient_sex>Both</patient_sex>
+      <patient_information>Immunoglobulin A nephropathy (IgAN) progressor</patient_information>
+      <references>
+        <reference>
+          <reference_text>De Angelis M, Montemurno E, Piccolo M, Vannini L, Lauriero G, Maranzano V, Gozzi G, Serrazanetti D, Dalfino G, Gobbetti M, Gesualdo L: Microbiota and metabolome associated with immunoglobulin A nephropathy (IgAN). PLoS One. 2014 Jun 12;9(6):e99006. doi: 10.1371/journal.pone.0099006. eCollection 2014.</reference_text>
+          <pubmed_id>24922509</pubmed_id>
+        </reference>
+      </references>
+    </concentration>
+    <concentration>
+      <biospecimen>Feces</biospecimen>
+      <concentration_value/>
+      <concentration_units/>
+      <patient_age>Adult (&gt;18 years old)</patient_age>
+      <patient_sex>Both</patient_sex>
+      <patient_information>Nonalcoholic fatty liver disease (NAFLD)</patient_information>
+      <comment>By GC-MS on fecal samples. This is a volatile organic compound.</comment>
+      <references>
+        <reference>
+          <reference_text>Raman M, Ahmed I, Gillevet PM, Probert CS, Ratcliffe NM, Smith S, Greenwood R, Sikaroodi M, Lam V, Crotty P, Bailey J, Myers RP, Rioux KP: Fecal microbiome and volatile organic compound metabolome in obese humans with nonalcoholic fatty liver disease. Clin Gastroenterol Hepatol. 2013 Jul;11(7):868-75.e1-3. doi: 10.1016/j.cgh.2013.02.015. Epub 2013 Feb 27.</reference_text>
+          <pubmed_id>23454028</pubmed_id>
+        </reference>
+      </references>
+    </concentration>
+    <concentration>
+      <biospecimen>Feces</biospecimen>
+      <concentration_value/>
+      <concentration_units/>
+      <patient_age>Adult (&gt;18 years old)</patient_age>
+      <patient_sex>Both</patient_sex>
+      <patient_information>Crohns disease</patient_information>
+      <references>
+        <reference>
+          <reference_text>Ahmed I, Greenwood R, Costello B, Ratcliffe N, Probert CS: Investigation of faecal volatile organic metabolites as novel diagnostic biomarkers in inflammatory bowel disease. Aliment Pharmacol Ther. 2016 Mar;43(5):596-611. doi: 10.1111/apt.13522. Epub 2016 Jan 25.</reference_text>
+          <pubmed_id>26806034</pubmed_id>
+        </reference>
+      </references>
+    </concentration>
+    <concentration>
+      <biospecimen>Feces</biospecimen>
+      <concentration_value/>
+      <concentration_units/>
+      <patient_age>Adult (&gt;18 years old)</patient_age>
+      <patient_sex>Both</patient_sex>
+      <patient_information>Ulcerative colitis</patient_information>
+      <references>
+        <reference>
+          <reference_text>Ahmed I, Greenwood R, Costello B, Ratcliffe N, Probert CS: Investigation of faecal volatile organic metabolites as novel diagnostic biomarkers in inflammatory bowel disease. Aliment Pharmacol Ther. 2016 Mar;43(5):596-611. doi: 10.1111/apt.13522. Epub 2016 Jan 25.</reference_text>
+          <pubmed_id>26806034</pubmed_id>
+        </reference>
+      </references>
+    </concentration>
+    <concentration>
+      <biospecimen>Feces</biospecimen>
+      <concentration_value/>
+      <concentration_units/>
+      <patient_age>Adult (&gt;18 years old)</patient_age>
+      <patient_sex>Both</patient_sex>
+      <patient_information>Ulcerative colitis</patient_information>
+      <comment>Volatile Organic Compound (VOC)</comment>
+      <references>
+        <reference>
+          <reference_text>De Preter V, Machiels K, Joossens M, Arijs I, Matthys C, Vermeire S, Rutgeerts P, Verbeke K: Faecal metabolite profiling identifies medium-chain fatty acids as discriminating compounds in IBD. Gut. 2015 Mar;64(3):447-58. doi: 10.1136/gutjnl-2013-306423. Epub 2014 May 8.</reference_text>
+          <pubmed_id>24811995</pubmed_id>
+        </reference>
+      </references>
+    </concentration>
+    <concentration>
+      <biospecimen>Feces</biospecimen>
+      <concentration_value/>
+      <concentration_units/>
+      <patient_age>Adult (&gt;18 years old)</patient_age>
+      <patient_sex>Both</patient_sex>
+      <patient_information>Crohn's disease </patient_information>
+      <comment>Volatile Organic Compound (VOC)</comment>
+      <references>
+        <reference>
+          <reference_text>De Preter V, Machiels K, Joossens M, Arijs I, Matthys C, Vermeire S, Rutgeerts P, Verbeke K: Faecal metabolite profiling identifies medium-chain fatty acids as discriminating compounds in IBD. Gut. 2015 Mar;64(3):447-58. doi: 10.1136/gutjnl-2013-306423. Epub 2014 May 8.</reference_text>
+          <pubmed_id>24811995</pubmed_id>
+        </reference>
+      </references>
+    </concentration>
+    <concentration>
+      <biospecimen>Feces</biospecimen>
+      <concentration_value>0-591010.807</concentration_value>
+      <concentration_units>nmol/g wet feces</concentration_units>
+      <patient_age>Children (1-13 years old)</patient_age>
+      <patient_sex>Not Specified</patient_sex>
+      <patient_information>Treated celiac disease</patient_information>
+      <comment>By gas-chromatography mass spectrometry/solid-phase microextraction (GC-MS/SPME) analysis. This is a volatile organic compound. The original concentration was reported as 0 - 131.42 ppm of wet feces.</comment>
+      <references>
+        <reference>
+          <reference_text>Di Cagno R, De Angelis M, De Pasquale I, Ndagijimana M, Vernocchi P, Ricciuti P, Gagliardi F, Laghi L, Crecchio C, Guerzoni ME, Gobbetti M, Francavilla R: Duodenal and faecal microbiota of celiac children: molecular, phenotype and metabolome characterization. BMC Microbiol. 2011 Oct 4;11:219. doi: 10.1186/1471-2180-11-219.</reference_text>
+          <pubmed_id>21970810</pubmed_id>
+        </reference>
+      </references>
+    </concentration>
+    <concentration>
+      <biospecimen>Feces</biospecimen>
+      <concentration_value/>
+      <concentration_units/>
+      <patient_age>Not Specified</patient_age>
+      <patient_sex>Not Specified</patient_sex>
+      <patient_information>Crohn's disease</patient_information>
+      <comment>Volatile Organic Compound (VOC)</comment>
+      <references>
+        <reference>
+          <reference_text>Walton C, Fowler DP, Turner C, Jia W, Whitehead RN, Griffiths L, Dawson C, Waring RH, Ramsden DB, Cole JA, Cauchi M, Bessant C, Hunter JO: Analysis of volatile organic compounds of bacterial origin in chronic gastrointestinal diseases. Inflamm Bowel Dis. 2013 Sep;19(10):2069-78. doi: 10.1097/MIB.0b013e31829a91f6.</reference_text>
+          <pubmed_id>23867873</pubmed_id>
+        </reference>
+      </references>
+    </concentration>
+    <concentration>
+      <biospecimen>Feces</biospecimen>
+      <concentration_value/>
+      <concentration_units/>
+      <patient_age>Not Specified</patient_age>
+      <patient_sex>Not Specified</patient_sex>
+      <patient_information>Ulcerative colitis</patient_information>
+      <comment>Volatile Organic Compound (VOC)</comment>
+      <references>
+        <reference>
+          <reference_text>Walton C, Fowler DP, Turner C, Jia W, Whitehead RN, Griffiths L, Dawson C, Waring RH, Ramsden DB, Cole JA, Cauchi M, Bessant C, Hunter JO: Analysis of volatile organic compounds of bacterial origin in chronic gastrointestinal diseases. Inflamm Bowel Dis. 2013 Sep;19(10):2069-78. doi: 10.1097/MIB.0b013e31829a91f6.</reference_text>
+          <pubmed_id>23867873</pubmed_id>
+        </reference>
+      </references>
+    </concentration>
+    <concentration>
+      <biospecimen>Feces</biospecimen>
+      <concentration_value>0.00192 (0.00103-0.00548)</concentration_value>
+      <concentration_units>nmol/g wet feces</concentration_units>
+      <patient_age>Not Specified</patient_age>
+      <patient_sex>Not Specified</patient_sex>
+      <patient_information>Crohns disease</patient_information>
+      <comment>VOC concetration as Median (Lower Quartile, Upper Quartile). The original unit of the concentration was reported as ng/L. The concentration has been converted to nmol/g using the assumption that 1 mL = 1 g of feces.</comment>
+      <references>
+        <reference>
+          <reference_text>Walton C, Fowler DP, Turner C, Jia W, Whitehead RN, Griffiths L, Dawson C, Waring RH, Ramsden DB, Cole JA, Cauchi M, Bessant C, Hunter JO: Analysis of volatile organic compounds of bacterial origin in chronic gastrointestinal diseases. Inflamm Bowel Dis. 2013 Sep;19(10):2069-78. doi: 10.1097/MIB.0b013e31829a91f6.</reference_text>
+          <pubmed_id>23867873</pubmed_id>
+        </reference>
+      </references>
+    </concentration>
+    <concentration>
+      <biospecimen>Feces</biospecimen>
+      <concentration_value>0.000337 (0.000040-0.00747)</concentration_value>
+      <concentration_units>nmol/g wet feces</concentration_units>
+      <patient_age>Not Specified</patient_age>
+      <patient_sex>Not Specified</patient_sex>
+      <patient_information>Ulcerative colitis</patient_information>
+      <comment>VOC concetration as Median (Lower Quartile, Upper Quartile). The original unit of the concentration was reported as ng/L. The concentration has been converted to nmol/g using the assumption that 1 mL = 1 g of feces.</comment>
+      <references>
+        <reference>
+          <reference_text>Walton C, Fowler DP, Turner C, Jia W, Whitehead RN, Griffiths L, Dawson C, Waring RH, Ramsden DB, Cole JA, Cauchi M, Bessant C, Hunter JO: Analysis of volatile organic compounds of bacterial origin in chronic gastrointestinal diseases. Inflamm Bowel Dis. 2013 Sep;19(10):2069-78. doi: 10.1097/MIB.0b013e31829a91f6.</reference_text>
+          <pubmed_id>23867873</pubmed_id>
+        </reference>
+      </references>
+    </concentration>
+    <concentration>
+      <biospecimen>Feces</biospecimen>
+      <concentration_value>0.000769 (0.000283-0.00120)</concentration_value>
+      <concentration_units>nmol/g wet feces</concentration_units>
+      <patient_age>Not Specified</patient_age>
+      <patient_sex>Not Specified</patient_sex>
+      <patient_information>Irritable bowel syndrome</patient_information>
+      <comment>VOC concetration as Median (Lower Quartile, Upper Quartile). The original unit of the concentration was reported as ng/L. The concentration has been converted to nmol/g using the assumption that 1 mL = 1 g of feces.</comment>
+      <references>
+        <reference>
+          <reference_text>Walton C, Fowler DP, Turner C, Jia W, Whitehead RN, Griffiths L, Dawson C, Waring RH, Ramsden DB, Cole JA, Cauchi M, Bessant C, Hunter JO: Analysis of volatile organic compounds of bacterial origin in chronic gastrointestinal diseases. Inflamm Bowel Dis. 2013 Sep;19(10):2069-78. doi: 10.1097/MIB.0b013e31829a91f6.</reference_text>
+          <pubmed_id>23867873</pubmed_id>
+        </reference>
+      </references>
+    </concentration>
+    <concentration>
+      <biospecimen>Feces</biospecimen>
+      <concentration_value/>
+      <concentration_units/>
+      <patient_age>Adult (&gt;18 years old)</patient_age>
+      <patient_sex>Both</patient_sex>
+      <patient_information>Campylobacter jejuni infection</patient_information>
+      <comment>SPME, GC-MS on feces samples. This is a volatile organic compound.</comment>
+      <references>
+        <reference>
+          <reference_text>Garner CE, Smith S, de Lacy Costello B, White P, Spencer R, Probert CS, Ratcliffe NM: Volatile organic compounds from feces and their potential for diagnosis of gastrointestinal disease. FASEB J. 2007 Jun;21(8):1675-88. Epub 2007 Feb 21.</reference_text>
+          <pubmed_id>17314143</pubmed_id>
+        </reference>
+      </references>
+    </concentration>
+    <concentration>
+      <biospecimen>Feces</biospecimen>
+      <concentration_value/>
+      <concentration_units/>
+      <patient_age>Adult (&gt;18 years old)</patient_age>
+      <patient_sex>Both</patient_sex>
+      <patient_information>Clostridium difficile infection</patient_information>
+      <comment>SPME, GC-MS on feces samples. This is a volatile organic compound.</comment>
+      <references>
+        <reference>
+          <reference_text>Garner CE, Smith S, de Lacy Costello B, White P, Spencer R, Probert CS, Ratcliffe NM: Volatile organic compounds from feces and their potential for diagnosis of gastrointestinal disease. FASEB J. 2007 Jun;21(8):1675-88. Epub 2007 Feb 21.</reference_text>
+          <pubmed_id>17314143</pubmed_id>
+        </reference>
+      </references>
+    </concentration>
+    <concentration>
+      <biospecimen>Feces</biospecimen>
+      <concentration_value/>
+      <concentration_units/>
+      <patient_age>Adult (&gt;18 years old)</patient_age>
+      <patient_sex>Both</patient_sex>
+      <patient_information>Ulcerative Colitis</patient_information>
+      <comment>SPME, GC-MS on feces samples. This is a volatile organic compound.</comment>
+      <references>
+        <reference>
+          <reference_text>Garner CE, Smith S, de Lacy Costello B, White P, Spencer R, Probert CS, Ratcliffe NM: Volatile organic compounds from feces and their potential for diagnosis of gastrointestinal disease. FASEB J. 2007 Jun;21(8):1675-88. Epub 2007 Feb 21.</reference_text>
+          <pubmed_id>17314143</pubmed_id>
+        </reference>
+      </references>
+    </concentration>
+  </abnormal_concentrations>
+  <diseases>
+    <disease>
+      <name>Celiac disease</name>
+      <omim_id>212750</omim_id>
+      <references>
+        <reference>
+          <reference_text>Spiller RC, Frost PF, Stewart JS, Bloom SR, Silk DB: Delayed postprandial plasma bile acid response in coeliac patients with slow mouth-caecum transit. Clin Sci (Lond). 1987 Feb;72(2):217-23.</reference_text>
+          <pubmed_id>3816078</pubmed_id>
+        </reference>
+        <reference>
+          <reference_text>Bene J, Komlosi K, Gasztonyi B, Juhasz M, Tulassay Z, Melegh B: Plasma carnitine ester profile in adult celiac disease patients maintained on long-term gluten free diet. World J Gastroenterol. 2005 Nov 14;11(42):6671-5.</reference_text>
+          <pubmed_id>16425363</pubmed_id>
+        </reference>
+        <reference>
+          <reference_text>Cox MA, Lewis KO, Cooper BT: Measurement of small intestinal permeability markers, lactulose, and mannitol in serum: results in celiac disease. Dig Dis Sci. 1999 Feb;44(2):402-6.</reference_text>
+          <pubmed_id>10063930</pubmed_id>
+        </reference>
+        <reference>
+          <reference_text>Hallert C, Astrom J, Sedvall G: Psychic disturbances in adult coeliac disease. III. Reduced central monoamine metabolism and signs of depression. Scand J Gastroenterol. 1982 Jan;17(1):25-8.</reference_text>
+          <pubmed_id>6182605</pubmed_id>
+        </reference>
+        <reference>
+          <reference_text>Hallert C, Allenmark S, Larsson-Cohn U, Sedvall G: High level of pyridoxal 5'-phosphate in the cerebrospinal fluid of adult celiac patients. Am J Clin Nutr. 1982 Nov;36(5):851-4.</reference_text>
+          <pubmed_id>6182788</pubmed_id>
+        </reference>
+        <reference>
+          <reference_text>Francavilla R, Ercolini D, Piccolo M, Vannini L, Siragusa S, De Filippis F, De Pasquale I, Di Cagno R, Di Toma M, Gozzi G, Serrazanetti DI, De Angelis M, Gobbetti M: Salivary microbiota and metabolome associated with celiac disease. Appl Environ Microbiol. 2014 Jun;80(11):3416-25. doi: 10.1128/AEM.00362-14. Epub  2014 Mar 21.</reference_text>
+          <pubmed_id>24657864</pubmed_id>
+        </reference>
+        <reference>
+          <reference_text>Di Cagno R, De Angelis M, De Pasquale I, Ndagijimana M, Vernocchi P, Ricciuti P, Gagliardi F, Laghi L, Crecchio C, Guerzoni ME, Gobbetti M, Francavilla R: Duodenal and faecal microbiota of celiac children: molecular, phenotype and metabolome characterization. BMC Microbiol. 2011 Oct 4;11:219. doi: 10.1186/1471-2180-11-219.</reference_text>
+          <pubmed_id>21970810</pubmed_id>
+        </reference>
+        <reference>
+          <reference_text>De Angelis M, Vannini L, Di Cagno R, Cavallo N, Minervini F, Francavilla R, Ercolini D, Gobbetti M: Salivary and fecal microbiota and metabolome of celiac children under gluten-free diet. Int J Food Microbiol. 2016 Dec 19;239:125-132. doi: 10.1016/j.ijfoodmicro.2016.07.025. Epub 2016 Jul 19.</reference_text>
+          <pubmed_id>27452636</pubmed_id>
+        </reference>
+      </references>
+    </disease>
+    <disease>
+      <name>Crohn's disease</name>
+      <omim_id>266600</omim_id>
+      <references>
+        <reference>
+          <reference_text>Lapidus A, Akerlund JE, Einarsson C: Gallbladder bile composition in patients with Crohn 's disease. World J Gastroenterol. 2006 Jan 7;12(1):70-4.</reference_text>
+          <pubmed_id>16440420</pubmed_id>
+        </reference>
+        <reference>
+          <reference_text>Ehrenpreis ED, Salvino M, Craig RM: Improving the serum D-xylose test for the identification of patients with small intestinal malabsorption. J Clin Gastroenterol. 2001 Jul;33(1):36-40.</reference_text>
+          <pubmed_id>11418788</pubmed_id>
+        </reference>
+        <reference>
+          <reference_text>Brydon WG, Nyhlin H, Eastwood MA, Merrick MV: Serum 7 alpha-hydroxy-4-cholesten-3-one and selenohomocholyltaurine (SeHCAT) whole body retention in the assessment of bile acid induced diarrhoea. Eur J Gastroenterol Hepatol. 1996 Feb;8(2):117-23.</reference_text>
+          <pubmed_id>8723414</pubmed_id>
+        </reference>
+        <reference>
+          <reference_text>Williams HR, Cox IJ, Walker DG, North BV, Patel VM, Marshall SE, Jewell DP, Ghosh S, Thomas HJ, Teare JP, Jakobovits S, Zeki S, Welsh KI, Taylor-Robinson SD, Orchard TR: Characterization of inflammatory bowel disease with urinary metabolic profiling. Am J Gastroenterol. 2009 Jun;104(6):1435-44. doi: 10.1038/ajg.2009.175. Epub 2009 Apr 28.</reference_text>
+          <pubmed_id>19491857</pubmed_id>
+        </reference>
+        <reference>
+          <reference_text>Marchesi JR, Holmes E, Khan F, Kochhar S, Scanlan P, Shanahan F, Wilson ID, Wang Y: Rapid and noninvasive metabonomic characterization of inflammatory bowel disease. J Proteome Res. 2007 Feb;6(2):546-51.</reference_text>
+          <pubmed_id>17269711</pubmed_id>
+        </reference>
+        <reference>
+          <reference_text>Ahmed I, Greenwood R, Costello Bde L, Ratcliffe NM, Probert CS: An investigation of fecal volatile organic metabolites in irritable bowel syndrome. PLoS One. 2013;8(3):e58204. doi: 10.1371/journal.pone.0058204. Epub 2013 Mar 13.</reference_text>
+          <pubmed_id>23516449</pubmed_id>
+        </reference>
+        <reference>
+          <reference_text>Walton C, Fowler DP, Turner C, Jia W, Whitehead RN, Griffiths L, Dawson C, Waring RH, Ramsden DB, Cole JA, Cauchi M, Bessant C, Hunter JO: Analysis of volatile organic compounds of bacterial origin in chronic gastrointestinal diseases. Inflamm Bowel Dis. 2013 Sep;19(10):2069-78. doi: 10.1097/MIB.0b013e31829a91f6.</reference_text>
+          <pubmed_id>23867873</pubmed_id>
+        </reference>
+        <reference>
+          <reference_text>De Preter V, Machiels K, Joossens M, Arijs I, Matthys C, Vermeire S, Rutgeerts P, Verbeke K: Faecal metabolite profiling identifies medium-chain fatty acids as discriminating compounds in IBD. Gut. 2015 Mar;64(3):447-58. doi: 10.1136/gutjnl-2013-306423. Epub 2014 May 8.</reference_text>
+          <pubmed_id>24811995</pubmed_id>
+        </reference>
+        <reference>
+          <reference_text>Bjerrum JT, Wang Y, Hao F, Coskun M, Ludwig C, Gunther U, Nielsen OH: Metabonomics of human fecal extracts characterize ulcerative colitis, Crohn's disease and healthy individuals. Metabolomics. 2015;11:122-133. Epub 2014 Jun 1.</reference_text>
+          <pubmed_id>25598765</pubmed_id>
+        </reference>
+        <reference>
+          <reference_text>Ahmed I, Greenwood R, Costello B, Ratcliffe N, Probert CS: Investigation of faecal volatile organic metabolites as novel diagnostic biomarkers in inflammatory bowel disease. Aliment Pharmacol Ther. 2016 Mar;43(5):596-611. doi: 10.1111/apt.13522. Epub 2016 Jan 25.</reference_text>
+          <pubmed_id>26806034</pubmed_id>
+        </reference>
+        <reference>
+          <reference_text>Lee T, Clavel T, Smirnov K, Schmidt A, Lagkouvardos I, Walker A, Lucio M, Michalke B, Schmitt-Kopplin P, Fedorak R, Haller D: Oral versus intravenous iron replacement therapy distinctly alters the gut microbiota and metabolome in patients with IBD. Gut. 2017 May;66(5):863-871. doi: 10.1136/gutjnl-2015-309940. Epub 2016 Feb 4.</reference_text>
+          <pubmed_id>26848182</pubmed_id>
+        </reference>
+        <reference>
+          <reference_text>Kolho KL, Pessia A, Jaakkola T, de Vos WM, Velagapudi V: Faecal and Serum Metabolomics in Paediatric Inflammatory Bowel Disease. J Crohns Colitis. 2017 Mar 1;11(3):321-334. doi: 10.1093/ecco-jcc/jjw158.</reference_text>
+          <pubmed_id>27609529</pubmed_id>
+        </reference>
+        <reference>
+          <reference_text>Azario I, Pievani A, Del Priore F, Antolini L, Santi L, Corsi A, Cardinale L, Sawamoto K, Kubaski F, Gentner B, Bernardo ME, Valsecchi MG, Riminucci M, Tomatsu S, Aiuti A, Biondi A, Serafini M: Neonatal umbilical cord blood transplantation halts skeletal disease progression in the murine model of MPS-I. Sci Rep. 2017 Aug 25;7(1):9473. doi: 10.1038/s41598-017-09958-9.</reference_text>
+          <pubmed_id>28842642</pubmed_id>
+        </reference>
+      </references>
+    </disease>
+    <disease>
+      <name>Diabetes mellitus type 2</name>
+      <omim_id>125853</omim_id>
+      <references>
+        <reference>
+          <reference_text>Tuma P, Samcova E, Balinova P: Determination of 3-methylhistidine and 1-methylhistidine in untreated urine samples by capillary electrophoresis. J Chromatogr B Analyt Technol Biomed Life Sci. 2005 Jul 5;821(1):53-9.</reference_text>
+          <pubmed_id>15899597</pubmed_id>
+        </reference>
+        <reference>
+          <reference_text>Tasker RC, Lutman D, Peters MJ: Hyperventilation in severe diabetic ketoacidosis. Pediatr Crit Care Med. 2005 Jul;6(4):405-11.</reference_text>
+          <pubmed_id>15982426</pubmed_id>
+        </reference>
+        <reference>
+          <reference_text>Bales JR, Higham DP, Howe I, Nicholson JK, Sadler PJ: Use of high-resolution proton nuclear magnetic resonance spectroscopy for rapid multi-component analysis of urine. Clin Chem. 1984 Mar;30(3):426-32.</reference_text>
+          <pubmed_id>6321058</pubmed_id>
+        </reference>
+        <reference>
+          <reference_text>Hoppel CL, Genuth SM: Urinary excretion of acetylcarnitine during human diabetic and fasting ketosis. Am J Physiol. 1982 Aug;243(2):E168-72.</reference_text>
+          <pubmed_id>6810706</pubmed_id>
+        </reference>
+        <reference>
+          <reference_text>Zhang AQ, Mitchell SC, Smith RL: Dimethylamine in human urine. Clin Chim Acta. 1995 Jan 16;233(1-2):81-8.</reference_text>
+          <pubmed_id>7758205</pubmed_id>
+        </reference>
+        <reference>
+          <reference_text>Blomqvist G, Alvarsson M, Grill V, Von Heijne G, Ingvar M, Thorell JO, Stone-Elander S, Widen L, Ekberg K: Effect of acute hyperketonemia on the cerebral uptake of ketone bodies in nondiabetic subjects and IDDM patients. Am J Physiol Endocrinol Metab. 2002 Jul;283(1):E20-8.</reference_text>
+          <pubmed_id>12067838</pubmed_id>
+        </reference>
+        <reference>
+          <reference_text>Greco AV, Mingrone G, Capristo E, Benedetti G, De Gaetano A, Gasbarrini G: The metabolic effect of dodecanedioic acid infusion in non-insulin-dependent diabetic patients. Nutrition. 1998 Apr;14(4):351-7.</reference_text>
+          <pubmed_id>9591306</pubmed_id>
+        </reference>
+        <reference>
+          <reference_text>McLellan AC, Phillips SA, Thornalley PJ: Fluorimetric assay of D-lactate. Anal Biochem. 1992 Oct;206(1):12-6.</reference_text>
+          <pubmed_id>1456422</pubmed_id>
+        </reference>
+        <reference>
+          <reference_text>Noroozi M, Burns J, Crozier A, Kelly IE, Lean ME: Prediction of dietary flavonol consumption from fasting plasma concentration or urinary excretion. Eur J Clin Nutr. 2000 Feb;54(2):143-9.</reference_text>
+          <pubmed_id>10694785</pubmed_id>
+        </reference>
+        <reference>
+          <reference_text>Wahl HG, Hoffmann A, Luft D, Liebich HM: Analysis of volatile organic compounds in human urine by headspace gas chromatography-mass spectrometry with a multipurpose sampler. J Chromatogr A. 1999 Jun 25;847(1-2):117-25.</reference_text>
+          <pubmed_id>10431355</pubmed_id>
+        </reference>
+        <reference>
+          <reference_text>Dungan KM, Buse JB, Largay J, Kelly MM, Button EA, Kato S, Wittlin S: 1,5-anhydroglucitol and postprandial hyperglycemia as measured by continuous glucose monitoring system in moderately controlled patients with diabetes. Diabetes Care. 2006 Jun;29(6):1214-9.</reference_text>
+          <pubmed_id>16731998</pubmed_id>
+        </reference>
+        <reference>
+          <reference_text>Costa A, Iguala I, Bedini J, Quinto L, Conget I: Uric acid concentration in subjects at risk of type 2 diabetes mellitus: relationship to components of the metabolic syndrome. Metabolism. 2002 Mar;51(3):372-5.</reference_text>
+          <pubmed_id>11887176</pubmed_id>
+        </reference>
+        <reference>
+          <reference_text>Avogaro A, Bier DM: Contribution of 3-hydroxyisobutyrate to the measurement of 3-hydroxybutyrate in human plasma: comparison of enzymatic and gas-liquid chromatography-mass spectrometry assays in normal and in diabetic subjects. J Lipid Res. 1989 Nov;30(11):1811-7.</reference_text>
+          <pubmed_id>2614280</pubmed_id>
+        </reference>
+        <reference>
+          <reference_text>Sheikh-Ali M, Karon BS, Basu A, Kudva YC, Muller LA, Xu J, Schwenk WF, Miles JM: Can serum beta-hydroxybutyrate be used to diagnose diabetic ketoacidosis? Diabetes Care. 2008 Apr;31(4):643-7. doi: 10.2337/dc07-1683. Epub 2008 Jan 9.</reference_text>
+          <pubmed_id>18184896</pubmed_id>
+        </reference>
+        <reference>
+          <reference_text>Kawasaki T, Akanuma H, Yamanouchi T: Increased fructose concentrations in blood and urine in patients with diabetes. Diabetes Care. 2002 Feb;25(2):353-7.</reference_text>
+          <pubmed_id>11815509</pubmed_id>
+        </reference>
+        <reference>
+          <reference_text>Stickle D, Turk J: A kinetic mass balance model for 1,5-anhydroglucitol: applications to monitoring of glycemic control. Am J Physiol. 1997 Oct;273(4 Pt 1):E821-30.</reference_text>
+          <pubmed_id>9357814</pubmed_id>
+        </reference>
+        <reference>
+          <reference_text>Nguyen TM, Rodriguez LM, Mason KJ, Heptulla RA: Serum 1,5-anhydroglucitol (Glycomark) levels in children with and without type 1 diabetes mellitus. Pediatr Diabetes. 2007 Aug;8(4):214-9.</reference_text>
+          <pubmed_id>17659063</pubmed_id>
+        </reference>
+        <reference>
+          <reference_text>del Carmen Crespillo M, Olveira G, de Adana MS, Rojo-Martinez G, Garcia-Aleman J, Olvera P, Soriguer F, Munoz A: Metabolic effects of an enteral nutrition formula for diabetes: comparison with standard formulas in patients with type 1 diabetes. Clin Nutr. 2003 Oct;22(5):483-7.</reference_text>
+          <pubmed_id>14512036</pubmed_id>
+        </reference>
+        <reference>
+          <reference_text>Stupar J, Vrtovec M, Dolinsek F: Longitudinal hair chromium profiles of elderly subjects with normal glucose tolerance and type 2 diabetes mellitus. Metabolism. 2007 Jan;56(1):94-104.</reference_text>
+          <pubmed_id>17161231</pubmed_id>
+        </reference>
+        <reference>
+          <reference_text>Liebich HM, Buelow HJ, Kallmayer R: Quantification of endogenous aliphatic alcohols in serum and urine. J Chromatogr. 1982 Apr 30;239:343-9.</reference_text>
+          <pubmed_id>7096503</pubmed_id>
+        </reference>
+        <reference>
+          <reference_text>Shin CS, Moon BS, Park KS, Kim SY, Park SJ, Chung MH, Lee HK: Serum 8-hydroxy-guanine levels are increased in diabetic patients. Diabetes Care. 2001 Apr;24(4):733-7.</reference_text>
+          <pubmed_id>11315839</pubmed_id>
+        </reference>
+        <reference>
+          <reference_text>Guevara-Aguirre J, Guevara-Aguirre M, Saavedra J, Bernstein G, Rosenbloom AL: Comparison of oral insulin spray and subcutaneous regular insulin at mealtime in type 1 diabetes. Diabetes Technol Ther. 2007 Aug;9(4):372-6.</reference_text>
+          <pubmed_id>17705693</pubmed_id>
+        </reference>
+        <reference>
+          <reference_text>Giussi GA, Ballejo G, Benedetti WL: Estriol serum levels, neonatal vitality and stromal villous edema in diabetic pregnancies. Acta Diabetol Lat. 1979 Apr-Jun;16(2):105-10.</reference_text>
+          <pubmed_id>484160</pubmed_id>
+        </reference>
+        <reference>
+          <reference_text>Ostlund RE Jr, McGill JB, Herskowitz I, Kipnis DM, Santiago JV, Sherman WR: D-chiro-inositol metabolism in diabetes mellitus. Proc Natl Acad Sci U S A. 1993 Nov 1;90(21):9988-92.</reference_text>
+          <pubmed_id>8234346</pubmed_id>
+        </reference>
+        <reference>
+          <reference_text>Mine S, Okada Y, Kawahara C, Tabata T, Tanaka Y: Serum hyaluronan concentration as a marker of angiopathy in patients with diabetes mellitus. Endocr J. 2006 Dec;53(6):761-6. Epub 2006 Sep 12.</reference_text>
+          <pubmed_id>16966827</pubmed_id>
+        </reference>
+        <reference>
+          <reference_text>Khuhawar MY, Zardari LA, Laghari AJ: Capillary gas chromatographic determination of methylglyoxal from serum of diabetic patients by precolumn derivatization with 1,2-diamonopropane. J Chromatogr B Analyt Technol Biomed Life Sci. 2008 Sep 15;873(1):15-9. doi: 10.1016/j.jchromb.2008.04.048. Epub 2008 May 17.</reference_text>
+          <pubmed_id>18760976</pubmed_id>
+        </reference>
+        <reference>
+          <reference_text>Paroni R, Ceriotti F, Galanello R, Battista Leoni G, Panico A, Scurati E, Paleari R, Chemello L, Quaino V, Scaldaferri L, Lapolla A, Mosca A: Performance characteristics and clinical utility of an enzymatic method for the measurement of glycated albumin in plasma. Clin Biochem. 2007 Dec;40(18):1398-405. Epub 2007 Aug 10.</reference_text>
+          <pubmed_id>17919531</pubmed_id>
+        </reference>
+        <reference>
+          <reference_text>Salek RM, Maguire ML, Bentley E, Rubtsov DV, Hough T, Cheeseman M, Nunez D, Sweatman BC, Haselden JN, Cox RD, Connor SC, Griffin JL: A metabolomic comparison of urinary changes in type 2 diabetes in mouse, rat, and human. Physiol Genomics. 2007 Apr 24;29(2):99-108. Epub 2006 Dec 26.</reference_text>
+          <pubmed_id>17190852</pubmed_id>
+        </reference>
+        <reference>
+          <reference_text>Galli E, Marchini M, Saba A, Berti S, Tonacchera M, Vitti P, Scanlan TS, Iervasi G, Zucchi R: Detection of 3-iodothyronamine in human patients: a preliminary study. J Clin Endocrinol Metab. 2012 Jan;97(1):E69-74. doi: 10.1210/jc.2011-1115. Epub 2011 Oct 26.</reference_text>
+          <pubmed_id>22031514</pubmed_id>
+        </reference>
+        <reference>
+          <reference_text>Llorach R, Urpi-Sarda M, Tulipani S, Garcia-Aloy M, Monagas M, Andres-Lacueva C: Metabolomic fingerprint in patients at high risk of cardiovascular disease by cocoa intervention. Mol Nutr Food Res. 2013 Jun;57(6):962-73. doi: 10.1002/mnfr.201200736. Epub 2013  May 2.</reference_text>
+          <pubmed_id>23637065</pubmed_id>
+        </reference>
+        <reference>
+          <reference_text>World Health Organisation Department of Noncommunicable Disease Surveillance (1999). "Definition, Diagnosis and Classification of Diabetes Mellitus and its Complications"</reference_text>
+          <pubmed_id/>
+        </reference>
+        <reference>
+          <reference_text>Rosa Va ́zquez-Fresno et al. An NMR metabolomics approach reveals a combined-biomarkers model in a wine interventional trial with validation in free-living individuals of the PREDIMED study.  Metabolomics (2015) 11:797- 806: https://link.springer.com/content/pdf/10.1007/s11306-014-0735-x.pdf</reference_text>
+        </reference>
+      </references>
+    </disease>
+    <disease>
+      <name>Irritable bowel syndrome</name>
+      <omim_id/>
+      <references>
+        <reference>
+          <reference_text>Bearcroft CP, Perrett D, Farthing MJ: Postprandial plasma 5-hydroxytryptamine in diarrhoea predominant irritable bowel syndrome: a pilot study. Gut. 1998 Jan;42(1):42-6.</reference_text>
+          <pubmed_id>9505884</pubmed_id>
+        </reference>
+        <reference>
+          <reference_text>Brydon WG, Nyhlin H, Eastwood MA, Merrick MV: Serum 7 alpha-hydroxy-4-cholesten-3-one and selenohomocholyltaurine (SeHCAT) whole body retention in the assessment of bile acid induced diarrhoea. Eur J Gastroenterol Hepatol. 1996 Feb;8(2):117-23.</reference_text>
+          <pubmed_id>8723414</pubmed_id>
+        </reference>
+        <reference>
+          <reference_text>Ponnusamy K, Choi JN, Kim J, Lee SY, Lee CH: Microbial community and metabolomic comparison of irritable bowel syndrome faeces. J Med Microbiol. 2011 Jun;60(Pt 6):817-27. doi: 10.1099/jmm.0.028126-0. Epub 2011 Feb 17.</reference_text>
+          <pubmed_id>21330412</pubmed_id>
+        </reference>
+        <reference>
+          <reference_text>Le Gall G, Noor SO, Ridgway K, Scovell L, Jamieson C, Johnson IT, Colquhoun IJ, Kemsley EK, Narbad A: Metabolomics of fecal extracts detects altered metabolic activity of gut microbiota in ulcerative colitis and irritable bowel syndrome. J Proteome Res. 2011 Sep 2;10(9):4208-18. doi: 10.1021/pr2003598. Epub 2011 Aug 8.</reference_text>
+          <pubmed_id>21761941</pubmed_id>
+        </reference>
+        <reference>
+          <reference_text>Hong YS, Hong KS, Park MH, Ahn YT, Lee JH, Huh CS, Lee J, Kim IK, Hwang GS, Kim JS: Metabonomic understanding of probiotic effects in humans with irritable bowel syndrome. J Clin Gastroenterol. 2011 May-Jun;45(5):415-25. doi: 10.1097/MCG.0b013e318207f76c.</reference_text>
+          <pubmed_id>21494186</pubmed_id>
+        </reference>
+        <reference>
+          <reference_text>Walton C, Fowler DP, Turner C, Jia W, Whitehead RN, Griffiths L, Dawson C, Waring RH, Ramsden DB, Cole JA, Cauchi M, Bessant C, Hunter JO: Analysis of volatile organic compounds of bacterial origin in chronic gastrointestinal diseases. Inflamm Bowel Dis. 2013 Sep;19(10):2069-78. doi: 10.1097/MIB.0b013e31829a91f6.</reference_text>
+          <pubmed_id>23867873</pubmed_id>
+        </reference>
+        <reference>
+          <reference_text>Zeber-Lubecka N, Kulecka M, Ambrozkiewicz F, Paziewska A, Goryca K, Karczmarski J, Rubel T, Wojtowicz W, Mlynarz P, Marczak L, Tomecki R, Mikula M, Ostrowski J: Limited prolonged effects of rifaximin treatment on irritable bowel syndrome-related differences in the fecal microbiome and metabolome. Gut Microbes. 2016 Sep 2;7(5):397-413. doi: 10.1080/19490976.2016.1215805. Epub 2016 Jul 26.</reference_text>
+          <pubmed_id>27662586</pubmed_id>
+        </reference>
+      </references>
+    </disease>
+    <disease>
+      <name>Ulcerative colitis</name>
+      <omim_id/>
+      <references>
+        <reference>
+          <reference_text>Knox C, Law V, Jewison T, Liu P, Ly S, Frolkis A, Pon A, Banco K, Mak C, Neveu V, Djoumbou Y, Eisner R, Guo AC, Wishart DS: DrugBank 3.0: a comprehensive resource for 'omics' research on drugs. Nucleic Acids Res. 2011 Jan;39(Database issue):D1035-41. doi: 10.1093/nar/gkq1126. Epub 2010 Nov 8.</reference_text>
+          <pubmed_id>21059682</pubmed_id>
+        </reference>
+        <reference>
+          <reference_text>Almer S, Andersson T, Strom M: Pharmacokinetics of tranexamic acid in patients with ulcerative colitis and in healthy volunteers after the single instillation of 2 g rectally. J Clin Pharmacol. 1992 Jan;32(1):49-54.</reference_text>
+          <pubmed_id>1740537</pubmed_id>
+        </reference>
+        <reference>
+          <reference_text>Garner CE, Smith S, de Lacy Costello B, White P, Spencer R, Probert CS, Ratcliffe NM: Volatile organic compounds from feces and their potential for diagnosis of gastrointestinal disease. FASEB J. 2007 Jun;21(8):1675-88. Epub 2007 Feb 21.</reference_text>
+          <pubmed_id>17314143</pubmed_id>
+        </reference>
+        <reference>
+          <reference_text>Marchesi JR, Holmes E, Khan F, Kochhar S, Scanlan P, Shanahan F, Wilson ID, Wang Y: Rapid and noninvasive metabonomic characterization of inflammatory bowel disease. J Proteome Res. 2007 Feb;6(2):546-51.</reference_text>
+          <pubmed_id>17269711</pubmed_id>
+        </reference>
+        <reference>
+          <reference_text>Le Gall G, Noor SO, Ridgway K, Scovell L, Jamieson C, Johnson IT, Colquhoun IJ, Kemsley EK, Narbad A: Metabolomics of fecal extracts detects altered metabolic activity of gut microbiota in ulcerative colitis and irritable bowel syndrome. J Proteome Res. 2011 Sep 2;10(9):4208-18. doi: 10.1021/pr2003598. Epub 2011 Aug 8.</reference_text>
+          <pubmed_id>21761941</pubmed_id>
+        </reference>
+        <reference>
+          <reference_text>Ahmed I, Greenwood R, Costello Bde L, Ratcliffe NM, Probert CS: An investigation of fecal volatile organic metabolites in irritable bowel syndrome. PLoS One. 2013;8(3):e58204. doi: 10.1371/journal.pone.0058204. Epub 2013 Mar 13.</reference_text>
+          <pubmed_id>23516449</pubmed_id>
+        </reference>
+        <reference>
+          <reference_text>Walton C, Fowler DP, Turner C, Jia W, Whitehead RN, Griffiths L, Dawson C, Waring RH, Ramsden DB, Cole JA, Cauchi M, Bessant C, Hunter JO: Analysis of volatile organic compounds of bacterial origin in chronic gastrointestinal diseases. Inflamm Bowel Dis. 2013 Sep;19(10):2069-78. doi: 10.1097/MIB.0b013e31829a91f6.</reference_text>
+          <pubmed_id>23867873</pubmed_id>
+        </reference>
+        <reference>
+          <reference_text>De Preter V, Machiels K, Joossens M, Arijs I, Matthys C, Vermeire S, Rutgeerts P, Verbeke K: Faecal metabolite profiling identifies medium-chain fatty acids as discriminating compounds in IBD. Gut. 2015 Mar;64(3):447-58. doi: 10.1136/gutjnl-2013-306423. Epub 2014 May 8.</reference_text>
+          <pubmed_id>24811995</pubmed_id>
+        </reference>
+        <reference>
+          <reference_text>Bjerrum JT, Wang Y, Hao F, Coskun M, Ludwig C, Gunther U, Nielsen OH: Metabonomics of human fecal extracts characterize ulcerative colitis, Crohn's disease and healthy individuals. Metabolomics. 2015;11:122-133. Epub 2014 Jun 1.</reference_text>
+          <pubmed_id>25598765</pubmed_id>
+        </reference>
+        <reference>
+          <reference_text>Ahmed I, Greenwood R, Costello B, Ratcliffe N, Probert CS: Investigation of faecal volatile organic metabolites as novel diagnostic biomarkers in inflammatory bowel disease. Aliment Pharmacol Ther. 2016 Mar;43(5):596-611. doi: 10.1111/apt.13522. Epub 2016 Jan 25.</reference_text>
+          <pubmed_id>26806034</pubmed_id>
+        </reference>
+        <reference>
+          <reference_text>Lee T, Clavel T, Smirnov K, Schmidt A, Lagkouvardos I, Walker A, Lucio M, Michalke B, Schmitt-Kopplin P, Fedorak R, Haller D: Oral versus intravenous iron replacement therapy distinctly alters the gut microbiota and metabolome in patients with IBD. Gut. 2017 May;66(5):863-871. doi: 10.1136/gutjnl-2015-309940. Epub 2016 Feb 4.</reference_text>
+          <pubmed_id>26848182</pubmed_id>
+        </reference>
+        <reference>
+          <reference_text>Kolho KL, Pessia A, Jaakkola T, de Vos WM, Velagapudi V: Faecal and Serum Metabolomics in Paediatric Inflammatory Bowel Disease. J Crohns Colitis. 2017 Mar 1;11(3):321-334. doi: 10.1093/ecco-jcc/jjw158.</reference_text>
+          <pubmed_id>27609529</pubmed_id>
+        </reference>
+        <reference>
+          <reference_text>Azario I, Pievani A, Del Priore F, Antolini L, Santi L, Corsi A, Cardinale L, Sawamoto K, Kubaski F, Gentner B, Bernardo ME, Valsecchi MG, Riminucci M, Tomatsu S, Aiuti A, Biondi A, Serafini M: Neonatal umbilical cord blood transplantation halts skeletal disease progression in the murine model of MPS-I. Sci Rep. 2017 Aug 25;7(1):9473. doi: 10.1038/s41598-017-09958-9.</reference_text>
+          <pubmed_id>28842642</pubmed_id>
+        </reference>
+      </references>
+    </disease>
+    <disease>
+      <name>Nonalcoholic fatty liver disease</name>
+      <omim_id/>
+      <references>
+        <reference>
+          <reference_text>Raman M, Ahmed I, Gillevet PM, Probert CS, Ratcliffe NM, Smith S, Greenwood R, Sikaroodi M, Lam V, Crotty P, Bailey J, Myers RP, Rioux KP: Fecal microbiome and volatile organic compound metabolome in obese humans with nonalcoholic fatty liver disease. Clin Gastroenterol Hepatol. 2013 Jul;11(7):868-75.e1-3. doi: 10.1016/j.cgh.2013.02.015. Epub 2013 Feb 27.</reference_text>
+          <pubmed_id>23454028</pubmed_id>
+        </reference>
+      </references>
+    </disease>
+  </diseases>
+  <foodb_id>FDB031032</foodb_id>
+  <chemspider_id>258</chemspider_id>
+  <chebi_id>28885</chebi_id>
+  <pubchem_compound_id>263</pubchem_compound_id>
+  <kegg_id>C06142</kegg_id>
+  <drugbank_id>DB02145</drugbank_id>
+  <pdb_id>1BO</pdb_id>
+  <knapsack_id>C00035814</knapsack_id>
+  <biocyc_id>BUTANOL</biocyc_id>
+  <phenol_explorer_compound_id/>
+  <bigg_id/>
+  <wikipedia_id>N-Butanol</wikipedia_id>
+  <metlin_id>7052</metlin_id>
+  <vmh_id>BTOH</vmh_id>
+  <fbonto_id/>
+  <synthesis_reference>Tsuchida, Takashi; Sakuma, Shuji.  Ethanol to 1-butanol on hydroxyapatite.    Shokubai  (2007),  49(3),  238-243. </synthesis_reference>
+  <general_references>
+    <reference>
+      <reference_text>Okamoto M, Kaji R, Kasetani H, Yoshida H, Moriya Y, Saito M, Sato M: Purification and characterization of interferon-gamma-inducing molecule of OK-432, a penicillin-killed streptococcal preparation, by monoclonal antibody neutralizing interferon-gamma-inducing activity of OK-432. J Immunother Emphasis Tumor Immunol. 1993 May 4;13(4):232-42.</reference_text>
+      <pubmed_id>8334107</pubmed_id>
+    </reference>
+    <reference>
+      <reference_text>Copovi A, Diez-Sales O, Herraez-Dominguez JV, Herraez-Dominguez M: Enhancing effect of alpha-hydroxyacids on "in vitro" permeation across the human skin of compounds with different lipophilicity. Int J Pharm. 2006 May 11;314(1):31-6. Epub 2006 Mar 20.</reference_text>
+      <pubmed_id>16545927</pubmed_id>
+    </reference>
+    <reference>
+      <reference_text>Bailyes EM, Seabrook RN, Calvin J, Maguire GA, Price CP, Siddle K, Luzio JP: The preparation of monoclonal antibodies to human bone and liver alkaline phosphatase and their use in immunoaffinity purification and in studying these enzymes when present in serum. Biochem J. 1987 Jun 15;244(3):725-33.</reference_text>
+      <pubmed_id>2451502</pubmed_id>
+    </reference>
+    <reference>
+      <reference_text>Gainer AL, Stinson RA: Evidence that alkaline phosphatase from human neutrophils is the same gene product as the liver/kidney/bone isoenzyme. Clin Chim Acta. 1982 Aug 4;123(1-2):11-7.</reference_text>
+      <pubmed_id>7116633</pubmed_id>
+    </reference>
+    <reference>
+      <reference_text>Yamamoto K, Takahashi Y, Mano T, Sakata Y, Nishikawa N, Yoshida J, Oishi Y, Hori M, Miwa T, Inoue S, Masuyama T: N-methylethanolamine attenuates cardiac fibrosis and improves diastolic function: inhibition of phospholipase D as a possible mechanism. Eur Heart J. 2004 Jul;25(14):1221-9.</reference_text>
+      <pubmed_id>15246640</pubmed_id>
+    </reference>
+    <reference>
+      <reference_text>Seiffert UB, Siede WH, Welsch GJ, Oremek G: Multiple forms of alkaline phosphatases in human liver tissue. Clin Chim Acta. 1984 Dec 15;144(1):17-27.</reference_text>
+      <pubmed_id>6210164</pubmed_id>
+    </reference>
+    <reference>
+      <reference_text>Chen M: Amended final report of the safety assessment of t-Butyl Alcohol as used in cosmetics. Int J Toxicol. 2005;24 Suppl 2:1-20.</reference_text>
+      <pubmed_id>16154913</pubmed_id>
+    </reference>
+    <reference>
+      <reference_text>Chang CH, Angellis D: Identification of a butanol-extractable human placenta-specific antigen with alkaline phosphatase activity. J Immunol. 1976 Jul;117(1):91-6.</reference_text>
+      <pubmed_id>58937</pubmed_id>
+    </reference>
+    <reference>
+      <reference_text>Oakley DM, Swarbrick J: Effects of ionization on the percutaneous absorption of drugs: partitioning of nicotine into organic liquids and hydrated stratum corneum. J Pharm Sci. 1987 Dec;76(12):866-71.</reference_text>
+      <pubmed_id>3440928</pubmed_id>
+    </reference>
+    <reference>
+      <reference_text>Waddell WJ, Marlowe C: Inhibition by alcohols of the localization of radioactive nitrosonornicotine in sites of tumor formation. Science. 1983 Jul 1;221(4605):51-3.</reference_text>
+      <pubmed_id>6857261</pubmed_id>
+    </reference>
+    <reference>
+      <reference_text>Bieler CA, Cornelius MG, Klein R, Arlt VM, Wiessler M, Phillips DH, Schmeiser HH: DNA adduct formation by the environmental contaminant 3-nitrobenzanthrone after intratracheal instillation in rats. Int J Cancer. 2005 Oct 10;116(6):833-8.</reference_text>
+      <pubmed_id>15856450</pubmed_id>
+    </reference>
+    <reference>
+      <reference_text>Wulkan RW, Huijskes-Heins MI, Leijnse B: Hydrophobic properties of alkaline phosphatases. Int J Biochem. 1986;18(11):1045-51.</reference_text>
+      <pubmed_id>3803695</pubmed_id>
+    </reference>
+    <reference>
+      <reference_text>Kalimanovska V, Whitaker KB, Moss DW: Effect of bromelain on alkaline phosphatases of intestinal and non-intestinal tissues and serum. Clin Chim Acta. 1987 Dec;170(2-3):219-25.</reference_text>
+      <pubmed_id>3436056</pubmed_id>
+    </reference>
+    <reference>
+      <reference_text>Basu A, Glew RH: Characterization of the activation of rat liver beta-glucosidase by sialosylgangliotetraosylceramide. J Biol Chem. 1985 Oct 25;260(24):13067-73.</reference_text>
+      <pubmed_id>3932339</pubmed_id>
+    </reference>
+    <reference>
+      <reference_text>Arlt VM, Sorg BL, Osborne M, Hewer A, Seidel A, Schmeiser HH, Phillips DH: DNA adduct formation by the ubiquitous environmental pollutant 3-nitrobenzanthrone and its metabolites in rats. Biochem Biophys Res Commun. 2003 Jan 3;300(1):107-14.</reference_text>
+      <pubmed_id>12480528</pubmed_id>
+    </reference>
+  </general_references>
+  <protein_associations>
+    <protein>
+      <protein_accession>HMDBP00089</protein_accession>
+      <name>Serum paraoxonase/lactonase 3</name>
+      <uniprot_id>Q15166</uniprot_id>
+      <gene_name>PON3</gene_name>
+      <protein_type>Enzyme</protein_type>
+    </protein>
+    <protein>
+      <protein_accession>HMDBP00091</protein_accession>
+      <name>Serum paraoxonase/arylesterase 1</name>
+      <uniprot_id>P27169</uniprot_id>
+      <gene_name>PON1</gene_name>
+      <protein_type>Enzyme</protein_type>
+    </protein>
+    <protein>
+      <protein_accession>HMDBP00092</protein_accession>
+      <name>Serum paraoxonase/arylesterase 2</name>
+      <uniprot_id>Q15165</uniprot_id>
+      <gene_name>PON2</gene_name>
+      <protein_type>Enzyme</protein_type>
+    </protein>
+    <protein>
+      <protein_accession>HMDBP00093</protein_accession>
+      <name>Intestinal-type alkaline phosphatase</name>
+      <uniprot_id>P09923</uniprot_id>
+      <gene_name>ALPI</gene_name>
+      <protein_type>Unknown</protein_type>
+    </protein>
+    <protein>
+      <protein_accession>HMDBP00094</protein_accession>
+      <name>Lysosomal acid phosphatase</name>
+      <uniprot_id>P11117</uniprot_id>
+      <gene_name>ACP2</gene_name>
+      <protein_type>Enzyme</protein_type>
+    </protein>
+    <protein>
+      <protein_accession>HMDBP00096</protein_accession>
+      <name>Alkaline phosphatase, tissue-nonspecific isozyme</name>
+      <uniprot_id>P05186</uniprot_id>
+      <gene_name>ALPL</gene_name>
+      <protein_type>Unknown</protein_type>
+    </protein>
+    <protein>
+      <protein_accession>HMDBP00097</protein_accession>
+      <name>Tartrate-resistant acid phosphatase type 5</name>
+      <uniprot_id>P13686</uniprot_id>
+      <gene_name>ACP5</gene_name>
+      <protein_type>Unknown</protein_type>
+    </protein>
+    <protein>
+      <protein_accession>HMDBP00099</protein_accession>
+      <name>Alkaline phosphatase, placental-like</name>
+      <uniprot_id>P10696</uniprot_id>
+      <gene_name>ALPPL2</gene_name>
+      <protein_type>Unknown</protein_type>
+    </protein>
+    <protein>
+      <protein_accession>HMDBP00297</protein_accession>
+      <name>Aldehyde dehydrogenase X, mitochondrial</name>
+      <uniprot_id>P30837</uniprot_id>
+      <gene_name>ALDH1B1</gene_name>
+      <protein_type>Unknown</protein_type>
+    </protein>
+    <protein>
+      <protein_accession>HMDBP00355</protein_accession>
+      <name>Sulfotransferase family cytosolic 2B member 1</name>
+      <uniprot_id>O00204</uniprot_id>
+      <gene_name>SULT2B1</gene_name>
+      <protein_type>Enzyme</protein_type>
+    </protein>
+    <protein>
+      <protein_accession>HMDBP00506</protein_accession>
+      <name>Sorbitol dehydrogenase</name>
+      <uniprot_id>Q00796</uniprot_id>
+      <gene_name>SORD</gene_name>
+      <protein_type>Unknown</protein_type>
+    </protein>
+    <protein>
+      <protein_accession>HMDBP00507</protein_accession>
+      <name>Alcohol dehydrogenase [NADP(+)]</name>
+      <uniprot_id>P14550</uniprot_id>
+      <gene_name>AKR1A1</gene_name>
+      <protein_type>Enzyme</protein_type>
+    </protein>
+    <protein>
+      <protein_accession>HMDBP00511</protein_accession>
+      <name>Alcohol dehydrogenase 4</name>
+      <uniprot_id>P08319</uniprot_id>
+      <gene_name>ADH4</gene_name>
+      <protein_type>Unknown</protein_type>
+    </protein>
+    <protein>
+      <protein_accession>HMDBP00782</protein_accession>
+      <name>Alcohol dehydrogenase 1B</name>
+      <uniprot_id>P00325</uniprot_id>
+      <gene_name>ADH1B</gene_name>
+      <protein_type>Unknown</protein_type>
+    </protein>
+    <protein>
+      <protein_accession>HMDBP00784</protein_accession>
+      <name>Alcohol dehydrogenase 1A</name>
+      <uniprot_id>P07327</uniprot_id>
+      <gene_name>ADH1A</gene_name>
+      <protein_type>Unknown</protein_type>
+    </protein>
+    <protein>
+      <protein_accession>HMDBP00785</protein_accession>
+      <name>Alcohol dehydrogenase 6</name>
+      <uniprot_id>P28332</uniprot_id>
+      <gene_name>ADH6</gene_name>
+      <protein_type>Unknown</protein_type>
+    </protein>
+    <protein>
+      <protein_accession>HMDBP00839</protein_accession>
+      <name>Beta-glucuronidase</name>
+      <uniprot_id>P08236</uniprot_id>
+      <gene_name>GUSB</gene_name>
+      <protein_type>Enzyme</protein_type>
+    </protein>
+    <protein>
+      <protein_accession>HMDBP00876</protein_accession>
+      <name>Plasma alpha-L-fucosidase</name>
+      <uniprot_id>Q9BTY2</uniprot_id>
+      <gene_name>FUCA2</gene_name>
+      <protein_type>Enzyme</protein_type>
+    </protein>
+    <protein>
+      <protein_accession>HMDBP01010</protein_accession>
+      <name>Trans-2-enoyl-CoA reductase, mitochondrial</name>
+      <uniprot_id>Q9BV79</uniprot_id>
+      <gene_name>MECR</gene_name>
+      <protein_type>Unknown</protein_type>
+    </protein>
+    <protein>
+      <protein_accession>HMDBP01912</protein_accession>
+      <name>Lecithin retinol acyltransferase</name>
+      <uniprot_id>O95237</uniprot_id>
+      <gene_name>LRAT</gene_name>
+      <protein_type>Enzyme</protein_type>
+    </protein>
+    <protein>
+      <protein_accession>HMDBP02494</protein_accession>
+      <name>Nuclear receptor subfamily 1 group I member 3</name>
+      <uniprot_id>Q14994</uniprot_id>
+      <gene_name>NR1I3</gene_name>
+      <protein_type>Enzyme</protein_type>
+    </protein>
+    <protein>
+      <protein_accession>HMDBP03216</protein_accession>
+      <name>Zinc-binding alcohol dehydrogenase domain-containing protein 2</name>
+      <uniprot_id>Q8N4Q0</uniprot_id>
+      <gene_name>ZADH2</gene_name>
+      <protein_type>Unknown</protein_type>
+    </protein>
+    <protein>
+      <protein_accession>HMDBP03251</protein_accession>
+      <name>Retinol dehydrogenase 13</name>
+      <uniprot_id>Q8NBN7</uniprot_id>
+      <gene_name>RDH13</gene_name>
+      <protein_type>Enzyme</protein_type>
+    </protein>
+    <protein>
+      <protein_accession>HMDBP03831</protein_accession>
+      <name>Hydroxyacid-oxoacid transhydrogenase, mitochondrial</name>
+      <uniprot_id>Q8IWW8</uniprot_id>
+      <gene_name>ADHFE1</gene_name>
+      <protein_type>Unknown</protein_type>
+    </protein>
+    <protein>
+      <protein_accession>HMDBP07271</protein_accession>
+      <name>Fatty acyl-CoA reductase 2</name>
+      <uniprot_id>Q96K12</uniprot_id>
+      <gene_name>FAR2</gene_name>
+      <protein_type>Enzyme</protein_type>
+    </protein>
+    <protein>
+      <protein_accession>HMDBP07279</protein_accession>
+      <name>Acyl-CoA wax alcohol acyltransferase 2</name>
+      <uniprot_id>Q6E213</uniprot_id>
+      <gene_name>AWAT2</gene_name>
+      <protein_type>Enzyme</protein_type>
+    </protein>
+    <protein>
+      <protein_accession>HMDBP07765</protein_accession>
+      <name>Klotho</name>
+      <uniprot_id>Q9UEF7</uniprot_id>
+      <gene_name>KL</gene_name>
+      <protein_type>Unknown</protein_type>
+    </protein>
+    <protein>
+      <protein_accession>HMDBP09380</protein_accession>
+      <name>Testicular acid phosphatase</name>
+      <uniprot_id>Q9BZG2</uniprot_id>
+      <gene_name>ACPT</gene_name>
+      <protein_type>Enzyme</protein_type>
+    </protein>
+    <protein>
+      <protein_accession>HMDBP10105</protein_accession>
+      <name>Carboxylesterase 5A</name>
+      <uniprot_id>Q6NT32</uniprot_id>
+      <gene_name>CES5A</gene_name>
+      <protein_type>Enzyme</protein_type>
+    </protein>
+    <protein>
+      <protein_accession>HMDBP11006</protein_accession>
+      <name>Acid phosphatase-like protein 2</name>
+      <uniprot_id>Q8TE99</uniprot_id>
+      <gene_name>ACPL2</gene_name>
+      <protein_type>Enzyme</protein_type>
+    </protein>
+    <protein>
+      <protein_accession>HMDBP11007</protein_accession>
+      <name>Synaptic vesicle membrane protein VAT-1 homolog-like</name>
+      <uniprot_id>Q9HCJ6</uniprot_id>
+      <gene_name>VAT1L</gene_name>
+      <protein_type>Enzyme</protein_type>
+    </protein>
+    <protein>
+      <protein_accession>HMDBP11008</protein_accession>
+      <name>Quinone oxidoreductase PIG3</name>
+      <uniprot_id>Q53FA7</uniprot_id>
+      <gene_name>TP53I3</gene_name>
+      <protein_type>Enzyme</protein_type>
+    </protein>
+    <protein>
+      <protein_accession>HMDBP11009</protein_accession>
+      <name>Synaptic vesicle membrane protein VAT-1 homolog</name>
+      <uniprot_id>Q99536</uniprot_id>
+      <gene_name>VAT1</gene_name>
+      <protein_type>Enzyme</protein_type>
+    </protein>
+    <protein>
+      <protein_accession>HMDBP11386</protein_accession>
+      <name>Reticulon-4-interacting protein 1, mitochondrial</name>
+      <uniprot_id>Q8WWV3</uniprot_id>
+      <gene_name>RTN4IP1</gene_name>
+      <protein_type>Unknown</protein_type>
+    </protein>
+  </protein_associations>
+</metabolite>
+

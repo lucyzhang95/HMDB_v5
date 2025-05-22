@@ -82,13 +82,16 @@ def ete3_taxon_name2taxid(taxon_names: list) -> dict:
     return ete3_mapped
 
 
-def entrez_taxon_name2taxid(taxon_names: list[str], sleep=0.34, email="bazhang@scripps.edu") -> dict:
+def entrez_taxon_name2taxid(
+    taxon_names: list[str], sleep=0.34, email="bazhang@scripps.edu"
+) -> dict:
     """Map taxonomy names to NCBI taxonomy ids using entrez API
     Entrez is good at mapping recent reclassified taxonomy names that are outdated
     but very slow due to no batch query allowed, so expensive to query, recommend cache the output
 
-    :param email:
     :param taxon_names:
+    :param sleep:
+    :param email:
     :return: a dictionary mapping taxon names to taxids,
     e.g., {'cellulomonas galba': {'taxid': 401861, 'mapping_tool': 'entrez'}, ...}
     """

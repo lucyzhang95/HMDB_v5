@@ -21,8 +21,7 @@ def strip_tag_namespace(tag: str) -> str:
     :param tag: element tags (e.g. <accession>HMDB0000001</accession>)
     :return: original tag without namespace
     """
-    idx = tag.rfind("}")
-    # rfind() method "not found" == -1
+    idx = tag.rfind("}") # rfind() "not found" == -1
     if idx != -1:  # if idx is not "not found"
         tag = tag[idx + 1 :]
     return tag

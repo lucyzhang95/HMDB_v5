@@ -175,7 +175,7 @@ def manual_correct_text2term_map(text2term_mapped: dict) -> dict:
     return text2term_mapped
 
 
-def manual_taxon_name2taxid():
+def manual_taxon_name2taxid(taxon_names: list[str]) -> dict:
     raw_mapping = {
         "rlzodopseudomonas spheroides": 1063,
         "clostridium calortolerans": 36832,
@@ -205,7 +205,9 @@ def manual_taxon_name2taxid():
     }
 
     manual_mapped = {
-        name: {"taxid": taxid, "mapping_tool": "manual"} for name, taxid in raw_mapping.items()
+        name: {"taxid": raw_mapping[name], "mapping_tool": "manual"}
+        for name in list(set(taxon_names))
+        if name in raw_mapping
     }
     return manual_mapped
 
@@ -272,4 +274,3 @@ if __name__ == "__main__":
         for name in microbe_cached
         if name not in ete3_cached and name not in entrez_cached and name not in text2term_cached
     ]
-    print(no_hits3)

@@ -21,7 +21,7 @@ def strip_tag_namespace(tag: str) -> str:
     :param tag: element tags (e.g. <accession>HMDB0000001</accession>)
     :return: original tag without namespace
     """
-    idx = tag.rfind("}") # rfind() "not found" == -1
+    idx = tag.rfind("}")  # rfind() "not found" == -1
     if idx != -1:  # if idx is not "not found"
         tag = tag[idx + 1 :]
     return tag
@@ -40,7 +40,7 @@ def get_all_microbe_names(input_xml: str | pathlib.Path) -> Iterator[str]:
     descendant_tag = f"{{{ns_uri}}}descendant"
     ontology_tag = f"{{{ns_uri}}}ontology"
 
-    for event, elem in ET.iterparse(str(input_xml), events=("end",), tag=f"{{{ns_uri}}}metabolite"):
+    for _, elem in ET.iterparse(str(input_xml), events=("end",), tag=f"{{{ns_uri}}}metabolite"):
         ontology = elem.find(ontology_tag)
         if ontology is not None:
             for root in ontology.findall(f"{f'{{{ns_uri}}}root'}"):
@@ -75,7 +75,7 @@ def ete3_taxon_name2taxid(taxon_names: list) -> dict:
     ete3_name2taxid = ncbi.get_name_translator(taxon_names)
     for name, taxid in ete3_name2taxid.items():
         if taxid:
-            ete3_mapped[name] = {"taxid": int(taxid[0])}
+            ete3_mapped[name] = {"taxid": int(taxid[0]), "mapping_tool": "ete3"}
     return ete3_mapped
 
 

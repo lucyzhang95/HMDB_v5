@@ -140,6 +140,7 @@ def text2term_taxon_name2taxid(taxon_names: list[str], min_score=0.8) -> dict:
             ontology_acronym="NCBITaxon",
         )
 
+    taxon_names = list(set(taxon_names))
     df_cached = text2term.map_terms(
         source_terms=taxon_names,
         target_ontology="NCBITaxon",
@@ -205,20 +206,35 @@ def get_ncit_taxon_description(taxon_names):
 if __name__ == "__main__":
     input_xml = os.path.join("downloads", "hmdb_metabolites.xml")
     microbe_names = get_all_microbe_names(input_xml)
+    # save_pickle(list(set(microbe_names)), "hmdb_v5_microbe_names.pkl")
     microbes4query = [obj for obj in microbe_names]
     # ete3_mapped = ete3_taxon_name2taxid(microbes4query)
     # save_pickle(ete3_mapped, "ete3_name2taxid.pkl")
-    ete3_cached = load_pickle(os.path.join("downloads", "ete3_name2taxid.pkl"))
+    ete3_cached = load_pickle("ete3_name2taxid.pkl")
 
     # no_hits = [name for name in set(microbe_names) if name not in ete3_mapped]
-    no_hits = [name for name in set(microbe_names) if name not in ete3_cached]
+    microbe_cached = load_pickle("hmdb_v5_microbe_names.pkl")
+    no_hits = [name for name in microbe_cached if name not in ete3_cached]
     # entrez_mapped = entrez_taxon_name2taxid(no_hits)
     # save_pickle(entrez_mapped, "entrez_name2taxid.pkl")
-    entrez_cached = load_pickle(os.path.join("downloads", "entrez_name2taxid.pkl"))
+    entrez_cached = load_pickle("entrez_name2taxid.pkl")
 
     # no_hits2 = [
     #     name for name in set(microbe_names) if name not in ete3_mapped and name not in entrez_mapped
     # ]
     no_hits2 = [
-        name for name in set(microbe_names) if name not in ete3_cached and name not in entrez_cached
+        name for name in microbe_cached if name not in ete3_cached and name not in entrez_cached
     ]
+
+    # text2term_mapped = text2term_taxon_name2taxid(no_hits2)
+    # text2term_mapped = manual_correct_text2term_map(text2term_mapped)
+    # save_pickle(text2term_mapped, "text2term_name2taxid.pkl")
+    text2term_cached = load_pickle("text2term_name2taxid.pkl")
+
+    # no_hits3 = [name for name in set(microbe_names) if name not in ete3_mapped and name not in entrez_mapped and name not in text2term_mapped]
+    no_hits3 = [
+        name
+        for name in microbe_cached
+        if name not in ete3_cached and name not in entrez_cached and name not in text2term_cached
+    ]
+    print(no_hits3)

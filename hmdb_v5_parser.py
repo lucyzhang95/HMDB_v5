@@ -1,5 +1,6 @@
 import os
 import pathlib
+import pickle
 import ssl
 import time
 import zipfile
@@ -12,6 +13,25 @@ from lxml import etree as ET
 
 CACHE_DIR = os.path.join(os.getcwd(), "cache")
 os.makedirs(CACHE_DIR, exist_ok=True)
+
+
+def save_pickle(obj, f_name):
+    """
+    :param obj:
+    :param f_name: files should only be existing in the cache directory
+    :return:
+    """
+    f_path = os.path.join(CACHE_DIR, f_name)
+    with open(f_path, "wb") as in_f:
+        pickle.dump(obj, in_f)
+
+
+def load_pickle(f_name):
+    f_path = os.path.join(CACHE_DIR, f_name)
+    if os.path.exists(f_path):
+        with open(f_path, "rb") as in_f:
+            return pickle.load(in_f)
+    return None
 
 
 def strip_tag_namespace(tag: str) -> str:

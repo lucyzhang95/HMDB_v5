@@ -175,6 +175,41 @@ def manual_correct_text2term_map(text2term_mapped: dict) -> dict:
     return text2term_mapped
 
 
+def manual_taxon_name2taxid():
+    raw_mapping = {
+        "rlzodopseudomonas spheroides": 1063,
+        "clostridium calortolerans": 36832,
+        "clostridium felsenium": 36839,
+        "rhodobacter spaeroides": 1063,
+        "clostridium propylbutyricum": 1485,
+        "algibacter sp. aqp096": 1872428,
+        "pseudomonas ligustri": 317,
+        "mycobacterium smegmatis": 1772,
+        "clostridium stricklandii": 1511,
+        "clostridium species": 1485,
+        "biﬁdobacterium": 1678,
+        "pseudomonas sp. dsm 2874": 306,
+        "methanothrix sochngenii": 2223,
+        "pseudomonas sp. st-200": 306,
+        "clostridium lituseburense": 1537,
+        "muricauda lutaonensis": 516051,
+        "clostridia propionicum": 28446,
+        "citrobacter frundii": 546,
+        "meningococcus": 487,
+        "pseudomonas orvilla": 303,
+        "clostridium xiva": 543317,
+        "chromobacterium prodigiosum": 615,
+        "clostridium mangenoyi": 1540,
+        "clostridium glycolycum": 36841,
+        "streptococcus group b": 1319,
+    }
+
+    manual_mapped = {
+        name: {"taxid": taxid, "mapping_tool": "manual"} for name, taxid in raw_mapping.items()
+    }
+    return manual_mapped
+
+
 def get_ncit_taxon_description(taxon_names):
     API_KEY = "efd61c1d-74a2-4877-b4ff-37ba827a96bc"
     search_url = "https://data.bioontology.org/search"

@@ -7,6 +7,7 @@ import zipfile
 from typing import Iterator
 
 import requests
+import text2term
 from Bio import Entrez
 from ete3 import NCBITaxa
 from lxml import etree as ET
@@ -132,6 +133,47 @@ def entrez_taxon_name2taxid(
     return entrez_mapped
 
 
+def text2term_taxon_name2taxid(taxon_names: list[str], min_score=0.8) -> dict:
+    if not text2term.cache_exists("NCBITaxon"):
+        text2term.cache_ontology(
+            ontology_url="http://purl.obolibrary.org/obo/ncbitaxon.owl",
+            ontology_acronym="NCBITaxon",
+        )
+
+    df_cached = text2term.map_terms(
+        source_terms=taxon_names,
+        target_ontology="NCBITaxon",
+        use_cache=True,
+        min_score=min_score,
+        max_mappings=1,
+    )
+
+    text2term_mapped = dict(zip(df_cached["Source Term"], df_cached["Mapped Term CURIE"]))
+    for name, taxid in text2term_mapped.items():
+        text2term_mapped[name] = {"taxid": int(taxid.split(":")[1]), "mapping_tool": "text2term"}
+    return text2term_mapped
+
+
+def manual_correct_text2term_map(text2term_mapped: dict) -> dict:
+    manual_corrections = {
+        "geobacillus thermoglucosidasius": 1426,
+        "bacteroides spp.": 816,
+        "clostridium difficile": 1496,
+        "pseudomonas pseudomaleii": 28450,
+        "lactobacillus plantarum": 1590,
+        "clostridium butylicum": 1492,
+        "corynebacterium jekeium": 38289,
+    }
+
+    for name, corrected_taxid in manual_corrections.items():
+        if name in text2term_mapped:
+            text2term_mapped[name]["taxid"] = corrected_taxid
+            text2term_mapped[name]["mapping_tool"] = "manual"
+
+    del text2term_mapped["gram-negative bacteria"]
+    return text2term_mapped
+
+
 def get_ncit_taxon_description(taxon_names):
     API_KEY = "efd61c1d-74a2-4877-b4ff-37ba827a96bc"
     search_url = "https://data.bioontology.org/search"
@@ -158,3 +200,25 @@ def get_ncit_taxon_description(taxon_names):
                     mapping_result[name] = ncit_output
                     del mapping_result[name]["name"]
     return mapping_result
+
+
+if __name__ == "__main__":
+    input_xml = os.path.join("downloads", "hmdb_metabolites.xml")
+    microbe_names = get_all_microbe_names(input_xml)
+    microbes4query = [obj for obj in microbe_names]
+    # ete3_mapped = ete3_taxon_name2taxid(microbes4query)
+    # save_pickle(ete3_mapped, "ete3_name2taxid.pkl")
+    ete3_cached = load_pickle(os.path.join("downloads", "ete3_name2taxid.pkl"))
+
+    # no_hits = [name for name in set(microbe_names) if name not in ete3_mapped]
+    no_hits = [name for name in set(microbe_names) if name not in ete3_cached]
+    # entrez_mapped = entrez_taxon_name2taxid(no_hits)
+    # save_pickle(entrez_mapped, "entrez_name2taxid.pkl")
+    entrez_cached = load_pickle(os.path.join("downloads", "entrez_name2taxid.pkl"))
+
+    # no_hits2 = [
+    #     name for name in set(microbe_names) if name not in ete3_mapped and name not in entrez_mapped
+    # ]
+    no_hits2 = [
+        name for name in set(microbe_names) if name not in ete3_cached and name not in entrez_cached
+    ]

@@ -134,6 +134,13 @@ def entrez_taxon_name2taxid(
 
 
 def text2term_taxon_name2taxid(taxon_names: list[str], min_score=0.8) -> dict:
+    """
+
+    :param taxon_names:
+    :param min_score:
+    :return:
+    e.g., {'pseudomonas uorescens': {'taxid': 294, 'mapping_tool': 'text2term'}, ...}
+    """
     if not text2term.cache_exists("NCBITaxon"):
         text2term.cache_ontology(
             ontology_url="http://purl.obolibrary.org/obo/ncbitaxon.owl",
@@ -176,6 +183,12 @@ def manual_correct_text2term_map(text2term_mapped: dict) -> dict:
 
 
 def manual_taxon_name2taxid(taxon_names: list[str]) -> dict:
+    """
+
+    :param taxon_names:
+    :return:
+    e.g., {'clostridia propionicum': {'taxid': 28446, 'mapping_tool': 'manual'}, ...}
+    """
     raw_mapping = {
         "rlzodopseudomonas spheroides": 1063,
         "clostridium calortolerans": 36832,
@@ -242,35 +255,43 @@ def get_ncit_taxon_description(taxon_names):
 
 if __name__ == "__main__":
     input_xml = os.path.join("downloads", "hmdb_metabolites.xml")
-    microbe_names = get_all_microbe_names(input_xml)
+    # microbe_names = get_all_microbe_names(input_xml)
     # save_pickle(list(set(microbe_names)), "hmdb_v5_microbe_names.pkl")
-    microbes4query = [obj for obj in microbe_names]
+    # microbes4query = [obj for obj in microbe_names]
     # ete3_mapped = ete3_taxon_name2taxid(microbes4query)
     # save_pickle(ete3_mapped, "ete3_name2taxid.pkl")
-    ete3_cached = load_pickle("ete3_name2taxid.pkl")
+    # ete3_cached = load_pickle("ete3_name2taxid.pkl")
 
     # no_hits = [name for name in set(microbe_names) if name not in ete3_mapped]
-    microbe_cached = load_pickle("hmdb_v5_microbe_names.pkl")
-    no_hits = [name for name in microbe_cached if name not in ete3_cached]
+    # microbe_cached = load_pickle("hmdb_v5_microbe_names.pkl")
+    # no_hits = [name for name in microbe_cached if name not in ete3_cached]
     # entrez_mapped = entrez_taxon_name2taxid(no_hits)
     # save_pickle(entrez_mapped, "entrez_name2taxid.pkl")
-    entrez_cached = load_pickle("entrez_name2taxid.pkl")
+    # entrez_cached = load_pickle("entrez_name2taxid.pkl")
 
     # no_hits2 = [
     #     name for name in set(microbe_names) if name not in ete3_mapped and name not in entrez_mapped
     # ]
-    no_hits2 = [
-        name for name in microbe_cached if name not in ete3_cached and name not in entrez_cached
-    ]
+    # no_hits2 = [
+    #     name for name in microbe_cached if name not in ete3_cached and name not in entrez_cached
+    # ]
 
     # text2term_mapped = text2term_taxon_name2taxid(no_hits2)
     # text2term_mapped = manual_correct_text2term_map(text2term_mapped)
     # save_pickle(text2term_mapped, "text2term_name2taxid.pkl")
-    text2term_cached = load_pickle("text2term_name2taxid.pkl")
+    # text2term_cached = load_pickle("text2term_name2taxid.pkl")
 
     # no_hits3 = [name for name in set(microbe_names) if name not in ete3_mapped and name not in entrez_mapped and name not in text2term_mapped]
-    no_hits3 = [
-        name
-        for name in microbe_cached
-        if name not in ete3_cached and name not in entrez_cached and name not in text2term_cached
-    ]
+    # no_hits3 = [
+    #     name
+    #     for name in microbe_cached
+    #     if name not in ete3_cached and name not in entrez_cached and name not in text2term_cached
+    # ]
+    # manual_mapped = manual_taxon_name2taxid(no_hits3)
+    # save_pickle(manual_mapped, "manual_name2taxid.pkl")
+    # manual_cached = load_pickle("manual_name2taxid.pkl")
+
+    # all_mapped_taxon_names = ete3_cached | entrez_cached | text2term_cached | manual_cached
+    # save_pickle(all_mapped_taxon_names, "all_taxon_name2taxid.pkl")
+
+    all_mapped_taxon_cached = load_pickle("all_taxon_name2taxid.pkl")

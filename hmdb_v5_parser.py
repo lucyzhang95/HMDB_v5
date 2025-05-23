@@ -6,6 +6,7 @@ import time
 import zipfile
 from typing import Iterator
 
+import biothings_client as bt
 import requests
 import text2term
 from Bio import Entrez
@@ -223,6 +224,59 @@ def manual_taxon_name2taxid(taxon_names: list[str]) -> dict:
         if name in raw_mapping
     }
     return manual_mapped
+
+
+def get_taxon_info_from_bt(taxids) -> dict:
+    """
+
+    :param taxids:
+    :return:
+        {
+       "28450":{
+          "id":"taxid:28450",
+          "taxid":28450,
+          "name":"burkholderia pseudomallei",
+          "parent_taxid":111527,
+          "lineage":[
+             28450,
+             111527,
+             32008,
+             119060,
+             80840,
+             28216,
+             1224,
+             3379134,
+             2,
+             131567,
+             1
+          ],
+          "rank":"species"
+       }"..."
+    }
+    """
+    taxids = set(taxids)
+    get_taxon = bt.get_client("taxon")
+    taxon_info = get_taxon.gettaxa(
+        taxids, fields=["scientific_name", "parent_taxid", "lineage", "rank"]
+    )
+
+    taxon = {}
+    for info in taxon_info:
+        if "notfound" not in info.keys():
+            taxon[info["query"]] = {
+                "id": f"taxid:{int(info['_id'])}",
+                "taxid": int(info["_id"]),
+                "name": info["scientific_name"],
+                "parent_taxid": int(info["parent_taxid"]),
+                "lineage": info["lineage"],
+                "rank": info["rank"],
+            }
+        else:
+            taxon[info["query"]] = {
+                "id": f"taxid:{int(info['query'])}",
+                "taxid": int(info["query"]),
+            }
+    return taxon
 
 
 def get_ncit_taxon_description(taxon_names):

@@ -280,6 +280,16 @@ def get_taxon_info_from_bt(taxids) -> dict:
 
 
 def get_ncit_taxon_description(taxon_names):
+    """
+
+    :param taxon_names:
+    :return:
+    {'serratia': {'description':
+    'A genus of small motile peritrichous bacteria in the Enterobacteriacaea family
+    consisting of Gram-negative rods.
+    [NCIT]',
+    'xrefs': {'ncit': 'C86010', }} ...}
+    """
     API_KEY = "efd61c1d-74a2-4877-b4ff-37ba827a96bc"
     search_url = "https://data.bioontology.org/search"
     taxon_names = set(taxon_names)
@@ -295,16 +305,48 @@ def get_ncit_taxon_description(taxon_names):
         for result in data.get("collection", []):
             if result:
                 ncit_output = {
-                    "ncit": result.get("@id").split("#")[1],
                     "name": result.get("prefLabel").lower(),
                     "description": f"{result.get('definition')[0]} [NCIT]"
                     if "definition" in result
                     else "",
+                    "xrefs": {"ncit": result.get("@id").split("#")[1]},
                 }
                 if ncit_output["name"] == name:
                     mapping_result[name] = ncit_output
                     del mapping_result[name]["name"]
     return mapping_result
+
+
+def add_description2taxon_info(taxon_info: dict, descriptions: dict) -> dict:
+    for _, info in taxon_info.items():
+        name = info.get("name")
+        if name in descriptions:
+            info.update(descriptions[name])
+    return taxon_info
+
+
+def get_full_taxon_info(mapped_taxon_names: dict, taxon_info: dict) -> dict:
+    """A dictionary of taxon metadata keyed by taxon name,
+    using taxid lookup from `taxon_info`.
+
+    :param mapped_taxon_names: Mapping of taxon name to a dict with taxon taxid, lineage, rank...
+    {'clostridia propionicum': {'taxid': 28446, 'mapping_tool': 'manual'} ...}
+    :param taxon_info: Mapping of taxid (as str) to a dictionary with mapped taxon names and taxid.
+    '28450': {'id': 'taxid:28450', 'taxid': 28450, 'name': 'burkholderia pseudomallei', 'parent_taxid': 111527, 'lineage': [28450, 111527, 32008, 119060, 80840, 28216, 1224, 3379134, 2, 131567, 1], 'rank': 'species', 'description': 'A species of aerobic, Gram-negative, rod shaped bacteria assigned to the phylum Proteobacteria.
+    This species is motile, non-spore forming, oxidase and catalase positive and indole negative.
+    B. pseudomallei is found in contaminated soil, water,
+    and produce and causes melioidosis in humans with the highest rate of disease occurring in southeast Asia.
+    [NCIT]', 'xrefs': {'ncit': 'C86010' }} ...}
+
+    :return:
+
+    """
+    full_taxon = {
+        name: taxon_info[str(taxon_entry["taxid"])]
+        for name, taxon_entry in mapped_taxon_names.items()
+        if str(taxon_entry["taxid"]) in taxon_info
+    }
+    return full_taxon
 
 
 if __name__ == "__main__":
@@ -349,3 +391,10 @@ if __name__ == "__main__":
     # save_pickle(all_mapped_taxon_names, "all_taxon_name2taxid.pkl")
 
     all_mapped_taxon_cached = load_pickle("all_taxon_name2taxid.pkl")
+    taxid2taxon = [int(taxid["taxid"]) for name, taxid in all_mapped_taxon_cached.items()]
+    taxon_info = get_taxon_info_from_bt(taxid2taxon)
+    taxon_sci_names = [info["name"] for info in taxon_info.values() if "name" in info]
+    taxon_descr = get_ncit_taxon_description(taxon_sci_names)
+    taxon_info_descr = add_description2taxon_info(taxon_info, taxon_descr)
+    full_taxon_info = get_full_taxon_info(all_mapped_taxon_cached, taxon_info)
+    # save_pickle(full_taxon_info, "original_taxon_name2taxid.pkl")

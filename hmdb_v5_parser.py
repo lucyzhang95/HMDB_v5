@@ -415,7 +415,7 @@ class HMDBParse:
 
     def get_text(self, elem, tag):
         child = elem.find(f"hmdb:{tag}", self.namespace)
-        return child.text.strip() if child and child.text else None
+        return child.text.strip() if child is not None and child.text else None
 
     def get_list(self, elem, tag):
         return [e.text.lower() for e in elem.findall(f"hmdb:{tag}", self.namespace) if e.text]
@@ -507,11 +507,10 @@ class HMDBParse:
                 "subject": {},
             }
 
+            name = self.get_text(metabolite, "name")
             object_node = {
                 "id": primary_id,
-                "name": self.get_text(metabolite, "name").lower()
-                if self.get_text(metabolite, "name")
-                else None,
+                "name": name.lower() if name else None,
                 "synonym": self.get_list(
                     metabolite.find("hmdb:synonyms", self.namespace), "synonym"
                 )

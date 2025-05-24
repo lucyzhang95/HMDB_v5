@@ -570,6 +570,8 @@ class HMDBParse:
                     _id = f"{rec['subject']['id'].split(':')[1]}_associated_with_{rec['object']['id'].split(':')[1]}"
                     rec["_id"] = _id
 
+                    # TODO: decide if want to remove duplicated records
+
                     yield rec
 
 

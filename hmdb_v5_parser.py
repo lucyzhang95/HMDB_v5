@@ -555,7 +555,7 @@ class HMDBParse:
             if not microbes:
                 continue
             for microbe in microbes:
-                if microbe in taxon_info:
+                if microbe in self.cached_taxon_info:
                     subject_node = self.cached_taxon_info[microbe].copy()
                     subject_node["original_name"] = microbe.lower().strip()
                     subject_node["type"] = "biolink:OrganismTaxon"

@@ -10,11 +10,13 @@ import biothings_client as bt
 import requests
 import text2term
 from Bio import Entrez
+from dotenv import load_dotenv
 from ete3 import NCBITaxa
 from lxml import etree as ET
 
 CACHE_DIR = os.path.join(os.getcwd(), "cache")
 os.makedirs(CACHE_DIR, exist_ok=True)
+load_dotenv()
 
 
 def save_pickle(obj, f_name):
@@ -105,15 +107,17 @@ def ete3_taxon_name2taxid(taxon_names: list) -> dict:
 
 
 def entrez_taxon_name2taxid(
-    taxon_names: list[str], sleep=0.34, email="bazhang@scripps.edu"
+    taxon_names: list[str],
+    email,
+    sleep=0.34,
 ) -> dict:
     """Map taxonomy names to NCBI taxonomy ids using entrez API
     Entrez is good at mapping recent reclassified taxonomy names that are outdated
     but very slow due to no batch query allowed, so expensive to query, recommend cache the output
 
     :param taxon_names:
-    :param sleep:
     :param email:
+    :param sleep:
     :return: a dictionary mapping taxon names to taxids,
     e.g., {'cellulomonas galba': {'taxid': 401861, 'mapping_tool': 'entrez'}, ...}
     """
@@ -290,7 +294,7 @@ def get_ncit_taxon_description(taxon_names):
     [NCIT]',
     'xrefs': {'ncit': 'C86010', }} ...}
     """
-    API_KEY = "efd61c1d-74a2-4877-b4ff-37ba827a96bc"
+    API_KEY = os.getenv("NCIT_API_KEY")
     search_url = "https://data.bioontology.org/search"
     taxon_names = set(taxon_names)
     mapping_result = {}
@@ -322,6 +326,9 @@ def add_description2taxon_info(taxon_info: dict, descriptions: dict) -> dict:
         name = info.get("name")
         if name in descriptions:
             info.update(descriptions[name])
+        else:
+            pass
+
     return taxon_info
 
 
@@ -349,46 +356,35 @@ def get_full_taxon_info(mapped_taxon_names: dict, taxon_info: dict) -> dict:
     return full_taxon
 
 
-if __name__ == "__main__":
-    input_xml = os.path.join("downloads", "hmdb_metabolites.xml")
-    # microbe_names = get_all_microbe_names(input_xml)
-    # save_pickle(list(set(microbe_names)), "hmdb_v5_microbe_names.pkl")
-    # microbes4query = [obj for obj in microbe_names]
-    # ete3_mapped = ete3_taxon_name2taxid(microbes4query)
-    # save_pickle(ete3_mapped, "ete3_name2taxid.pkl")
-    # ete3_cached = load_pickle("ete3_name2taxid.pkl")
+def cache_data(input_xml):
+    microbe_names = get_all_microbe_names(input_xml)
+    save_pickle(list(set(microbe_names)), "hmdb_v5_microbe_names.pkl")
 
-    # no_hits = [name for name in set(microbe_names) if name not in ete3_mapped]
-    # microbe_cached = load_pickle("hmdb_v5_microbe_names.pkl")
-    # no_hits = [name for name in microbe_cached if name not in ete3_cached]
-    # entrez_mapped = entrez_taxon_name2taxid(no_hits)
-    # save_pickle(entrez_mapped, "entrez_name2taxid.pkl")
-    # entrez_cached = load_pickle("entrez_name2taxid.pkl")
+    microbes4query = load_pickle("hmdb_v5_microbe_names.pkl")
+    ete3_mapped = ete3_taxon_name2taxid(microbes4query)
+    save_pickle(ete3_mapped, "ete3_name2taxid.pkl")
 
-    # no_hits2 = [
-    #     name for name in set(microbe_names) if name not in ete3_mapped and name not in entrez_mapped
-    # ]
-    # no_hits2 = [
-    #     name for name in microbe_cached if name not in ete3_cached and name not in entrez_cached
-    # ]
+    no_hits = [name for name in microbes4query if name not in ete3_mapped]
+    entrez_mapped = entrez_taxon_name2taxid(no_hits, email=os.getenv("EMAIL_ADDRESS"))
+    save_pickle(entrez_mapped, "entrez_name2taxid.pkl")
 
-    # text2term_mapped = text2term_taxon_name2taxid(no_hits2)
-    # text2term_mapped = manual_correct_text2term_map(text2term_mapped)
-    # save_pickle(text2term_mapped, "text2term_name2taxid.pkl")
-    # text2term_cached = load_pickle("text2term_name2taxid.pkl")
+    no_hits2 = [
+        name for name in microbes4query if name not in ete3_mapped and name not in entrez_mapped
+    ]
+    text2term_mapped = text2term_taxon_name2taxid(no_hits2)
+    text2term_mapped = manual_correct_text2term_map(text2term_mapped)
+    save_pickle(text2term_mapped, "text2term_name2taxid.pkl")
 
-    # no_hits3 = [name for name in set(microbe_names) if name not in ete3_mapped and name not in entrez_mapped and name not in text2term_mapped]
-    # no_hits3 = [
-    #     name
-    #     for name in microbe_cached
-    #     if name not in ete3_cached and name not in entrez_cached and name not in text2term_cached
-    # ]
-    # manual_mapped = manual_taxon_name2taxid(no_hits3)
-    # save_pickle(manual_mapped, "manual_name2taxid.pkl")
-    # manual_cached = load_pickle("manual_name2taxid.pkl")
+    no_hits3 = [
+        name
+        for name in set(microbe_names)
+        if name not in ete3_mapped and name not in entrez_mapped and name not in text2term_mapped
+    ]
+    manual_mapped = manual_taxon_name2taxid(no_hits3)
+    save_pickle(manual_mapped, "manual_name2taxid.pkl")
 
-    # all_mapped_taxon_names = ete3_cached | entrez_cached | text2term_cached | manual_cached
-    # save_pickle(all_mapped_taxon_names, "all_taxon_name2taxid.pkl")
+    all_mapped_taxon_names = ete3_mapped | entrez_mapped | text2term_mapped | manual_mapped
+    save_pickle(all_mapped_taxon_names, "all_taxon_name2taxid.pkl")
 
     all_mapped_taxon_cached = load_pickle("all_taxon_name2taxid.pkl")
     taxid2taxon = [int(taxid["taxid"]) for name, taxid in all_mapped_taxon_cached.items()]
@@ -396,5 +392,21 @@ if __name__ == "__main__":
     taxon_sci_names = [info["name"] for info in taxon_info.values() if "name" in info]
     taxon_descr = get_ncit_taxon_description(taxon_sci_names)
     taxon_info_descr = add_description2taxon_info(taxon_info, taxon_descr)
-    full_taxon_info = get_full_taxon_info(all_mapped_taxon_cached, taxon_info)
-    # save_pickle(full_taxon_info, "original_taxon_name2taxid.pkl")
+    full_taxon_info = get_full_taxon_info(all_mapped_taxon_cached, taxon_info_descr)
+    save_pickle(full_taxon_info, "original_taxon_name2taxid.pkl")
+
+
+def load_hmdb_v5_data(input_xml):
+    # cache_data(input_xml)
+    cached_taxon_info = load_pickle("original_taxon_name2taxid.pkl")
+
+
+
+
+
+
+if __name__ == "__main__":
+    hmdb_xml = os.path.join("downloads", "hmdb_metabolites.xml")
+    cache_data(hmdb_xml)
+    cached_taxon_info = load_pickle("original_taxon_name2taxid.pkl")
+    print(len(cached_taxon_info))

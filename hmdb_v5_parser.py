@@ -421,7 +421,7 @@ class HMDBParse:
         return [e.text.lower() for e in elem.findall(f"hmdb:{tag}", self.namespace) if e.text]
 
     def get_experimental_properties(self, metabolite, prop_name):
-        props = metabolite.find("hmdb:experimentalProperties", self.namespace)
+        props = metabolite.find("hmdb:experimental_properties", self.namespace)
         if props:
             for prop in props.findall("hmdb:property", self.namespace):
                 kind = self.get_text(prop, "kind")
@@ -430,12 +430,15 @@ class HMDBParse:
         return None
 
     def get_molecular_weights(self, metabolite):
-        return {
-            "average_molecular_weight": self.get_text(metabolite, "average_molecular_weight"),
-            "monisotopic_molecular_weight": self.get_text(
-                metabolite, "monisotopic_molecular_weight"
-            ),
-        }
+        avg = self.get_text(metabolite, "average_molecular_weight")
+        mono = self.get_text(metabolite, "monisotopic_molecular_weight")
+
+        weights = {}
+        if avg:
+            weights["average_molecular_weight"] = float(avg)
+        if mono:
+            weights["monoisotopic_molecular_weight"] = float(mono)
+        return weights
 
     def get_microbes(self, metabolite):
         ontology = metabolite.find("hmdb:ontology", self.namespace)
@@ -478,17 +481,25 @@ class HMDBParse:
 
         xrefs = {}
         primary_id = None
-
         for tag, prefix in id_hierarchy:
             val = self.get_text(metabolite, tag)
             if val:
                 if tag == "kegg_id":
                     prefix = classify_kegg(val)
-                curie = f"{prefix}:{val}" if prefix != "HMDB" else val.replace("HMDB", "")
+
+                curie = f"{prefix}:{val}"
                 if not primary_id:
                     primary_id = curie
                 else:
-                    xrefs[prefix] = val
+                    key = (
+                        "foodb"
+                        if prefix == "foodb.compound"
+                        else "hmdb"
+                        if prefix == "HMDB"
+                        else prefix.lower().split(".")[0]
+                    )
+                    xrefs[key] = curie
+
         return primary_id, xrefs
 
     def parse(self):
@@ -507,7 +518,14 @@ class HMDBParse:
                 "subject": {},
             }
 
+            association_node = {
+                "predicate": "biolink:OrganismTaxonToChemicalEntityAssociation",
+                "infores": "hmdb_v5",
+            }
+            rec["association"] = association_node
+
             name = self.get_text(metabolite, "name")
+            logp = self.get_experimental_properties(metabolite, "logp")
             object_node = {
                 "id": primary_id,
                 "name": name.lower() if name else None,
@@ -523,7 +541,7 @@ class HMDBParse:
                 "water_solubility": self.get_experimental_properties(
                     metabolite, "water_solubility"
                 ),
-                "logp": self.get_experimental_properties(metabolite, "logp"),
+                "logp": float(logp) if logp else None,
                 "melting_point": self.get_experimental_properties(metabolite, "melting_point"),
                 "type": "biolink:SmallMolecule",
                 "xrefs": xrefs,

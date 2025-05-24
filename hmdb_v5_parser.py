@@ -549,6 +549,6 @@ class HMDBParse:
 if __name__ == "__main__":
     zip_path = os.path.join("downloads", "hmdb_metabolites.zip")
     hmdb_xml = extract_xml_from_zip(zip_path)
-    parser = HMDBParse(xml_path)
+    parser = HMDBParse(hmdb_xml)
     for rec in parser.parse():
         print(rec)

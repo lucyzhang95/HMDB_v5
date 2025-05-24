@@ -38,6 +38,17 @@ def load_pickle(f_name):
     return None
 
 
+def extract_xml_from_zip(zip_path, expected_filename="hmdb_metabolites.xml"):
+    extract_dir = os.path.dirname(zip_path)
+    extracted_path = os.path.join(extract_dir, expected_filename)
+
+    if not os.path.exists(extracted_path):
+        with zipfile.ZipFile(zip_path, "r") as zip_f:
+            zip_f.extract(expected_filename, path=extract_dir)
+
+    return extracted_path
+
+
 def strip_tag_namespace(tag: str) -> str:
     """Strip namespace from main element tag
     Each element tag from HMDB contains "http://www.hmdb.ca" as namespace
@@ -396,17 +407,148 @@ def cache_data(input_xml):
     save_pickle(full_taxon_info, "original_taxon_name2taxid.pkl")
 
 
-def load_hmdb_v5_data(input_xml):
-    # cache_data(input_xml)
-    cached_taxon_info = load_pickle("original_taxon_name2taxid.pkl")
+class HMDBParse:
+    def __init__(self, input_xml):
+        self.namespace = {"hmdb": "http://www.hmdb.ca"}
+        self.input_xml = input_xml
+        self.cached_taxon_info = load_pickle("original_taxon_name2taxid.pkl")
 
+    def get_text(self, elem, tag):
+        child = elem.find(f"hmdb:{tag}", self.namespace)
+        return child.text.strip() if child and child.text else None
 
+    def get_list(self, elem, tag):
+        return [e.text.lower() for e in elem.findall(f"hmdb:{tag}", self.namespace) if e.text]
 
+    def get_experimental_properties(self, metabolite, prop_name):
+        props = metabolite.find("hmdb:experimentalProperties", self.namespace)
+        if props:
+            for prop in props.findall("hmdb:property", self.namespace):
+                kind = self.get_text(prop, "kind")
+                if kind and kind.lower() == prop_name.lower():
+                    return self.get_text(prop, "value")
+        return None
 
+    def get_molecular_weights(self, metabolite):
+        return {
+            "average_molecular_weight": self.get_text(metabolite, "average_molecular_weight"),
+            "monisotopic_molecular_weight": self.get_text(
+                metabolite, "monisotopic_molecular_weight"
+            ),
+        }
+
+    def get_microbes(self, metabolite):
+        ontology = metabolite.find("hmdb:ontology", self.namespace)
+        for root in ontology.findall("hmdb:root", self.namespace):
+            if self.get_text(root, "term") != "Disposition":
+                continue
+            for d in root.findall(".//hmdb:descendant", self.namespace):
+                if self.get_text(d, "term") == "Microbe":
+                    return sorted(
+                        {
+                            t.text.lower().strip()
+                            for t in d.findall(".//hmdb:term", self.namespace)
+                            if t.text and t.text.strip().lower() != "microbe"
+                        }
+                    )
+
+    def get_primary_id(self, metabolite):
+        id_hierarchy = [
+            ("pubchem_compound_id", "PUBCHEM.COMPOUND"),
+            ("inchikey", "INCHIKEY"),
+            ("drugbank_id", "DRUGBANK"),
+            ("chebi_id", "CHEBI"),
+            ("chembl_id", "CHEMBL.COMPOUND"),
+            ("accession", "HMDB"),
+            ("cas_registry_number", "CAS"),
+            ("kegg_id", None),
+            ("chemspider_id", "chemspider"),
+            ("foodb_id", "foodb.compound"),
+            ("bigg_id", "BIGG.METABOLITE"),
+        ]
+
+        def classify_kegg(val):
+            if val.startswith("C"):
+                return "KEGG.COMPOUND"
+            elif val.startswith("G"):
+                return "KEGG.GLYCAN"
+            elif val.startswith("D"):
+                return "KEGG.DRUG"
+            return "KEGG"
+
+        xrefs = {}
+        primary_id = None
+
+        for tag, prefix in id_hierarchy:
+            val = self.get_text(metabolite, tag)
+            if val:
+                if tag == "kegg_id":
+                    prefix = classify_kegg(val)
+                curie = f"{prefix}:{val}" if prefix != "HMDB" else val.replace("HMDB", "")
+                if not primary_id:
+                    primary_id = curie
+                else:
+                    xrefs[prefix] = val
+        return primary_id, xrefs
+
+    def parse(self):
+        tree = ET.parse(self.input_xml)
+        root = tree.getroot()
+        if not os.path.exists("original_taxon_name2taxid.pkl"):
+            cache_data(self.xml_path)
+
+        for metabolite in root.findall("hmdb:metabolite", self.namespace):
+            primary_id, xrefs = self.get_primary_id(metabolite)
+            rec = {
+                "_id": None,
+                "association": {},
+                "object": {},
+                "subject": {},
+            }
+
+            object_node = {
+                "id": primary_id,
+                "name": self.get_text(metabolite, "name").lower()
+                if self.get_text(metabolite, "name")
+                else None,
+                "synonym": self.get_list(
+                    metabolite.find("hmdb:synonyms", self.namespace), "synonym"
+                )
+                if metabolite.find("hmdb:synonyms", self.namespace)
+                else [],
+                "description": self.get_text(metabolite, "description"),
+                "chemical_formula": self.get_text(metabolite, "chemical_formula"),
+                "molecular_weight": self.get_molecular_weights(metabolite),
+                "state": self.get_experimental_properties(metabolite, "state"),
+                "water_solubility": self.get_experimental_properties(
+                    metabolite, "water_solubility"
+                ),
+                "logp": self.get_experimental_properties(metabolite, "logp"),
+                "melting_point": self.get_experimental_properties(metabolite, "melting_point"),
+                "type": "biolink:SmallMolecule",
+                "xrefs": xrefs,
+            }
+            rec["object"] = object_node
+
+            microbes = self.get_microbes(metabolite)
+            taxon_info = self.cached_taxon_info
+            if not microbes:
+                continue
+            for microbe in microbes:
+                if microbe in taxon_info:
+                    subject_node = taxon_info[microbe]
+                    subject_node["original_name"] = microbe.lower().strip()
+                    subject_node["type"] = "biolink:OrganismTaxon"
+                    rec["subject"] = subject_node
+
+                    _id = f"{rec['subject']['id'].split(':')[1]}_associated_with_{rec['object']['id'].split(':')[1]}"
+                    rec["_id"] = _id
+                    yield rec
 
 
 if __name__ == "__main__":
-    hmdb_xml = os.path.join("downloads", "hmdb_metabolites.xml")
-    cache_data(hmdb_xml)
-    cached_taxon_info = load_pickle("original_taxon_name2taxid.pkl")
-    print(len(cached_taxon_info))
+    zip_path = os.path.join("downloads", "hmdb_metabolites.zip")
+    xml_path = extract_xml_from_zip(zip_path)
+    parser = HMDBParse(xml_path)
+    for rec in parser.parse():
+        print(rec)

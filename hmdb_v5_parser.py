@@ -422,7 +422,7 @@ class HMDBParse:
 
     def get_experimental_properties(self, metabolite, prop_name):
         props = metabolite.find("hmdb:experimental_properties", self.namespace)
-        if props:
+        if props is not None:
             for prop in props.findall("hmdb:property", self.namespace):
                 kind = self.get_text(prop, "kind")
                 if kind and kind.lower() == prop_name.lower():
@@ -502,6 +502,14 @@ class HMDBParse:
 
         return primary_id, xrefs
 
+    def remove_none_values(self, d):
+        if isinstance(d, dict):
+            return {k: self.remove_none_values(v) for k, v in d.items() if v is not None}
+        elif isinstance(d, list):
+            return [self.remove_none_values(v) for v in d if v is not None]
+        else:
+            return d
+
     def parse(self):
         tree = ET.parse(self.input_xml)
         root = tree.getroot()
@@ -511,56 +519,57 @@ class HMDBParse:
 
         for metabolite in root.findall("hmdb:metabolite", self.namespace):
             primary_id, xrefs = self.get_primary_id(metabolite)
-            rec = {
-                "_id": None,
-                "association": {},
-                "object": {},
-                "subject": {},
-            }
 
             association_node = {
                 "predicate": "biolink:OrganismTaxonToChemicalEntityAssociation",
                 "infores": "hmdb_v5",
             }
-            rec["association"] = association_node
 
             name = self.get_text(metabolite, "name")
+            synonyms_elem = metabolite.find("hmdb:synonyms", self.namespace)
             logp = self.get_experimental_properties(metabolite, "logp")
+            state = self.get_text(metabolite, "state")
             object_node = {
                 "id": primary_id,
                 "name": name.lower() if name else None,
-                "synonym": self.get_list(
-                    metabolite.find("hmdb:synonyms", self.namespace), "synonym"
-                )
+                "synonym": self.get_list(synonyms_elem, "synonym")
+                if synonyms_elem is not None
+                else []
                 if metabolite.find("hmdb:synonyms", self.namespace)
                 else [],
                 "description": self.get_text(metabolite, "description"),
                 "chemical_formula": self.get_text(metabolite, "chemical_formula"),
                 "molecular_weight": self.get_molecular_weights(metabolite),
-                "state": self.get_experimental_properties(metabolite, "state"),
+                "state": state.lower() if state else None,
                 "water_solubility": self.get_experimental_properties(
                     metabolite, "water_solubility"
                 ),
-                "logp": float(logp) if logp else None,
+                "logp": logp,
                 "melting_point": self.get_experimental_properties(metabolite, "melting_point"),
                 "type": "biolink:SmallMolecule",
                 "xrefs": xrefs,
             }
-            rec["object"] = object_node
+            object_node = self.remove_none_values(object_node)
 
             microbes = self.get_microbes(metabolite)
-            taxon_info = self.cached_taxon_info
             if not microbes:
                 continue
             for microbe in microbes:
                 if microbe in taxon_info:
-                    subject_node = taxon_info[microbe]
+                    subject_node = self.cached_taxon_info[microbe].copy()
                     subject_node["original_name"] = microbe.lower().strip()
                     subject_node["type"] = "biolink:OrganismTaxon"
-                    rec["subject"] = subject_node
+
+                    rec = {
+                        "_id": None,
+                        "association": association_node,
+                        "object": object_node,
+                        "subject": self.remove_none_values(subject_node),
+                    }
 
                     _id = f"{rec['subject']['id'].split(':')[1]}_associated_with_{rec['object']['id'].split(':')[1]}"
                     rec["_id"] = _id
+
                     yield rec
 
 
@@ -568,5 +577,7 @@ if __name__ == "__main__":
     zip_path = os.path.join("downloads", "hmdb_metabolites.zip")
     hmdb_xml = extract_xml_from_zip(zip_path)
     parser = HMDBParse(hmdb_xml)
-    for record in parser.parse():
+    records = [record for record in parser.parse()]
+    save_pickle(records, "hmdb_v5_microbe_metabolite.pkl")
+    for record in records:
         print(record)

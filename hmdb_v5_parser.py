@@ -495,7 +495,7 @@ class HMDBParse:
         tree = ET.parse(self.input_xml)
         root = tree.getroot()
         if not os.path.exists("original_taxon_name2taxid.pkl"):
-            cache_data(self.xml_path)
+            cache_data(self.input_xml)
 
         for metabolite in root.findall("hmdb:metabolite", self.namespace):
             primary_id, xrefs = self.get_primary_id(metabolite)
@@ -548,7 +548,7 @@ class HMDBParse:
 
 if __name__ == "__main__":
     zip_path = os.path.join("downloads", "hmdb_metabolites.zip")
-    xml_path = extract_xml_from_zip(zip_path)
+    hmdb_xml = extract_xml_from_zip(zip_path)
     parser = HMDBParse(xml_path)
     for rec in parser.parse():
         print(rec)

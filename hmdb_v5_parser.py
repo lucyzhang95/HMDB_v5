@@ -1,6 +1,7 @@
 import os
 import pathlib
 import pickle
+import re
 import ssl
 import time
 import zipfile
@@ -412,6 +413,7 @@ class HMDBParse:
         self.namespace = {"hmdb": "http://www.hmdb.ca"}
         self.input_xml = input_xml
         self.cached_taxon_info = load_pickle("original_taxon_name2taxid.pkl")
+        self.parenthetical_pattern = re.compile(r"([^.?!]*?)\s*\(([^)]*?)\)")
 
     def get_text(self, elem, tag):
         child = elem.find(f"hmdb:{tag}", self.namespace)
@@ -502,6 +504,39 @@ class HMDBParse:
 
         return primary_id, xrefs
 
+    def get_references(self, description, microbes):
+        reference_indicators = ["PMID", "DOI", "Wikipedia", "http", "www", ":"]
+        matches = self.parenthetical_pattern.findall(description or "")
+        extracted = []
+
+        for sentence, paren in matches:
+            if any(ind.lower() in paren.lower() for ind in reference_indicators):
+                matched_microbes = [m for m in microbes if m.lower() in sentence.lower()]
+                if not matched_microbes:
+                    continue
+
+                paren = re.sub(r"\bPMID[\s:]+(\d+)", r"PMID:\1", paren, flags=re.IGNORECASE)
+                refs = [r.strip() for r in re.split(r"[;|,]", paren) if ":" in r and "CAS" not in r]
+
+                if refs:
+                    ref_dict = {"id": refs[0] if "PMID" in refs[0] else None}
+                    for ref in refs:
+                        key = (
+                            "pmid"
+                            if "pmid" in ref.lower()
+                            else "doi"
+                            if "doi" in ref.lower()
+                            else "wikidata"
+                            if "wikipedia" in ref.lower()
+                            else "url"
+                            if "http" in ref.lower() or "www" in ref.lower()
+                            else "article"
+                        )
+                        ref_dict.setdefault(key, []).append(ref)
+                    extracted.append(ref_dict)
+
+        return extracted
+
     def remove_none_values(self, d):
         if isinstance(d, dict):
             return {k: self.remove_none_values(v) for k, v in d.items() if v is not None}
@@ -519,10 +554,14 @@ class HMDBParse:
 
         for metabolite in root.findall("hmdb:metabolite", self.namespace):
             primary_id, xrefs = self.get_primary_id(metabolite)
+            microbes = self.get_microbes(metabolite)
+            description = self.get_text(metabolite, "description")
+            references = self.get_references(description, microbes)
 
             association_node = {
                 "predicate": "biolink:OrganismTaxonToChemicalEntityAssociation",
                 "infores": "hmdb_v5",
+                "publications": references,
             }
 
             name = self.get_text(metabolite, "name")
@@ -537,7 +576,7 @@ class HMDBParse:
                 else []
                 if metabolite.find("hmdb:synonyms", self.namespace)
                 else [],
-                "description": self.get_text(metabolite, "description"),
+                "description": description,
                 "chemical_formula": self.get_text(metabolite, "chemical_formula"),
                 "molecular_weight": self.get_molecular_weights(metabolite),
                 "state": state.lower() if state else None,
@@ -551,7 +590,6 @@ class HMDBParse:
             }
             object_node = self.remove_none_values(object_node)
 
-            microbes = self.get_microbes(metabolite)
             if not microbes:
                 continue
             for microbe in microbes:
@@ -580,6 +618,6 @@ if __name__ == "__main__":
     hmdb_xml = extract_xml_from_zip(zip_path)
     parser = HMDBParse(hmdb_xml)
     records = [record for record in parser.parse()]
-    save_pickle(records, "hmdb_v5_microbe_metabolite.pkl")
+    # save_pickle(records, "hmdb_v5_microbe_metabolite.pkl")
     for record in records:
         print(record)

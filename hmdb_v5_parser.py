@@ -508,6 +508,7 @@ class HMDBParse:
         reference_indicators = ["PMID", "DOI", "Wikipedia", "http", "www", ":"]
         matches = self.parenthetical_pattern.findall(description or "")
         extracted = []
+        microbes = microbes or []
 
         for sentence, paren in matches:
             if any(ind.lower() in paren.lower() for ind in reference_indicators):

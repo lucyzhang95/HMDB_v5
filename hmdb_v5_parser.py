@@ -517,37 +517,40 @@ class HMDBParse:
                     continue
 
                 paren = re.sub(r"\bPMID[\s:]+(\d+)", r"PMID:\1", paren, flags=re.IGNORECASE)
-                refs = [
-                    r.strip()
-                    for r in re.split(r"[;|,]", paren)
-                    if ":" in r and "CAS" not in r
-                ]
-
+                refs = [r.strip() for r in re.split(r"[;|,]", paren) if ":" in r and "CAS" not in r]
                 if refs:
                     ref_dict = {}
                     for ref in refs:
-                        ref_lower = ref.lower()
+                        try:
+                            prefix, value = ref.split(":", 1)
+                        except ValueError:
+                            continue
+
                         key = (
                             "pmid"
-                            if "pmid" in ref_lower
+                            if prefix.lower() == "pmid"
                             else "doi"
-                            if "doi" in ref_lower
+                            if prefix.lower() == "doi"
                             else "wikidata"
-                            if "wikipedia" in ref_lower
+                            if "wikipedia" in prefix.lower()
                             else "url"
-                            if "http" in ref_lower or "www" in ref_lower
+                            if "http" in prefix.lower() or "www" in prefix.lower()
                             else "article"
                         )
-                        ref_dict.setdefault(key, []).append(int(ref.split(":")[1].strip()) if "PMID" in ref else ref)
+                        value = (
+                            int(value.strip()) if key == "pmid" and value.strip().isdigit() else ref
+                        )
+                        ref_dict.setdefault(key, []).append(value)
 
-                    for k, v in ref_dict.items():
-                        if len(v) == 1:
-                            ref_dict[k] = v[0]
+                    for k in list(ref_dict):
+                        if len(ref_dict[k]) == 1:
+                            ref_dict[k] = ref_dict[k][0]
 
                     if "pmid" in ref_dict:
                         ref_dict["id"] = (
                             f"PMID:{ref_dict['pmid']}"
-                            if isinstance(ref_dict["pmid"], int) else f"PMID:{ref_dict['pmid'][0]}"
+                            if isinstance(ref_dict["pmid"], int)
+                            else f"PMID:{ref_dict['pmid'][0]}"
                         )
                     elif "url" in ref_dict:
                         ref_dict["id"] = (
@@ -564,14 +567,11 @@ class HMDBParse:
                     elif "wikidata" in ref_dict:
                         ref_dict["id"] = "Wikipedia"
                     elif "article" in ref_dict:
-                        ref_dict["id"] = (
-                            ref_dict["article"]
-                            if isinstance(ref_dict["article"], str)
-                            else ref_dict["article"][0]
-                        )
-                    ref_dict["type"] = "biolink:Publication"
+                        ref_dict["id"] = f"JournalArticle:{ref_dict['article']}"
 
+                    ref_dict["type"] = "biolink:Publication"
                     return ref_dict
+
         return {}
 
     def remove_empty_none_values(self, d):

@@ -518,6 +518,7 @@ class HMDBParse:
 
                 paren = re.sub(r"\bPMID[\s:]+(\d+)", r"PMID:\1", paren, flags=re.IGNORECASE)
                 refs = [r.strip() for r in re.split(r"[;|,]", paren) if ":" in r and "CAS" not in r]
+
                 if refs:
                     ref_dict = {}
                     for ref in refs:
@@ -537,37 +538,46 @@ class HMDBParse:
                             if "http" in prefix.lower() or "www" in prefix.lower()
                             else "article"
                         )
+
                         value = (
                             int(value.strip()) if key == "pmid" and value.strip().isdigit() else ref
                         )
                         ref_dict.setdefault(key, []).append(value)
 
                     for k in list(ref_dict):
-                        if len(ref_dict[k]) == 1:
+                        if isinstance(ref_dict[k], list) and len(ref_dict[k]) == 1:
                             ref_dict[k] = ref_dict[k][0]
 
                     if "pmid" in ref_dict:
-                        ref_dict["id"] = (
-                            f"PMID:{ref_dict['pmid']}"
-                            if isinstance(ref_dict["pmid"], int)
-                            else f"PMID:{ref_dict['pmid'][0]}"
+                        first_pmid = (
+                            ref_dict["pmid"][0]
+                            if isinstance(ref_dict["pmid"], list)
+                            else ref_dict["pmid"]
                         )
+                        ref_dict["id"] = f"PMID:{first_pmid}"
                     elif "url" in ref_dict:
-                        ref_dict["id"] = (
-                            f"JournalArticle:{ref_dict['url']}"
-                            if isinstance(ref_dict["url"], str)
-                            else f"JournalArticle:{ref_dict['url'][0]}"
+                        first_url = (
+                            ref_dict["url"][0]
+                            if isinstance(ref_dict["url"], list)
+                            else ref_dict["url"]
                         )
+                        ref_dict["id"] = f"JournalArticle:{first_url}"
                     elif "doi" in ref_dict:
-                        ref_dict["id"] = (
-                            f"doi:{ref_dict['doi']}"
-                            if isinstance(ref_dict["doi"], str)
-                            else f"doi:{ref_dict['doi'][0]}"
+                        first_doi = (
+                            ref_dict["doi"][0]
+                            if isinstance(ref_dict["doi"], list)
+                            else ref_dict["doi"]
                         )
+                        ref_dict["id"] = f"doi:{first_doi}"
                     elif "wikidata" in ref_dict:
                         ref_dict["id"] = "Wikipedia"
                     elif "article" in ref_dict:
-                        ref_dict["id"] = f"JournalArticle:{ref_dict['article']}"
+                        first_article = (
+                            ref_dict["article"][0]
+                            if isinstance(ref_dict["article"], list)
+                            else ref_dict["article"]
+                        )
+                        ref_dict["id"] = first_article
 
                     ref_dict["type"] = "biolink:Publication"
                     return ref_dict

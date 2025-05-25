@@ -518,7 +518,7 @@ class HMDBParse:
 
                 paren = re.sub(r"\bPMID[\s:]+(\d+)", r"PMID:\1", paren, flags=re.IGNORECASE)
                 refs = [
-                    int(r.split(":")[1].strip()) if "PMID" in r else r.strip()
+                    r.strip()
                     for r in re.split(r"[;|,]", paren)
                     if ":" in r and "CAS" not in r
                 ]
@@ -538,7 +538,7 @@ class HMDBParse:
                             if "http" in ref_lower or "www" in ref_lower
                             else "article"
                         )
-                        ref_dict.setdefault(key, []).append(ref)
+                        ref_dict.setdefault(key, []).append(int(ref.split(":")[1].strip()) if "PMID" in ref else ref)
 
                     for k, v in ref_dict.items():
                         if len(v) == 1:
@@ -546,9 +546,8 @@ class HMDBParse:
 
                     if "pmid" in ref_dict:
                         ref_dict["id"] = (
-                            ref_dict["pmid"]
-                            if isinstance(ref_dict["pmid"], str)
-                            else ref_dict["pmid"][0]
+                            f"PMID:{ref_dict['pmid']}"
+                            if isinstance(ref_dict["pmid"], int) else f"PMID:{ref_dict['pmid'][0]}"
                         )
                     elif "url" in ref_dict:
                         ref_dict["id"] = (
@@ -558,9 +557,9 @@ class HMDBParse:
                         )
                     elif "doi" in ref_dict:
                         ref_dict["id"] = (
-                            f"DOI:{ref_dict['doi']}"
+                            f"doi:{ref_dict['doi']}"
                             if isinstance(ref_dict["doi"], str)
-                            else f"DOI:{ref_dict['doi'][0]}"
+                            else f"doi:{ref_dict['doi'][0]}"
                         )
                     elif "wikidata" in ref_dict:
                         ref_dict["id"] = "Wikipedia"

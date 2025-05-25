@@ -4,6 +4,7 @@ import pickle
 import re
 import ssl
 import time
+import uuid
 import zipfile
 from typing import Iterator
 
@@ -507,7 +508,6 @@ class HMDBParse:
     def get_references(self, description, microbes):
         reference_indicators = ["PMID", "DOI", "Wikipedia", "http", "www", ":"]
         matches = self.parenthetical_pattern.findall(description or "")
-        extracted = []
         microbes = microbes or []
 
         for sentence, paren in matches:
@@ -517,32 +517,71 @@ class HMDBParse:
                     continue
 
                 paren = re.sub(r"\bPMID[\s:]+(\d+)", r"PMID:\1", paren, flags=re.IGNORECASE)
-                refs = [r.strip() for r in re.split(r"[;|,]", paren) if ":" in r and "CAS" not in r]
+                refs = [
+                    int(r.split(":")[1].strip()) if "PMID" in r else r.strip()
+                    for r in re.split(r"[;|,]", paren)
+                    if ":" in r and "CAS" not in r
+                ]
 
                 if refs:
-                    ref_dict = {"id": refs[0] if "PMID" in refs[0] else None}
+                    ref_dict = {}
                     for ref in refs:
+                        ref_lower = ref.lower()
                         key = (
                             "pmid"
-                            if "pmid" in ref.lower()
+                            if "pmid" in ref_lower
                             else "doi"
-                            if "doi" in ref.lower()
+                            if "doi" in ref_lower
                             else "wikidata"
-                            if "wikipedia" in ref.lower()
+                            if "wikipedia" in ref_lower
                             else "url"
-                            if "http" in ref.lower() or "www" in ref.lower()
+                            if "http" in ref_lower or "www" in ref_lower
                             else "article"
                         )
                         ref_dict.setdefault(key, []).append(ref)
-                    extracted.append(ref_dict)
 
-        return extracted
+                    for k, v in ref_dict.items():
+                        if len(v) == 1:
+                            ref_dict[k] = v[0]
 
-    def remove_none_values(self, d):
+                    if "pmid" in ref_dict:
+                        ref_dict["id"] = (
+                            ref_dict["pmid"]
+                            if isinstance(ref_dict["pmid"], str)
+                            else ref_dict["pmid"][0]
+                        )
+                    elif "url" in ref_dict:
+                        ref_dict["id"] = (
+                            f"JournalArticle:{ref_dict['url']}"
+                            if isinstance(ref_dict["url"], str)
+                            else f"JournalArticle:{ref_dict['url'][0]}"
+                        )
+                    elif "doi" in ref_dict:
+                        ref_dict["id"] = (
+                            f"DOI:{ref_dict['doi']}"
+                            if isinstance(ref_dict["doi"], str)
+                            else f"DOI:{ref_dict['doi'][0]}"
+                        )
+                    elif "wikidata" in ref_dict:
+                        ref_dict["id"] = "Wikipedia"
+                    elif "article" in ref_dict:
+                        ref_dict["id"] = (
+                            ref_dict["article"]
+                            if isinstance(ref_dict["article"], str)
+                            else ref_dict["article"][0]
+                        )
+                    ref_dict["type"] = "biolink:Publication"
+
+                    return ref_dict
+        return {}
+
+    def remove_empty_none_values(self, d):
         if isinstance(d, dict):
-            return {k: self.remove_none_values(v) for k, v in d.items() if v is not None}
+            return {
+                k: self.remove_empty_none_values(v) for k, v in d.items() if v not in (None, {}, [])
+            }
         elif isinstance(d, list):
-            return [self.remove_none_values(v) for v in d if v is not None]
+            return [self.remove_empty_none_values(v) for v in d if v not in (None, {}, [])]
         else:
             return d
 
@@ -562,8 +601,9 @@ class HMDBParse:
             association_node = {
                 "predicate": "biolink:OrganismTaxonToChemicalEntityAssociation",
                 "infores": "hmdb_v5",
-                "publications": references,
+                "publication": references,
             }
+            association_node = self.remove_empty_none_values(association_node)
 
             name = self.get_text(metabolite, "name")
             synonyms_elem = metabolite.find("hmdb:synonyms", self.namespace)
@@ -589,7 +629,7 @@ class HMDBParse:
                 "type": "biolink:SmallMolecule",
                 "xrefs": xrefs,
             }
-            object_node = self.remove_none_values(object_node)
+            object_node = self.remove_empty_none_values(object_node)
 
             if not microbes:
                 continue
@@ -598,18 +638,14 @@ class HMDBParse:
                     subject_node = self.cached_taxon_info[microbe].copy()
                     subject_node["original_name"] = microbe.lower().strip()
                     subject_node["type"] = "biolink:OrganismTaxon"
+                    subject_node = self.remove_empty_none_values(subject_node)
 
                     rec = {
-                        "_id": None,
+                        "_id": str(uuid.uuid4()),
                         "association": association_node,
                         "object": object_node,
-                        "subject": self.remove_none_values(subject_node),
+                        "subject": subject_node,
                     }
-
-                    _id = f"{rec['subject']['id'].split(':')[1]}_associated_with_{rec['object']['id'].split(':')[1]}"
-                    rec["_id"] = _id
-
-                    # TODO: decide if want to remove duplicated records
 
                     yield rec
 
@@ -619,6 +655,6 @@ if __name__ == "__main__":
     hmdb_xml = extract_xml_from_zip(zip_path)
     parser = HMDBParse(hmdb_xml)
     records = [record for record in parser.parse()]
-    # save_pickle(records, "hmdb_v5_microbe_metabolite.pkl")
+    save_pickle(records, "hmdb_v5_microbe_metabolite.pkl")
     for record in records:
         print(record)

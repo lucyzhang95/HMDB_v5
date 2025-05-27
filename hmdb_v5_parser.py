@@ -564,9 +564,9 @@ class HMDBParse:
                         ref_dict["id"] = f"JournalArticle:{first_url}"
                     elif "doi" in ref_dict:
                         first_doi = (
-                            ref_dict["doi"][0]
+                            ref_dict["doi"][0].split(":")[1].strip()
                             if isinstance(ref_dict["doi"], list)
-                            else ref_dict["doi"]
+                            else ref_dict["doi"].split(":")[1].strip()
                         )
                         ref_dict["id"] = f"doi:{first_doi}"
                     elif "wikidata" in ref_dict:

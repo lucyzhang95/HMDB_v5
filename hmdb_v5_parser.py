@@ -6,7 +6,7 @@ import ssl
 import time
 import uuid
 import zipfile
-from typing import Iterator
+from typing import Iterator, Union
 
 import biothings_client as bt
 import requests
@@ -93,6 +93,30 @@ def get_all_microbe_names(input_xml: str | pathlib.Path) -> Iterator[str]:
                                 if mt.text:
                                     yield mt.text.strip().lower()
         elem.clear()
+
+
+def get_all_diseases(input_xml: Union[str, pathlib.Path]) -> dict[str, str]:
+    namespace = {"hmdb": "http://www.hmdb.ca"}
+    tree = ET.parse(input_xml)
+    root = tree.getroot()
+
+    disease2omim = {}
+    for metabolite in root.findall("hmdb:metabolite", namespace):
+        diseases_elem = metabolite.find("hmdb:diseases", namespace)
+        if diseases_elem is None:
+            continue
+
+        for disease_elem in diseases_elem.findall("hmdb:disease", namespace):
+            name_elem = disease_elem.find("hmdb:name", namespace)
+            omim_elem = disease_elem.find("hmdb:omim_id", namespace)
+            if name_elem is not None and name_elem.text:
+                disease_name = name_elem.text.strip().lower()
+                omim_id = (
+                    omim_elem.text.strip() if omim_elem is not None and omim_elem.text else None
+                )
+                disease2omim[disease_name] = int(omim_id) if omim_id else None
+
+    return disease2omim
 
 
 def ete3_taxon_name2taxid(taxon_names: list) -> dict:
@@ -662,8 +686,13 @@ class HMDBParse:
 if __name__ == "__main__":
     zip_path = os.path.join("downloads", "hmdb_metabolites.zip")
     hmdb_xml = extract_xml_from_zip(zip_path)
-    parser = HMDBParse(hmdb_xml)
-    records = [record for record in parser.parse_mime()]
-    save_pickle(records, "hmdb_v5_microbe_metabolite.pkl")
-    for record in records:
-        print(record)
+    # parser = HMDBParse(hmdb_xml)
+    # records = [record for record in parser.parse_mime()]
+    # save_pickle(records, "hmdb_v5_microbe_metabolite.pkl")
+    # for record in records:
+    #     print(record)
+
+    diseases = get_all_diseases(hmdb_xml)
+    save_pickle(diseases, "hmdb_v5_diseases.pkl")
+    print(diseases)
+    print(len(diseases))

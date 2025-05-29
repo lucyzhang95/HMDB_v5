@@ -13,7 +13,9 @@ According to the publication, 9,445,375 highly quality predicted spectral datase
 - Total metabolites found: 217,920
 
 ## Microbe-Metabolite 
-- **Total Microbe-Metabolite records: 922**
+Last Modified: 05/28/2025
+- **Total Microbe-Metabolite records: 922, 35 records fewer than the full data (957)** <br>
+**~ 96.3% of the entire records** <br>
 - Unique Metabolite: 154
 - Unique Microbes: 349
 - Unique publication: 88
@@ -27,16 +29,17 @@ According to the publication, 9,445,375 highly quality predicted spectral datase
 - No hit names after ETE3 and Entrez mapping: 49
 - text2term mapped unique microbes: 23
 - text2term mapped unique microbes are wrong: 8
-- text2term manually override microbes: 7
+- text2term manually overrides microbes: 7
 - text2term manually deleted microbe: 1
 - text2term final mapped unique microbes: 22
 - No hit names after ETE3, Entrez, and text2term: 27
 - Manually mapped taxon names: 25
-- Total mapped microbes: 360 (360/387 = ~93%) → *Due to manual map, some of the taxon names get broader from strains in species, so there are 24 duplicates, the unique microbes without these duplicates are 360
+- Total mapped microbes: 360 (360/387 = ~93%)
+**Due to manual mapping, some taxon names were broadened from strain level to species level, resulting in 24 duplicates. After removing these, the total number of unique microbes is 360.*
 - Unique microbes used for getting taxon info via biothings: 360
 - NCIT mapped descriptions: 141 (54 are species, 74 are genus, 13 are taxon groups, and other ranks)
-- Microbe **description** in records (with duplications): 646
-- Unique microbe **description** in records: 135
+- Microbial **description** in records (with duplications): 646
+- Unique microbial **description** in records: 135
 
 ```json
 {
@@ -53,8 +56,8 @@ According to the publication, 9,445,375 highly quality predicted spectral datase
 ```
 
 ### Metabolite
-- Metabolite description in records (with duplications): 922
-- Unique metabolite description in records: 154
+- Metabolite **description** in records (with duplications): 922
+- Unique metabolite **description** in records: 154
 
 ```json
 {"PUBCHEM.COMPOUND": 911, "INCHIKEY": 11}
@@ -65,7 +68,7 @@ According to the publication, 9,445,375 highly quality predicted spectral datase
 {"PMID": 645, "JournalArticle (url)": 81, "doi": 2} 
 ```
 
-### Example output
+## Example output
 ```json
 {
    "_id":"a29b50df-da09-41e9-8ee9-39fda90b08b6",
@@ -159,3 +162,5 @@ According to the publication, 9,445,375 highly quality predicted spectral datase
 }
 ```
 
+## Metabolite-Disease
+Last Modified: 

@@ -594,7 +594,7 @@ class HMDBParse:
         else:
             return d
 
-    def parse(self):
+    def parse_mime(self):
         tree = ET.parse(self.input_xml)
         root = tree.getroot()
         cached_data_path = os.path.join("cache", "original_taxon_name2taxid.pkl")
@@ -663,7 +663,7 @@ if __name__ == "__main__":
     zip_path = os.path.join("downloads", "hmdb_metabolites.zip")
     hmdb_xml = extract_xml_from_zip(zip_path)
     parser = HMDBParse(hmdb_xml)
-    records = [record for record in parser.parse()]
+    records = [record for record in parser.parse_mime()]
     save_pickle(records, "hmdb_v5_microbe_metabolite.pkl")
     for record in records:
         print(record)

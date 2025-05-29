@@ -65,4 +65,97 @@ According to the publication, 9,445,375 highly quality predicted spectral datase
 {"PMID": 645, "JournalArticle (url)": 81, "doi": 2} 
 ```
 
+### Example output
+```json
+{
+   "_id":"a29b50df-da09-41e9-8ee9-39fda90b08b6",
+   "association":{
+      "predicate":"biolink:OrganismTaxonToChemicalEntityAssociation",
+      "infores":"hmdb_v5",
+      "publication":{
+	       "id":"PMID:22815244",
+         "pmid":[
+            22815244,
+            16346691
+         ],
+         "type":"biolink:Publication"
+      }
+   },
+   "object":{
+      "id":"PUBCHEM.COMPOUND:14925",
+      "name":"1,2,3-propanetricarboxylic acid",
+      "synonym":[
+         "3-carboxyglutaric acid",
+         "3-carboxypentanedioic acid",
+         "beta-carboxyglutaric acid",
+         "carballylic acid",
+         "carboxymethylsuccinic acid",
+         "tricarballylate",
+         "3-carboxyglutarate",
+         "3-carboxypentanedioate",
+         "b-carboxyglutarate",
+         "b-carboxyglutaric acid",
+         "beta-carboxyglutarate",
+         "β-carboxyglutarate",
+         "β-carboxyglutaric acid",
+         "carballylate",
+         "carboxymethylsuccinate",
+         "tricarballylic acid",
+         "1,2,3-propanetricarboxylate",
+         "1,2,3-tripropanetricarboxylic acid",
+         "propane 1,2,3-tricarboxylic acid",
+         "tricarballylic acid, trisodium salt",
+         "propane-1,2,3-tricarboxylate",
+         "tricarballylic acid, sodium salt",
+         "1,2,3-propanetricarboxylic acid"
+      ],
+      "description":"1,2,3-Propanetricarboxylic acid is found in corn. 1,2,3-Propanetricarboxylic acid is isolated from plants e.g. sugarbeet sap, sap of Acer saccharinum (maple syrup). Propane-1,2,3-tricarboxylic acid, also known as tricarballylic acid, carballylic acid, and beta-carboxyglutaric acid, is a tricarboxylic acid that has three carboxylic acid functional groups. The compound is an inhibitor of the enzyme aconitase and interferes with the Krebs cycle. 1,2,3-Propanetricarboxylic acid can be produced by Bacteroides, Butyrivibrio, Megasphaera, Wolinella and fungi Nectriaceae (PMID:22815244; PMID:16346691). It is also associated with Fumonisins. Fumonisins are fungal toxins produced by Fusarium verticilloides. Detection of this compound indicates presence of fumonisins in gastrointestinal tract. Corn intake or corn contaminated with fumonisins can lead to increased levels of tricarballylic acid (PMID:22815244).",
+      "chemical_formula":"C6H8O6",
+      "molecular_weight":{
+         "average_molecular_weight":176.1241,
+         "monoisotopic_molecular_weight":176.032087988
+      },
+      "state":"solid",
+      "water_solubility":"3.32E+05 mg/L @ 18C (exp)",
+      "logp":"-1.420 (est)",
+      "melting_point":"166 °C",
+      "type":"biolink:SmallMolecule",
+      "xrefs":{
+         "inchikey":"INCHIKEY:KQTIIICEAUMSDG-UHFFFAOYSA-N",
+         "drugbank":"DRUGBANK:DB04562",
+         "chebi":"CHEBI:45969",
+         "hmdb":"HMDB:HMDB0031193",
+         "cas":"CAS:99-14-9",
+         "kegg":"KEGG.COMPOUND:C19806",
+         "chemspider":"chemspider:14220",
+         "foodb":"foodb.compound:FDB003213"
+      }
+   },
+   "subject":{
+      "id":"taxid:844",
+      "taxid":844,
+      "name":"wolinella succinogenes",
+      "parent_taxid":843,
+      "lineage":[
+         844,
+         843,
+         72293,
+         213849,
+         3031852,
+         29547,
+         3379134,
+         2,
+         131567,
+         1
+      ],
+      "rank":"species",
+      "description":"A species of anaerobic, Gram negative, rod shaped bacteria assigned to the phylum Proteobacteria. This species is motile, oxidase positive, peroxidase and urease negative and cannot metabolize carbohydrates. W. succinogenes is a commensal organism of the gastrointestinal tract and may be an emerging pathogen. [NCIT]",
+      "xrefs":{
+         "ncit":"C86851"
+      },
+      "original_name":"wolinella succinogenes",
+      "type":"biolink:OrganismTaxon"
+   }
+}
+```
 

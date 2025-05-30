@@ -1,3 +1,4 @@
+import asyncio
 import os
 import pathlib
 import pickle
@@ -6,8 +7,9 @@ import ssl
 import time
 import uuid
 import zipfile
-from typing import Iterator, Union
+from typing import Dict, Iterator, List, Optional, Union
 
+import aiohttp
 import biothings_client as bt
 import requests
 import text2term
@@ -274,13 +276,12 @@ def manual_disease_name2id(disease_names: list[str]) -> dict:
         "perillyl alcohol administration for cancer treatment": "GO:0018457",  # perillyl-alcohol dehydrogenase (NAD+) activity
         "ketotic hypoglycemia": "HP:0012734",  # ketotic hypoglycemia (imported)
         "anoxia": "NCIT:C2876",  # anoxia
-        "3-hydroxyisobutyric acid dehydrogenase deficiency": "",
-        "septic shock": "",
-        "smoking": "",
-        "thymidine treatment": "",
-        "attachment loss": "",
-        "periodontal probing depth": "",
-        "continuous ambulatory peritoneal dialysis": "",
+        "3-hydroxyisobutyric acid dehydrogenase deficiency": "MONDO:0009371",  # 3-hydroxyisobutyric aciduria
+        "septic shock": "UMLS:C0036983",
+        "smoking": "UMLS:C0037369",  # smoking
+        "attachment loss": "UMLS:C0206114",  # periodontal attachment loss
+        "periodontal probing depth": "UMLS:C1882338",  # periodontal probing
+        "continuous ambulatory peritoneal dialysis": "UMLS:C0031140",  # peritoneal dialysis, continuous ambulatory
         "hemodialysis": "",
         "hyperoxalemia": "",
         "missing teeth": "",
@@ -488,6 +489,54 @@ def get_full_taxon_info(mapped_taxon_names: dict, taxon_info: dict) -> dict:
     return full_taxon
 
 
+class UMLSClient:
+    def __init__(self, api_key: str, max_concurrent: int = 10):
+        self.api_key = api_key
+        self.tgt_url: Optional[str] = None
+        self.semaphore = asyncio.Semaphore(max_concurrent)
+
+    async def get_tgt(self, session: aiohttp.ClientSession):
+        data = {"apikey": self.api_key}
+        async with session.post("https://utslogin.nlm.nih.gov/cas/v1/api-key", data=data) as resp:
+            if resp.status != 201:
+                raise RuntimeError(f"Failed to get TGT: {resp.status}")
+            self.tgt_url = resp.headers["location"]
+
+    async def get_st(self, session: aiohttp.ClientSession):
+        if not self.tgt_url:
+            await self.get_tgt(session)
+        data = {"service": "http://umlsks.nlm.nih.gov"}
+        async with session.post(self.tgt_url, data=data) as resp:
+            return await resp.text()
+
+    async def get_cui(self, session: aiohttp.ClientSession, term: str) -> Optional[str]:
+        async with self.semaphore:
+            try:
+                st = await self.get_st(session)
+                params = {"string": term, "ticket": st, "pageSize": 1, "searchType": "exact"}
+                url = "https://uts-ws.nlm.nih.gov/rest/search/current"
+                async with session.get(url, params=params) as resp:
+                    if resp.status != 200:
+                        print(f"Error querying {term}: status {resp.status}")
+                        return None
+                    data = await resp.json()
+                    results = data["result"]["results"]
+                    return f"UMLS:{results[0]['ui']}" if results else ""
+            except Exception as e:
+                print(f"Failed for {term}: {e}")
+                return None
+
+    async def query_cuis(self, terms: List[str]) -> Dict[str, Optional[str]]:
+        results = {}
+        async with aiohttp.ClientSession() as session:
+            if not self.tgt_url:
+                await self.get_tgt(session)
+            tasks = [self.get_cui(session, term) for term in terms]
+            cuis = await asyncio.gather(*tasks)
+            results = {term: cui for term, cui in zip(terms, cuis)}
+        return results
+
+
 def cache_data(input_xml):
     microbe_names = get_all_microbe_names(input_xml)
     save_pickle(list(set(microbe_names)), "hmdb_v5_microbe_names.pkl")
@@ -526,6 +575,13 @@ def cache_data(input_xml):
     taxon_info_descr = add_description2taxon_info(taxon_info, taxon_descr)
     full_taxon_info = get_full_taxon_info(all_mapped_taxon_cached, taxon_info_descr)
     save_pickle(full_taxon_info, "original_taxon_name2taxid.pkl")
+
+    async def get_cuis():
+        disease_names = []
+        client = UMLSClient(api_key=os.getenv("UMLS_API_KEY"), max_concurrent=10)
+        name_to_cui = await client.query_cuis(disease_names)
+
+    asyncio.run(get_cuis())
 
 
 class HMDBParse:

@@ -541,6 +541,52 @@ def manual_disease_name2id(disease_names: list[str]) -> dict:
     return manual_mapped
 
 
+def bt_get_disease_info(ids):
+    ids = set(ids)
+    get_disease = bt.get_client("disease")
+    d_queried = get_disease.querymany(
+        ids,
+        scopes=[
+            "mondo.mondo",
+            "mondo.xrefs.hp",
+            "mondo.xrefs.efo",
+            "disease_ontology.xrefs.efo",
+            "disgenet.xrefs.efo",
+            "hpo.clinical_course.orphanet_refs",
+            "hpo.phenotype_related_to_disease.orphanet_refs",
+        ],
+        fields=["mondo", "mondo.definition"],
+    )
+    d_info_all = {}
+
+    for info in d_queried:
+        query = info["query"]
+        if "notfound" in info:
+            continue
+
+        current_score = info.get("_score", 0)
+        existing = d_info_all.get(query)
+        existing_score = existing.get("_score", -1) if existing else -1
+
+        if current_score > existing_score:
+            mondo_data = info.get("mondo", {})
+            _id = query.lower() if "Orphanet" in query else query.upper()
+            prefix = query.split(":")[0].strip().lower()
+
+            d_info_all[query] = {
+                "id": info["_id"],
+                "name": mondo_data.get("label"),
+                "description": mondo_data.get("definition"),
+                "type": "biolink:Disease",
+                "xrefs": {prefix: _id if info["_id"] != _id else info["_id"]},
+                "_score": current_score,
+            }
+    for v in d_info_all.values():
+        v.pop("_score", None)
+
+    return d_info_all
+
+
 def cache_data(input_xml):
     microbe_names = get_all_microbe_names(input_xml)
     save_pickle(list(set(microbe_names)), "hmdb_v5_microbe_names.pkl")
@@ -596,7 +642,7 @@ def cache_data(input_xml):
     di_manual_mapped = manual_disease_name2id(di_no_hit)
     save_pickle(di_manual_mapped, "manual_disease_name2id.pkl")
     hmdb_di_mapped = {
-        di_name: {"id": omim, "mapping_tool": "hmdb_v5"}
+        di_name: {"id": f"OMIM:{omim}", "mapping_tool": "hmdb_v5"}
         for di_name, omim in diseases.items()
         if omim
     }
@@ -865,5 +911,3 @@ if __name__ == "__main__":
     # save_pickle(records, "hmdb_v5_microbe_metabolite.pkl")
     # for record in records:
     #     print(record)
-    
-    

@@ -440,7 +440,7 @@ class UMLSClient:
             tasks = [self.get_cui(session, term) for term in terms]
             cuis = await asyncio.gather(*tasks)
             results = {
-                term: {term: cui, "mapping_tool": "UMLS", "search_type": "exact"}
+                term: {"id": cui, "mapping_tool": "UMLS", "search_type": "exact"}
                 for term, cui in zip(terms, cuis)
             }
         return results
@@ -487,7 +487,7 @@ def text2term_disease_name2id(
         zip(filtered_map_df["Source Term"], filtered_map_df["Mapped Term CURIE"])
     )
     mapped = {
-        name: {name: _id, "mapping_tool": "text2term", "min_score": 0.8}
+        name: {"id": _id, "mapping_tool": "text2term", "min_score": 0.8}
         for name, _id in filtered_map_dict.items()
     }
     return mapped
@@ -545,6 +545,7 @@ def cache_data(input_xml):
     microbe_names = get_all_microbe_names(input_xml)
     save_pickle(list(set(microbe_names)), "hmdb_v5_microbe_names.pkl")
 
+    # cache mapped taxon
     microbes4query = load_pickle("hmdb_v5_microbe_names.pkl")
     ete3_mapped = ete3_taxon_name2taxid(microbes4query)
     save_pickle(ete3_mapped, "ete3_name2taxid.pkl")
@@ -580,8 +581,30 @@ def cache_data(input_xml):
     full_taxon_info = get_full_taxon_info(all_mapped_taxon_cached, taxon_info_descr)
     save_pickle(full_taxon_info, "original_taxon_name2taxid.pkl")
 
+    # cache mapped diseases
     diseases = get_all_diseases(hmdb_xml)
     save_pickle(diseases, "hmdb_v5_diseases.pkl")
+
+    diseases = load_pickle("hmdb_v5_diseases.pkl")
+    disease4text2term = [di_name for di_name, omim in diseases.items() if omim is None]
+    text2term_mapped = text2term_disease_name2id(disease4text2term)
+    save_pickle(text2term_mapped, "text2term_disease_name2id.pkl")
+    disease2cui = [di_name for di_name in disease4text2term if di_name not in text2term_mapped]
+    umls_mapped = get_cuis_sync(os.getenv("UMLS_API_KEY"), disease2cui)
+    save_pickle(umls_mapped, "umls_disease_name2id.pkl")
+    di_no_hit = [name for name, mapped in umls_mapped.items() if mapped["id"] == ""]
+    di_manual_mapped = manual_disease_name2id(di_no_hit)
+    save_pickle(di_manual_mapped, "manual_disease_name2id.pkl")
+    hmdb_di_mapped = {
+        di_name: {"id": omim, "mapping_tool": "hmdb_v5"}
+        for di_name, omim in diseases.items()
+        if omim
+    }
+    all_mapped_disease_names = hmdb_di_mapped | text2term_mapped | umls_mapped | di_manual_mapped
+    filtered_all_mapped_disease_names = {
+        name: mapped for name, mapped in all_mapped_disease_names.items() if not mapped["id"] == ""
+    }
+    save_pickle(filtered_all_mapped_disease_names, "all_disease_name2id.pkl")
 
 
 class HMDBParse:
@@ -842,15 +865,5 @@ if __name__ == "__main__":
     # save_pickle(records, "hmdb_v5_microbe_metabolite.pkl")
     # for record in records:
     #     print(record)
-
-    # diseases = get_all_diseases(hmdb_xml)
-    # save_pickle(diseases, "hmdb_v5_diseases.pkl")
-    diseases = load_pickle("hmdb_v5_diseases.pkl")
-    disease4text2term = [di_name for di_name, omim in diseases.items() if omim is None]
-    text2term_mapped = text2term_disease_name2id(disease4text2term)
-    # save_pickle(text2term_mapped, "text2term_disease_name2id.pkl")
-    disease2cui = [di_name for di_name in disease4text2term if di_name not in text2term_mapped]
-    umls_mapped = get_cuis_sync(os.getenv("UMLS_API_KEY"), disease2cui)
-    # save_pickle(umls_mapped, "umls_disease_name2id.pkl")
-    di_no_hit = [name for name, mapped in umls_mapped.items() if mapped[name] == ""]
-    di_manual_mapped = manual_disease_name2id(di_no_hit)
+    
+    

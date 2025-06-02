@@ -795,8 +795,8 @@ class HMDBParse:
     def parse_mime(self):
         tree = ET.parse(self.input_xml)
         root = tree.getroot()
-        cached_data_path = os.path.join("cache", "original_taxon_name2taxid.pkl")
-        if not os.path.exists(cached_data_path):
+        cached_taxon_info = os.path.join("cache", "original_taxon_name2taxid.pkl")
+        if not os.path.exists(cached_taxon_info):
             cache_data(self.input_xml)
 
         for metabolite in root.findall("hmdb:metabolite", self.namespace):

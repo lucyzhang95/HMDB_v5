@@ -758,7 +758,7 @@ class HMDBParse:
             ("foodb_id", "foodb.compound"),
             ("bigg_id", "BIGG.METABOLITE"),
             ("pdb_id", "PDB"),
-            ("vmh_id", "VMH")
+            ("vmh_id", "VMH"),
         ]
 
         def classify_kegg(val):
@@ -946,8 +946,102 @@ class HMDBParse:
 
                     yield rec
 
-    def get_medi_references(self):
+    def get_diseases(self, metabolite):
+        disease_names = set()
+        diseases_elem = metabolite.find("hmdb:diseases", self.namespace)
+        if diseases_elem is not None:
+            for disease_elem in diseases_elem.findall("hmdb:disease", self.namespace):
+                name_elem = disease_elem.find("hmdb:name", self.namespace)
+                if name_elem is not None and name_elem.text:
+                    disease_name = name_elem.text.strip().lower()
+                    disease_names.add(disease_name)
 
+        return sorted(disease_names)
+
+    def get_medi_references(self, disease_elem):
+        pmids = []
+        references_elem = disease_elem.find("hmdb:references", self.namespace)
+        if references_elem is not None:
+            for ref in references_elem.findall("hmdb:reference", self.namespace):
+                pmid_elem = ref.find("hmdb:pubmed_id", self.namespace)
+                if pmid_elem is not None and pmid_elem.text:
+                    try:
+                        pmids.append(int(pmid_elem.text.strip()))
+                    except ValueError:
+                        continue
+        if pmids:
+            pmids = sorted(set(pmids))
+            pmid_value = pmids[0] if len(pmids) == 1 else pmids
+
+            return {"id": f"PMID:{pmids[0]}", "pmid": pmid_value, "type": "biolink:Publication"}
+
+    def parse_medi(self):
+        tree = ET.parse(self.input_xml)
+        root = tree.getroot()
+        cached_disease_info = os.path.join("cache", "original_disease_name2id.pkl")
+        if not os.path.exists(cached_disease_info):
+            cache_data(self.input_xml)
+
+        for metabolite in root.findall("hmdb:metabolite", self.namespace):
+            primary_id, xrefs = self.get_primary_id(metabolite)
+            description = self.get_text(metabolite, "description")
+            diseases = self.get_diseases(metabolite)
+
+            name = self.get_text(metabolite, "name")
+            synonyms_elem = metabolite.find("hmdb:synonyms", self.namespace)
+            logp = self.get_experimental_properties(metabolite, "logp")
+            state = self.get_text(metabolite, "state")
+            subject_node = {
+                "id": primary_id,
+                "name": name.lower() if name else None,
+                "synonym": self.get_list(synonyms_elem, "synonym")
+                if synonyms_elem is not None
+                else []
+                if metabolite.find("hmdb:synonyms", self.namespace)
+                else [],
+                "description": description,
+                "chemical_formula": self.get_text(metabolite, "chemical_formula"),
+                "molecular_weight": self.get_molecular_weights(metabolite),
+                "state": state.lower() if state else None,
+                "water_solubility": self.get_experimental_properties(
+                    metabolite, "water_solubility"
+                ),
+                "logp": logp,
+                "melting_point": self.get_experimental_properties(metabolite, "melting_point"),
+                "type": "biolink:SmallMolecule",
+                "xrefs": xrefs,
+            }
+            subject_node = self.remove_empty_none_values(subject_node)
+
+            diseases_elem = metabolite.find("hmdb:diseases", self.namespace)
+            if diseases_elem is not None:
+                for disease_elem in diseases_elem.findall("hmdb:disease", self.namespace):
+                    references = self.get_medi_references(disease_elem)
+                    if references is None:
+                        continue
+
+                    association_node = {
+                        "predicate": "biolink:ChemicalEntityToDiseaseAssociation",
+                        "infores": "hmdb_v5",
+                        "publication": references,
+                    }
+                    association_node = self.remove_empty_none_values(association_node)
+
+                    if not diseases:
+                        continue
+                    for disease in diseases:
+                        if disease in self.cached_disease_info:
+                            object_node = self.cached_disease_info[disease].copy()
+                            object_node = self.remove_empty_none_values(object_node)
+
+                            rec = {
+                                "_id": str(uuid.uuid4()),
+                                "association": association_node,
+                                "object": object_node,
+                                "subject": subject_node,
+                            }
+
+                            yield rec
 
 
 if __name__ == "__main__":

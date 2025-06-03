@@ -1039,12 +1039,12 @@ if __name__ == "__main__":
     hmdb_xml = extract_xml_from_zip(zip_path)
     parser = HMDBParse(hmdb_xml)
 
-    mime_records = [record for record in parser.parse_mime()]
-    save_pickle(mime_records, "hmdb_v5_microbe_metabolite.pkl")
-    for record in mime_records:
-        print(record[0])
+    # mime_records = [record for record in parser.parse_mime()]
+    # save_pickle(mime_records, "hmdb_v5_microbe_metabolite.pkl")
+    # for record in mime_records:
+    #     print(record)
 
     medi_records = [record for record in parser.parse_medi()]
     save_pickle(medi_records, "hmdb_v5_metabolite_disease.pkl")
     for record in medi_records:
-        print(record[0])
+        print(record)

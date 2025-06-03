@@ -549,16 +549,16 @@ def bt_get_disease_info(ids):
         scopes=[
             "mondo.mondo",
             "mondo.xrefs.hp",
-            "mondo.xrefs.efo",
-            "disease_ontology.xrefs.efo",
-            "disgenet.xrefs.efo",
-            "hpo.clinical_course.orphanet_refs",
-            "hpo.phenotype_related_to_disease.orphanet_refs",
+            "mondo.xrefs.omim",
+            "mondo.xrefs.umls",
+            "mondo.xrefs.umls_cui",
+            "disease_ontology.xrefs.omim",
+            "disease_ontology.xrefs.umls_cui",
         ],
         fields=["mondo", "mondo.definition"],
     )
-    d_info_all = {}
 
+    d_info_all = {}
     for info in d_queried:
         query = info["query"]
         if "notfound" in info:
@@ -568,21 +568,34 @@ def bt_get_disease_info(ids):
         existing = d_info_all.get(query)
         existing_score = existing.get("_score", -1) if existing else -1
 
+        # determine prefix and id
         if current_score > existing_score:
             mondo_data = info.get("mondo", {})
-            _id = query.lower() if "Orphanet" in query else query.upper()
-            prefix = query.split(":")[0].strip().lower()
 
-            d_info_all[query] = {
+            if re.fullmatch(r"\d+", query):
+                prefix = "omim"
+                _id = f"OMIM:{query}"
+            elif re.fullmatch(r"C\d+", query):
+                prefix = "umls"
+                _id = f"UMLS:{query}"
+            else:
+                prefix = query.split(":")[0].lower()
+                _id = query
+
+            d_info_all[_id] = {
                 "id": info["_id"],
-                "name": mondo_data.get("label"),
+                "name": mondo_data.get("label", "").lower(),
                 "description": mondo_data.get("definition"),
                 "type": "biolink:Disease",
                 "xrefs": {prefix: _id if info["_id"] != _id else info["_id"]},
                 "_score": current_score,
             }
+
+    # clean up
     for v in d_info_all.values():
         v.pop("_score", None)
+        if v.get("description") is None:
+            v.pop("description", None)
 
     return d_info_all
 
@@ -911,3 +924,14 @@ if __name__ == "__main__":
     # save_pickle(records, "hmdb_v5_microbe_metabolite.pkl")
     # for record in records:
     #     print(record)
+
+    di2id_path = os.path.join("cache", "all_disease_name2id.pkl")
+    if os.path.exists(di2id_path):
+        all_di_mapped = load_pickle("all_disease_name2id.pkl")
+
+    di_ids = [
+        mapped["id"]
+        if "UMLS" not in mapped["id"] and "OMIM" not in mapped["id"]
+        else mapped["id"].split(":")[1]
+        for _, mapped in all_di_mapped.items()
+    ]

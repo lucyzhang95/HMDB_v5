@@ -24,6 +24,9 @@ Last Modified: 05/28/2025
 - Unique publication: 88
 - Records with publication with duplication: 728 (include duplicates for different microbe-metabolite associations with the same reference)
 
+<details>
+<summary>Details</summary>
+
 ### Taxon (subject)
 - Total unique microbes in HMDB v5: 387
 - ETE3 mapped unique microbes: 335
@@ -70,6 +73,7 @@ Last Modified: 05/28/2025
 ```json
 {"PMID": 645, "JournalArticle (url)": 81, "doi": 2} 
 ```
+</details>
 
 ## Example output
 ```json
@@ -175,6 +179,9 @@ Last Modified: 06/02/2025
 - Unique disease names: 657
 - Unique pmids: 1,189
 
+<details>
+<summary>Details</summary>
+
 ### Metabolite (subject)
 - `description`: 92,892
 
@@ -264,7 +271,7 @@ Last Modified: 06/02/2025
    "HP":258
 }
 ```
-
+</details>
 
 ## Example Output
 

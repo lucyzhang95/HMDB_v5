@@ -21,7 +21,7 @@ Last Modified: 05/28/2025
 - Unique publication: 88
 - Records with publication with duplication: 728 (include duplicates for different microbe-metabolite associations with the same reference)
 
-### Taxon 
+### Taxon (subject)
 - Total unique microbes in HMDB v5: 387
 - ETE3 mapped unique microbes: 335
 - No hit names after ETE3 mapping: 52
@@ -55,7 +55,7 @@ Last Modified: 05/28/2025
 }
 ```
 
-### Metabolite
+### Metabolite (object)
 - Metabolite **description** in records (with duplications): 922
 - Unique metabolite **description** in records: 154
 
@@ -63,7 +63,7 @@ Last Modified: 05/28/2025
 {"PUBCHEM.COMPOUND": 911, "INCHIKEY": 11}
 ```
 
-### Publication
+### Publication (association)
 ```json
 {"PMID": 645, "JournalArticle (url)": 81, "doi": 2} 
 ```
@@ -164,8 +164,104 @@ Last Modified: 05/28/2025
 
 ## Metabolite-Disease
 Last Modified: 06/02/2025
+- **Total Metabolite-Disease records: 92,892**
+- Unique metabolite: 22,569
+- Unique disease names: 657
+- Unique pmids: 1,189
+
+### Metabolite (subject)
+- `description`: 92,892
+
+- `id` count
+```json
+{"PUBCHEM.COMPOUND":82580, "INCHIKEY":10312}
+```
+
+- `id xrefs` count
+```json
+{
+   "HMDB":92892,
+   "foodb.compound":89356,
+   "INCHIKEY":82580,
+   "CHEBI":70601,
+   "CAS":69634,
+   "chemspider":66317,
+   "KEGG.COMPOUND":65692,
+   "VMH":58656,
+   "DRUGBANK":47304,
+   "BIGG.METABOLITE":46086,
+   "PDB":1936,
+   "KEGG.DRUG":1
+}
+```
+
+- metabolite `property` count
+```json
+{
+   "synonym":92768,
+   "description":92892,
+   "molecular_weight":92842,
+   "state":92166,
+   "water_solubility":52177,
+   "logp":44438,
+   "melting_point":62739
+}
+```
+
+### Disease (object)
+
+- Mapped disease names to identifiers: 650 (total is 657)
+- Unique disease name with OMIM ids: 402
+- Unique diseases do not have identifiers: 255
+- Disease with description: 73,925
+
+- BT mapped: 135 (120 no hit)
+```ruby
+92 input query terms found dup hits
+120 input query terms found no hit
+```
+
+- text2term mapped using MONDO ontology: 165 (90)
+```json
+{"MONDO": 146, "HP": 14, "GO": 3, "ECTO": 2}
+```
+
+- text2term mapped using EFO ontology: 167 (88) → did not use this mapping
+ 
+- UMLS mapped: 47
+- Manual mapped: 36
+- HMDB mapped with OMIM: 402
+- Total mapped unique diseases: 650 (165 + 47 + 36 + 402)
+- Removed disease names: 7 
+```ruby
+['thymidine treatment', 'sodium nitrate consumption', 'tetrahydrofuran exposure', 'anephric patients', 'supradiaphragmatic malignancy', 'pregnene hydroxylation deficiency', 'eucalyptol exposure']
+```
+
+- Disease `id` count:
+```json
+{
+   "MONDO":85078,
+   "UMLS":4427,
+   "OMIM":1749,
+   "GO":1118,
+   "HP":473,
+   "ECTO":47
+}
+```
+
+- Disease `id xrefs` count:
+```json
+{
+   "OMIM":66032,
+   "MONDO":18203,
+   "UMLS":352,
+   "HP":258
+}
+```
+
 
 ## Example Output
+
 ```json
 {
    "_id":"5dd15728-0cfc-41c0-a063-eda42cb4e67e",

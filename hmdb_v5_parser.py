@@ -978,9 +978,6 @@ class HMDBParse:
     def parse_medi(self):
         tree = ET.parse(self.input_xml)
         root = tree.getroot()
-        cached_disease_info = os.path.join("cache", "original_disease_name2id.pkl")
-        if not os.path.exists(cached_disease_info):
-            cache_data(self.input_xml)
 
         for metabolite in root.findall("hmdb:metabolite", self.namespace):
             primary_id, xrefs = self.get_primary_id(metabolite)
@@ -991,13 +988,12 @@ class HMDBParse:
             synonyms_elem = metabolite.find("hmdb:synonyms", self.namespace)
             logp = self.get_experimental_properties(metabolite, "logp")
             state = self.get_text(metabolite, "state")
+
             subject_node = {
                 "id": primary_id,
                 "name": name.lower() if name else None,
                 "synonym": self.get_list(synonyms_elem, "synonym")
                 if synonyms_elem is not None
-                else []
-                if metabolite.find("hmdb:synonyms", self.namespace)
                 else [],
                 "description": description,
                 "chemical_formula": self.get_text(metabolite, "chemical_formula"),
@@ -1027,21 +1023,18 @@ class HMDBParse:
                     }
                     association_node = self.remove_empty_none_values(association_node)
 
-                    if not diseases:
-                        continue
                     for disease in diseases:
-                        if disease in self.cached_disease_info:
-                            object_node = self.cached_disease_info[disease].copy()
+                        disease_key = disease.strip().lower()
+                        if disease_key in self.cached_disease_info:
+                            object_node = self.cached_disease_info[disease_key].copy()
                             object_node = self.remove_empty_none_values(object_node)
 
-                            rec = {
+                            yield {
                                 "_id": str(uuid.uuid4()),
                                 "association": association_node,
                                 "object": object_node,
                                 "subject": subject_node,
                             }
-
-                            yield rec
 
 
 if __name__ == "__main__":

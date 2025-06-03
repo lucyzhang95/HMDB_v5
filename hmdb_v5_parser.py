@@ -1044,7 +1044,7 @@ if __name__ == "__main__":
     # for record in mime_records:
     #     print(record)
 
-    medi_records = [record for record in parser.parse_medi()]
-    save_pickle(medi_records, "hmdb_v5_metabolite_disease.pkl")
-    for record in medi_records:
-        print(record)
+    # medi_records = [record for record in parser.parse_medi()]
+    # save_pickle(medi_records, "hmdb_v5_metabolite_disease.pkl")
+    # for record in medi_records:
+    #     print(record)

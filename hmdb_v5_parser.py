@@ -699,6 +699,7 @@ class HMDBParse:
         self.namespace = {"hmdb": "http://www.hmdb.ca"}
         self.input_xml = input_xml
         self.cached_taxon_info = load_pickle("original_taxon_name2taxid.pkl")
+        self.cached_disease_info = load_pickle("original_disease_name2id.pkl")
         self.parenthetical_pattern = re.compile(r"([^.?!]*?)\s*\(([^)]*?)\)")
 
     def get_text(self, elem, tag):
@@ -756,6 +757,8 @@ class HMDBParse:
             ("chemspider_id", "chemspider"),
             ("foodb_id", "foodb.compound"),
             ("bigg_id", "BIGG.METABOLITE"),
+            ("pdb_id", "PDB"),
+            ("vmh_id", "VMH")
         ]
 
         def classify_kegg(val):
@@ -942,6 +945,9 @@ class HMDBParse:
                     }
 
                     yield rec
+
+    def get_medi_references(self):
+
 
 
 if __name__ == "__main__":

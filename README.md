@@ -1,5 +1,4 @@
 # Data parser for [Human Metabolome Database (HMDB)]("https://www.hmdb.ca/")
-***
 
 HMDB 5.0 increased annotated metabolite entries to 217,920 and unannotated derivatized metabolite entries for GC-MS to 1,581,537.
 The metabolite descriptions are generated, corrected, and expanded manually or semi-manually.
@@ -14,6 +13,7 @@ According to the publication, 9,445,375 highly quality predicted spectral datase
 - Total metabolites found: 217,920
 
 <br><br>
+***
 
 ## Microbe-Metabolite 
 ***
@@ -165,7 +165,9 @@ Last Modified: 05/28/2025
    }
 }
 ```
+
 <br><br>
+***
 
 ## Metabolite-Disease
 ***

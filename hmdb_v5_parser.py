@@ -952,31 +952,3 @@ if __name__ == "__main__":
     # save_pickle(records, "hmdb_v5_microbe_metabolite.pkl")
     # for record in records:
     #     print(record)
-
-    di2id_path = os.path.join("cache", "all_disease_name2id.pkl")
-    if os.path.exists(di2id_path):
-        all_di_mapped = load_pickle("all_disease_name2id.pkl")
-
-    di_ids = [
-        mapped["id"]
-        if "UMLS" not in mapped["id"] and "OMIM" not in mapped["id"]
-        else mapped["id"].split(":")[1]
-        for _, mapped in all_di_mapped.items()
-    ]
-
-    bt_di_info = bt_get_disease_info(di_ids)
-    di_info = {}
-    for name, mapped in all_di_mapped.items():
-        _id = mapped["id"]
-        if _id in bt_di_info:
-            info = bt_di_info[_id].copy()
-            info["original_name"] = name
-            di_info[name] = info
-    other_di = {
-        name: {"id": mapped["id"], "name": name, "type": "biolink:Disease"}
-        for name, mapped in all_di_mapped.items()
-        if mapped["id"] not in bt_di_info
-    }
-
-    original_di_name_all = di_info | other_di
-    save_pickle(original_di_name_all, "original_disease_name2id.pkl")

@@ -15,8 +15,7 @@ According to the publication, 9,445,375 highly quality predicted spectral datase
 <br><br>
 ***
 
-## Microbe-Metabolite 
-***
+## Microbe-Metabolite
 Last Modified: 05/28/2025
 - **Total Microbe-Metabolite records: 922, 35 records fewer than the full data (957)** <br>
 **~ 96.3% of the entire records** <br>
@@ -170,7 +169,6 @@ Last Modified: 05/28/2025
 ***
 
 ## Metabolite-Disease
-***
 Last Modified: 06/02/2025
 - **Total Metabolite-Disease records: 92,892**
 - Unique metabolite: 22,569

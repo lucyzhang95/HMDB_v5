@@ -279,7 +279,7 @@ Last Modified: 06/02/2025
 {
    "_id":"5dd15728-0cfc-41c0-a063-eda42cb4e67e",
    "association":{
-      "predicate":"biolink:ChemicalEntityToDiseaseAssociation",
+      "predicate":"biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation",
       "infores":"hmdb_v5",
       "publication":{
          "id":"PMID:7482520",

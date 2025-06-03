@@ -1,4 +1,5 @@
 import asyncio
+import json
 import os
 import pathlib
 import pickle
@@ -40,6 +41,12 @@ def load_pickle(f_name):
         with open(f_path, "rb") as in_f:
             return pickle.load(in_f)
     return None
+
+
+def save_json(obj, f_name):
+    f_path = os.path.join(CACHE_DIR, f_name)
+    with open(f_path, "w") as out_f:
+        json.dump(obj, out_f, indent=4)
 
 
 def extract_xml_from_zip(zip_path, expected_filename="hmdb_metabolites.xml"):

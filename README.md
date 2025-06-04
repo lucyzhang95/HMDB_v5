@@ -175,6 +175,8 @@ Last Modified: 05/28/2025
 ## Metabolite-Disease
 Last Modified: 06/02/2025
 - **Total Metabolite-Disease records: 92,892**
+- **Total unique Metabolite-Disease records: 27,575** <br>
+**Many records have the same subject and object but different publication references*
 - Unique metabolite: 22,569
 - Unique disease names: 657
 - Unique pmids: 1,189

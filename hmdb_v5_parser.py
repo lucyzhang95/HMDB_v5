@@ -1131,3 +1131,7 @@ if __name__ == "__main__":
     uniprot_ids = []
     uniprot_q_loop = asyncio.get_event_loop()
     uniprot_q_loop.run_until_complete(get_batch_protein_functions(uniprot_ids))
+
+    # query gene summaries from NCBI
+    gene_ids = []
+    summaries = asyncio.run(get_batch_gene_summaries(gene_ids))

@@ -607,7 +607,7 @@ def bt_get_disease_info(ids):
     return d_info_all
 
 
-async def fetch_function(session, uniprot_id):
+async def get_protein_function(session, uniprot_id):
     url = f"https://rest.uniprot.org/uniprotkb/{uniprot_id}.json"
     try:
         async with session.get(url) as response:
@@ -629,14 +629,14 @@ async def fetch_function(session, uniprot_id):
         print(uniprot_id, f"Error: {str(e)}")
 
 
-async def fetch_functions(uniprot_ids: List[str], batch_size=5, delay=1.0):
+async def get_protein_functions(uniprot_ids: List[str], batch_size=5, delay=1.0):
     results = []
     uniprot_ids = list(set(uniprot_ids))
     connector = aiohttp.TCPConnector(limit=batch_size)
     async with aiohttp.ClientSession(connector=connector) as session:
         for i in range(0, len(uniprot_ids), batch_size):
             batch = uniprot_ids[i : i + batch_size]
-            tasks = [fetch_function(session, uid) for uid in batch]
+            tasks = [get_protein_function(session, uid) for uid in batch]
             batch_results = await asyncio.gather(*tasks)
             results.extend(batch_results)
             await asyncio.sleep(delay)
@@ -1091,3 +1091,8 @@ if __name__ == "__main__":
     # save_pickle(medi_records, "hmdb_v5_metabolite_disease.pkl")
     # for record in medi_records:
     #     print(record)
+
+    # query Uniprot functions/descriptions
+    uniprot_ids = []
+    uniprot_q_loop = asyncio.get_event_loop()
+    uniprot_q_loop.run_until_complete(get_protein_functions(uniprot_ids))

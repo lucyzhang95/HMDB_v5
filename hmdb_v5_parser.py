@@ -629,7 +629,7 @@ async def get_protein_function(session, uniprot_id):
         print(uniprot_id, f"Error: {str(e)}")
 
 
-async def get_protein_functions(uniprot_ids: List[str], batch_size=5, delay=1.0):
+async def get_batch_protein_functions(uniprot_ids: List[str], batch_size=5, delay=1.0):
     results = []
     uniprot_ids = list(set(uniprot_ids))
     connector = aiohttp.TCPConnector(limit=batch_size)
@@ -637,6 +637,41 @@ async def get_protein_functions(uniprot_ids: List[str], batch_size=5, delay=1.0)
         for i in range(0, len(uniprot_ids), batch_size):
             batch = uniprot_ids[i : i + batch_size]
             tasks = [get_protein_function(session, uid) for uid in batch]
+            batch_results = await asyncio.gather(*tasks)
+            results.extend(batch_results)
+            await asyncio.sleep(delay)
+    return results
+
+
+async def get_gene_summary(session, gene_id):
+    url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi"
+    params = {
+        "db": "gene",
+        "id": gene_id,
+        "retmode": "json",
+        "tool": "your_tool_name",
+        "email": "your_email@example.com",
+    }
+    try:
+        async with session.get(url, params=params) as resp:
+            if resp.status == 200:
+                data = await resp.json()
+                summary = (
+                    data.get("result", {}).get(str(gene_id), {}).get("summary", "No summary found.")
+                )
+                return {gene_id: {"description": summary}}
+            print({gene_id, f"Failed: HTTP {resp.status}"})
+    except Exception as e:
+        print(gene_id, f"Error: {str(e)}")
+
+
+async def get_batch_gene_summaries(gene_ids: List[str], batch_size=5, delay=1.0):
+    results = []
+    connector = aiohttp.TCPConnector(limit=batch_size)
+    async with aiohttp.ClientSession(connector=connector) as session:
+        for i in range(0, len(gene_ids), batch_size):
+            batch = gene_ids[i : i + batch_size]
+            tasks = [get_gene_summary(session, gid) for gid in batch]
             batch_results = await asyncio.gather(*tasks)
             results.extend(batch_results)
             await asyncio.sleep(delay)
@@ -1095,4 +1130,4 @@ if __name__ == "__main__":
     # query Uniprot functions/descriptions
     uniprot_ids = []
     uniprot_q_loop = asyncio.get_event_loop()
-    uniprot_q_loop.run_until_complete(get_protein_functions(uniprot_ids))
+    uniprot_q_loop.run_until_complete(get_batch_protein_functions(uniprot_ids))

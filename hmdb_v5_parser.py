@@ -1173,9 +1173,9 @@ if __name__ == "__main__":
     # query uniprot functions/descriptions
     mapped_proteins = load_pickle("all_protein_name2uniprot.pkl")
     uniprot_ids = [uniprot for name, uniprot in mapped_proteins.items()]
-    mapped_protein_descr = asyncio.run(get_batch_protein_functions(uniprot_ids))
-    print(len(mapped_protein_descr))
-    save_pickle(mapped_protein_descr, "uniprot_protein_functions.pkl")
+    # mapped_protein_descr = asyncio.run(get_batch_protein_functions(uniprot_ids))
+    # print(len(mapped_protein_descr))
+    # save_pickle(mapped_protein_descr, "uniprot_protein_functions.pkl")
 
     # query gene summaries from NCBI
     gene_ids = []

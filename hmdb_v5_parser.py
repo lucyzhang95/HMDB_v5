@@ -616,12 +616,8 @@ async def get_protein_function(session, uniprot_id):
                 for comment in data.get("comments", []):
                     if comment.get("commentType") == "FUNCTION":
                         texts = comment.get("texts", [])
-                        if texts:
-                            return {
-                                uniprot_id: {
-                                    "description": texts[0].get("value", "No function found.")
-                                }
-                            }
+                        if texts and texts[0].get("value"):
+                            return {uniprot_id: {"description": texts[0]["value"]}}
                 print({uniprot_id: "Function not found."})
             else:
                 print(f"Failed: HTTP {response.status}")
@@ -638,7 +634,7 @@ async def get_batch_protein_functions(uniprot_ids: List[str], batch_size=5, dela
             batch = uniprot_ids[i : i + batch_size]
             tasks = [get_protein_function(session, uid) for uid in batch]
             batch_results = await asyncio.gather(*tasks)
-            results.extend(batch_results)
+            results.extend([r for r in batch_results if r is not None])  # filter out None results
             await asyncio.sleep(delay)
     return results
 
@@ -1171,13 +1167,15 @@ if __name__ == "__main__":
     #     print(record)
 
     # Test uniprot and mapping functions
-    mapped_proteins = get_all_uniprot_ids_from_hmdb(hmdb_xml)
-    save_pickle(mapped_proteins, "all_protein_name2uniprot.pkl")
+    # mapped_proteins = get_all_uniprot_ids_from_hmdb(hmdb_xml)
+    # save_pickle(mapped_proteins, "all_protein_name2uniprot.pkl")
 
-    # query Uniprot functions/descriptions
-    uniprot_ids = []
-    uniprot_q_loop = asyncio.get_event_loop()
-    uniprot_q_loop.run_until_complete(get_batch_protein_functions(uniprot_ids))
+    # query uniprot functions/descriptions
+    mapped_proteins = load_pickle("all_protein_name2uniprot.pkl")
+    uniprot_ids = [uniprot for name, uniprot in mapped_proteins.items()]
+    mapped_protein_descr = asyncio.run(get_batch_protein_functions(uniprot_ids))
+    print(len(mapped_protein_descr))
+    save_pickle(mapped_protein_descr, "uniprot_protein_functions.pkl")
 
     # query gene summaries from NCBI
     gene_ids = []

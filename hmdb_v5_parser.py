@@ -643,6 +643,31 @@ async def get_batch_protein_functions(uniprot_ids: List[str], batch_size=5, dela
     return results
 
 
+def get_all_uniprot_ids_from_hmdb(input_xml) -> dict[str, str]:
+    namespace = {"hmdb": "http://www.hmdb.ca"}
+    tree = ET.parse(input_xml)
+    root = tree.getroot()
+
+    protein2uniport = {}
+    for metabolite in root.findall("hmdb:metabolite", namespace):
+        protein_assoc_elem = metabolite.find("hmdb:protein_associations", namespace)
+        if protein_assoc_elem is None:
+            continue
+
+        for protein_elem in protein_assoc_elem.findall("hmdb:protein", namespace):
+            name_elem = protein_elem.find("hmdb:name", namespace)
+            uniprot_elem = protein_elem.find("hmdb:uniprot_id", namespace)
+            if name_elem is not None and name_elem.text:
+                protein_name = name_elem.text.strip().lower()
+                uniprot_id = (
+                    uniprot_elem.text.strip()
+                    if uniprot_elem is not None and uniprot_elem.text
+                    else None
+                )
+                protein2uniport[protein_name] = uniprot_id if uniprot_id else None
+    return protein2uniport
+
+
 async def get_gene_summary(session, gene_id):
     url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi"
     params = {
@@ -1126,6 +1151,10 @@ if __name__ == "__main__":
     # save_pickle(medi_records, "hmdb_v5_metabolite_disease.pkl")
     # for record in medi_records:
     #     print(record)
+
+    # Test uniprot and mapping functions
+    mapped_proteins = get_all_uniprot_ids_from_hmdb(hmdb_xml)
+    save_pickle(mapped_proteins, "all_protein_name2uniprot.pkl")
 
     # query Uniprot functions/descriptions
     uniprot_ids = []

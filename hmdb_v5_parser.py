@@ -668,6 +668,24 @@ def get_all_uniprot_ids_from_hmdb(input_xml) -> dict[str, str]:
     return protein2uniport
 
 
+def uniprot_id2entrezgene(uniprot_ids: list[str]) -> dict:
+    uniprot_ids = list(set(uniprot_ids))
+    get_gene = bt.get_client("gene")
+    gene_q = get_gene.querymany(uniprot_ids, scopes=["uniprot", "uniprot.Swiss-Prot"])
+
+    entrezgene_mapped = {}
+    for info in gene_q:
+        if "notfound" in info:
+            continue
+        if "entrezgene" in info:
+            entrezgene_mapped[info["query"]] = {
+                "gene_id": f"NCBIGene:{info['entrezgene']}",
+                "mapping_tool": "bt",
+            }
+
+    return entrezgene_mapped
+
+
 async def get_gene_summary(session, gene_id):
     url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi"
     params = {

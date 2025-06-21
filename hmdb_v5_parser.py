@@ -665,6 +665,12 @@ def get_all_uniprot_ids_from_hmdb(input_xml) -> dict[str, str]:
 
 
 def uniprot_id2entrezgene(uniprot_ids: list[str]) -> dict:
+    """
+
+    :param uniprot_ids:
+    :return:
+    e.g., {'Q8IYK8': {'gene_id': 'NCBIGene:161253', 'mapping_tool': 'bt'},...}
+    """
     uniprot_ids = list(set(uniprot_ids))
     get_gene = bt.get_client("gene")
     gene_q = get_gene.querymany(uniprot_ids, scopes=["uniprot", "uniprot.Swiss-Prot"])
@@ -688,8 +694,9 @@ async def get_gene_summary(session, gene_id):
         "db": "gene",
         "id": gene_id,
         "retmode": "json",
-        "tool": "your_tool_name",
-        "email": "your_email@example.com",
+        "tool": "Microbiome Knowledge Graph",
+        "email": "bazhang@scripps.edu",
+        "api_key": os.getenv("NCBI_API_KEY"),
     }
     try:
         async with session.get(url, params=params) as resp:
@@ -1177,6 +1184,13 @@ if __name__ == "__main__":
     # print(len(mapped_protein_descr))
     # save_pickle(mapped_protein_descr, "uniprot_protein_functions.pkl")
 
-    # query gene summaries from NCBI
-    gene_ids = []
-    summaries = asyncio.run(get_batch_gene_summaries(gene_ids))
+    # get gene summary after mapping uniprot to entrezgene
+    uniprot2entrez = uniprot_id2entrezgene(uniprot_ids)
+    save_pickle(uniprot2entrez, "bt_uniprot2entrezgene.pkl")
+    entrezgenes = [
+        mapped["gene_id"].split(":")[1]
+        for _, mapped in uniprot2entrez.items()
+        if "gene_id" in mapped
+    ]
+    gene_descr = asyncio.run(get_batch_gene_summaries(entrezgenes))
+    save_pickle(gene_descr, "entrezgene_summaries.pkl")

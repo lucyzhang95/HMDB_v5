@@ -1003,7 +1003,37 @@ class HMDBParse:
         else:
             return d
 
+    def get_diseases(self, metabolite):
+        disease_names = set()
+        diseases_elem = metabolite.find("hmdb:diseases", self.namespace)
+        if diseases_elem is not None:
+            for disease_elem in diseases_elem.findall("hmdb:disease", self.namespace):
+                name_elem = disease_elem.find("hmdb:name", self.namespace)
+                if name_elem is not None and name_elem.text:
+                    disease_name = name_elem.text.strip().lower()
+                    disease_names.add(disease_name)
+
+        return sorted(disease_names)
+
+    def get_medi_references(self, disease_elem):
+        pmids = []
+        references_elem = disease_elem.find("hmdb:references", self.namespace)
+        if references_elem is not None:
+            for ref in references_elem.findall("hmdb:reference", self.namespace):
+                pmid_elem = ref.find("hmdb:pubmed_id", self.namespace)
+                if pmid_elem is not None and pmid_elem.text:
+                    try:
+                        pmids.append(int(pmid_elem.text.strip()))
+                    except ValueError:
+                        continue
+        if pmids:
+            pmids = sorted(set(pmids))
+            pmid_value = pmids[0] if len(pmids) == 1 else pmids
+
+            return {"id": f"PMID:{pmids[0]}", "pmid": pmid_value, "type": "biolink:Publication"}
+
     def parse_mime(self):
+        """Parse the HMDB XML for microbe-metabolite associations."""
         tree = ET.parse(self.input_xml)
         root = tree.getroot()
         cached_taxon_info = os.path.join("cache", "original_taxon_name2taxid.pkl")
@@ -1067,36 +1097,8 @@ class HMDBParse:
 
                     yield rec
 
-    def get_diseases(self, metabolite):
-        disease_names = set()
-        diseases_elem = metabolite.find("hmdb:diseases", self.namespace)
-        if diseases_elem is not None:
-            for disease_elem in diseases_elem.findall("hmdb:disease", self.namespace):
-                name_elem = disease_elem.find("hmdb:name", self.namespace)
-                if name_elem is not None and name_elem.text:
-                    disease_name = name_elem.text.strip().lower()
-                    disease_names.add(disease_name)
-
-        return sorted(disease_names)
-
-    def get_medi_references(self, disease_elem):
-        pmids = []
-        references_elem = disease_elem.find("hmdb:references", self.namespace)
-        if references_elem is not None:
-            for ref in references_elem.findall("hmdb:reference", self.namespace):
-                pmid_elem = ref.find("hmdb:pubmed_id", self.namespace)
-                if pmid_elem is not None and pmid_elem.text:
-                    try:
-                        pmids.append(int(pmid_elem.text.strip()))
-                    except ValueError:
-                        continue
-        if pmids:
-            pmids = sorted(set(pmids))
-            pmid_value = pmids[0] if len(pmids) == 1 else pmids
-
-            return {"id": f"PMID:{pmids[0]}", "pmid": pmid_value, "type": "biolink:Publication"}
-
     def parse_medi(self):
+        """Parse the HMDB XML for metabolite-disease associations."""
         tree = ET.parse(self.input_xml)
         root = tree.getroot()
 
@@ -1156,6 +1158,10 @@ class HMDBParse:
                                 "object": object_node,
                                 "subject": subject_node,
                             }
+                            
+    def parse_mepr(self):
+        """Parse the HMDB XML for metabolite-protein associations."""
+        
 
 
 if __name__ == "__main__":
@@ -1185,12 +1191,12 @@ if __name__ == "__main__":
     # save_pickle(mapped_protein_descr, "uniprot_protein_functions.pkl")
 
     # get gene summary after mapping uniprot to entrezgene
-    uniprot2entrez = uniprot_id2entrezgene(uniprot_ids)
-    save_pickle(uniprot2entrez, "bt_uniprot2entrezgene.pkl")
-    entrezgenes = [
-        mapped["gene_id"].split(":")[1]
-        for _, mapped in uniprot2entrez.items()
-        if "gene_id" in mapped
-    ]
-    gene_descr = asyncio.run(get_batch_gene_summaries(entrezgenes))
-    save_pickle(gene_descr, "entrezgene_summaries.pkl")
+    # uniprot2entrez = uniprot_id2entrezgene(uniprot_ids)
+    # save_pickle(uniprot2entrez, "bt_uniprot2entrezgene.pkl")
+    # entrezgenes = [
+    #     mapped["gene_id"].split(":")[1]
+    #     for _, mapped in uniprot2entrez.items()
+    #     if "gene_id" in mapped
+    # ]
+    # gene_descr = asyncio.run(get_batch_gene_summaries(entrezgenes))
+    # save_pickle(gene_descr, "entrezgene_summaries.pkl")

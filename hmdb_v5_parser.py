@@ -814,6 +814,24 @@ def cache_data(input_xml):
     original_di_name_all = di_info | other_di
     save_pickle(original_di_name_all, "original_disease_name2id.pkl")
 
+    # cache mapped proteins and protein functions
+    mapped_proteins = get_all_uniprot_ids_from_hmdb(hmdb_xml)
+    save_pickle(mapped_proteins, "all_protein_name2uniprot.pkl")
+    uniprot_ids = [uniprot for name, uniprot in mapped_proteins.items()]
+    mapped_protein_descr = asyncio.run(get_batch_protein_functions(uniprot_ids))
+    save_pickle(mapped_protein_descr, "uniprot_protein_functions.pkl")
+
+    # cache entrezgene ids and gene summaries
+    uniprot2entrez = uniprot_id2entrezgene(uniprot_ids)
+    save_pickle(uniprot2entrez, "bt_uniprot2entrezgene.pkl")
+    entrezgenes = [
+        mapped["gene_id"].split(":")[1]
+        for _, mapped in uniprot2entrez.items()
+        if "gene_id" in mapped
+    ]
+    gene_descr = asyncio.run(get_batch_gene_summaries(entrezgenes))
+    save_pickle(gene_descr, "entrezgene_summaries.pkl")
+
 
 class HMDBParse:
     def __init__(self, input_xml):
@@ -821,6 +839,7 @@ class HMDBParse:
         self.input_xml = input_xml
         self.cached_taxon_info = load_pickle("original_taxon_name2taxid.pkl")
         self.cached_disease_info = load_pickle("original_disease_name2id.pkl")
+        self.cached_protein_function = load_pickle("uniprot_protein_functions.pkl")
         self.parenthetical_pattern = re.compile(r"([^.?!]*?)\s*\(([^)]*?)\)")
 
     def get_text(self, elem, tag):
@@ -1015,6 +1034,16 @@ class HMDBParse:
 
         return sorted(disease_names)
 
+    def get_uniprot_ids(self, metabolite):
+        uniprot_ids = set()
+        protein_elem = metabolite.find("hmdb:protein_associations", self.namespace)
+        if protein_elem is not None:
+            for protein in protein_elem.findall("hmdb:protein", self.namespace):
+                uniprot_id = protein.find("hmdb:uniprot_id", self.namespace)
+                if uniprot_id is not None and uniprot_id.text:
+                    uniprot_ids.add(uniprot_id.text.strip())
+        return sorted(uniprot_ids)
+
     def get_medi_references(self, disease_elem):
         pmids = []
         references_elem = disease_elem.find("hmdb:references", self.namespace)
@@ -1158,10 +1187,40 @@ class HMDBParse:
                                 "object": object_node,
                                 "subject": subject_node,
                             }
-                            
+
     def parse_mepr(self):
         """Parse the HMDB XML for metabolite-protein associations."""
-        
+        tree = ET.parse(self.input_xml)
+        root = tree.getroot()
+
+        for metabolite in root.findall("hmdb:metabolite", self.namespace):
+            primary_id, xrefs = self.get_primary_id(metabolite)
+            description = self.get_text(metabolite, "description")
+
+            name = self.get_text(metabolite, "name")
+            synonyms_elem = metabolite.find("hmdb:synonyms", self.namespace)
+            logp = self.get_experimental_properties(metabolite, "logp")
+            state = self.get_text(metabolite, "state")
+
+            subject_node = {
+                "id": primary_id,
+                "name": name.lower() if name else None,
+                "synonym": self.get_list(synonyms_elem, "synonym")
+                if synonyms_elem is not None
+                else [],
+                "description": description,
+                "chemical_formula": self.get_text(metabolite, "chemical_formula"),
+                "molecular_weight": self.get_molecular_weights(metabolite),
+                "state": state.lower() if state else None,
+                "water_solubility": self.get_experimental_properties(
+                    metabolite, "water_solubility"
+                ),
+                "logp": logp,
+                "melting_point": self.get_experimental_properties(metabolite, "melting_point"),
+                "type": "biolink:SmallMolecule",
+                "xrefs": xrefs,
+            }
+            subject_node = self.remove_empty_none_values(subject_node)
 
 
 if __name__ == "__main__":
@@ -1178,25 +1237,3 @@ if __name__ == "__main__":
     # save_pickle(medi_records, "hmdb_v5_metabolite_disease.pkl")
     # for record in medi_records:
     #     print(record)
-
-    # Test uniprot and mapping functions
-    # mapped_proteins = get_all_uniprot_ids_from_hmdb(hmdb_xml)
-    # save_pickle(mapped_proteins, "all_protein_name2uniprot.pkl")
-
-    # query uniprot functions/descriptions
-    mapped_proteins = load_pickle("all_protein_name2uniprot.pkl")
-    uniprot_ids = [uniprot for name, uniprot in mapped_proteins.items()]
-    # mapped_protein_descr = asyncio.run(get_batch_protein_functions(uniprot_ids))
-    # print(len(mapped_protein_descr))
-    # save_pickle(mapped_protein_descr, "uniprot_protein_functions.pkl")
-
-    # get gene summary after mapping uniprot to entrezgene
-    # uniprot2entrez = uniprot_id2entrezgene(uniprot_ids)
-    # save_pickle(uniprot2entrez, "bt_uniprot2entrezgene.pkl")
-    # entrezgenes = [
-    #     mapped["gene_id"].split(":")[1]
-    #     for _, mapped in uniprot2entrez.items()
-    #     if "gene_id" in mapped
-    # ]
-    # gene_descr = asyncio.run(get_batch_gene_summaries(entrezgenes))
-    # save_pickle(gene_descr, "entrezgene_summaries.pkl")

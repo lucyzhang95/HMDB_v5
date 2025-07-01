@@ -340,3 +340,79 @@ Last Modified: 06/02/2025
    }
 }
 ```
+<br><br>
+***
+
+## Metabolite-Protein
+Last Modified: 06/30/2025
+- **Total records with potential duplicates: 863,759**
+- **Total unique records:  863,333 (426 fewer)**
+
+## Example Output
+```json
+{
+   "_id":"3080612_ChemicalGeneInteractionAssociation_Q9NPD5",
+   "association":{
+      "predicate":"biolink:ChemicalGeneInteractionAssociation",
+      "infores":"hmdb_v5"
+   },
+   "object":{
+      "id":"UniProtKB:Q9NPD5",
+      "name":"SLCO1B3",
+      "full_name":"Solute carrier organic anion transporter family member 1B3",
+      "description":"Mediates the Na(+)-independent uptake of organic anions (PubMed:10779507, PubMed:15159445, PubMed:17412826). Shows broad substrate specificity, can transport both organic anions such as bile acid taurocholate (cholyltaurine) and conjugated steroids (17-beta-glucuronosyl estradiol, dehydroepiandrosterone sulfate (DHEAS), and estrone 3-sulfate), as well as eicosanoid leukotriene C4, prostaglandin E2 and L-thyroxine (T4) (PubMed:10779507, PubMed:11159893, PubMed:12568656, PubMed:15159445, PubMed:17412826, PubMed:19129463). Hydrogencarbonate/HCO3(-) acts as the probable counteranion that exchanges for organic anions (PubMed:19129463). Shows a pH-sensitive substrate specificity towards sulfated steroids, taurocholate and T4 which may be ascribed to the protonation state of the binding site and leads to a stimulation of substrate transport in an acidic microenvironment (PubMed:19129463). Involved in the clearance of bile acids and organic anions from the liver (PubMed:22232210). Can take up bilirubin glucuronides from plasma into the liver, contributing to the detoxification-enhancing liver-blood shuttling loop (PubMed:22232210). Transports coproporphyrin I and III, by-products of heme synthesis, and may be involved in their hepatic disposition (PubMed:26383540). May contribute to regulate the transport of organic compounds in testes across the blood-testis-barrier (Probable). Can transport HMG-CoA reductase inhibitors (also known as statins) such as pitavastatin, a clinically important class of hypolipidemic drugs (PubMed:15159445). May play an important role in plasma and tissue distribution of the structurally diverse chemotherapeutic drugs methotrexate and paclitaxel (PubMed:23243220). May also transport antihypertension agents, such as the angiotensin-converting enzyme (ACE) inhibitor prodrug enalapril, and the highly selective angiotensin II AT1-receptor antagonist valsartan, in the liver (PubMed:16624871, PubMed:16627748)",
+      "type":"biolink:Protein",
+      "protein_type":"transporter",
+      "xrefs":{
+         "hmdbp":"HMDBP:HMDBP00446",
+         "uniprotkb":"UniProtKB:Q9NPD5"
+      }
+   },
+   "subject":{
+      "id":"PUBCHEM.COMPOUND:3080612",
+      "name":"12-ketodeoxycholic acid",
+      "synonym":[
+         "12-ketodeoxycholate",
+         "(3a,5b)-3-hydroxy-12-oxo-cholan-24-oate",
+         "(3a,5b)-3-hydroxy-12-oxo-cholan-24-oic acid",
+         "(3alpha,5beta)-3-hydroxy-12-oxo-cholan-24-oate",
+         "(3alpha,5beta)-3-hydroxy-12-oxo-cholan-24-oic acid",
+         "12-dehydrodeoxycholate",
+         "12-dehydrodeoxycholic acid",
+         "12-ketolithocholate",
+         "12-ketolithocholic acid",
+         "12-oxo-3a-hydroxy-5b-cholanate",
+         "12-oxo-3a-hydroxy-5b-cholanic acid",
+         "12-oxolithocholate",
+         "12-oxolithocholic acid",
+         "3a-hydroxy-12-oxo-5b-cholan-24-oate",
+         "3a-hydroxy-12-oxo-5b-cholan-24-oic acid",
+         "3a-hydroxy-12-oxo-5b-cholanate",
+         "3a-hydroxy-12-oxo-5b-cholanic acid",
+         "3a-hydroxy-12-oxo-5b-cholanoate",
+         "3a-hydroxy-12-oxo-5b-cholanoic acid",
+         "3-hydroxy-12-ketocholanoic acid",
+         "12-ketolithocholic acid, (3beta,5beta)-isomer",
+         "3 alpha-hydroxy-12-keto-5 beta-cholanoic acid",
+         "(4r)-4-[(1s,2s,5r,7r,10r,11s,14r,15r)-5-hydroxy-2,15-dimethyl-16-oxotetracyclo[8.7.0.0²,⁷.0¹¹,¹⁵]heptadecan-14-yl]pentanoate"
+      ],
+      "description":"12-Ketodeoxycholic acid is a bile acid. Bile acids are steroid acids found predominantly in the bile of mammals. The distinction between different bile acids is minute, depending only on the presence or absence of hydroxyl groups on positions 3, 7, and 12. Bile acids are physiological detergents that facilitate excretion, absorption, and transport of fats and sterols in the intestine and liver. Bile acids are also steroidal amphipathic molecules derived from the catabolism of cholesterol. They modulate bile flow and lipid secretion, are essential for the absorption of dietary fats and vitamins, and have been implicated in the regulation of all the key enzymes involved in cholesterol homeostasis. Bile acids recirculate through the liver, bile ducts, small intestine and portal vein to form an enterohepatic circuit. They exist as anions at physiological pH and, consequently, require a carrier for transport across the membranes of the enterohepatic tissues. The unique detergent properties of bile acids are essential for the digestion and intestinal absorption of hydrophobic nutrients. Bile acids have potent toxic properties (e.g. membrane disruption) and there are a plethora of mechanisms to limit their accumulation in blood and tissues (PMID: 11316487, 16037564, 12576301, 11907135).",
+      "chemical_formula":"C24H38O4",
+      "molecular_weight":{
+         "average_molecular_weight":390.5561,
+         "monoisotopic_molecular_weight":390.277009704
+      },
+      "state":"solid",
+      "type":"biolink:SmallMolecule",
+      "xrefs":{
+         "pubchem":"PUBCHEM.COMPOUND:3080612",
+         "inchikey":"INCHIKEY:CVNYHSDFZXHMMJ-VPUMZWJWSA-N",
+         "chebi":"CHEBI:803536",
+         "hmdb":"HMDB:HMDB0000328",
+         "cas":"CAS:5130-29-0",
+         "chemspider":"chemspider:2338365",
+         "foodb":"foodb.compound:FDB021953"
+      }
+   }
+}
+```

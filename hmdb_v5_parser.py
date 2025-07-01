@@ -910,27 +910,26 @@ class HMDBParse:
                 return "KEGG.DRUG"
             return "KEGG"
 
-        xrefs = {}
-        primary_id = None
+        xrefs, primary_id = {}, None
         for tag, prefix in id_hierarchy:
             val = self.get_text(metabolite, tag)
-            if val:
-                if tag == "kegg_id":
-                    prefix = classify_kegg(val)
+            if not val:
+                continue
+            if tag == "kegg_id":
+                prefix = classify_kegg(val)
 
-                curie = f"{prefix}:{val}"
-                if not primary_id:
-                    primary_id = curie
-                else:
-                    key = (
-                        "foodb"
-                        if prefix == "foodb.compound"
-                        else "hmdb"
-                        if prefix == "HMDB"
-                        else prefix.lower().split(".")[0]
-                    )
-                    xrefs[key] = curie
+            curie = f"{prefix}:{val}"
+            key = (
+                "foodb"
+                if prefix == "foodb.compound"
+                else "hmdb"
+                if prefix == "HMDB"
+                else prefix.lower().split(".")[0]
+            )
+            if primary_id is None:
+                primary_id = curie
 
+            xrefs.setdefault(key, curie)
         return primary_id, xrefs
 
     def get_references(self, description, microbes):
@@ -1034,16 +1033,6 @@ class HMDBParse:
 
         return sorted(disease_names)
 
-    def get_uniprot_ids(self, metabolite):
-        uniprot_ids = set()
-        protein_elem = metabolite.find("hmdb:protein_associations", self.namespace)
-        if protein_elem is not None:
-            for protein in protein_elem.findall("hmdb:protein", self.namespace):
-                uniprot_id = protein.find("hmdb:uniprot_id", self.namespace)
-                if uniprot_id is not None and uniprot_id.text:
-                    uniprot_ids.add(uniprot_id.text.strip())
-        return sorted(uniprot_ids)
-
     def get_medi_references(self, disease_elem):
         pmids = []
         references_elem = disease_elem.find("hmdb:references", self.namespace)
@@ -1065,8 +1054,7 @@ class HMDBParse:
         """Parse the HMDB XML for microbe-metabolite associations."""
         tree = ET.parse(self.input_xml)
         root = tree.getroot()
-        cached_taxon_info = os.path.join("cache", "original_taxon_name2taxid.pkl")
-        if not os.path.exists(cached_taxon_info):
+        if not self.cached_taxon_info:
             cache_data(self.input_xml)
 
         for metabolite in root.findall("hmdb:metabolite", self.namespace):
@@ -1117,14 +1105,12 @@ class HMDBParse:
                     subject_node["type"] = "biolink:OrganismTaxon"
                     subject_node = self.remove_empty_none_values(subject_node)
 
-                    rec = {
+                    yield {
                         "_id": str(uuid.uuid4()),
                         "association": association_node,
                         "object": object_node,
                         "subject": subject_node,
                     }
-
-                    yield rec
 
     def parse_medi(self):
         """Parse the HMDB XML for metabolite-disease associations."""
@@ -1133,34 +1119,27 @@ class HMDBParse:
 
         for metabolite in root.findall("hmdb:metabolite", self.namespace):
             primary_id, xrefs = self.get_primary_id(metabolite)
-            description = self.get_text(metabolite, "description")
-            diseases = self.get_diseases(metabolite)
-
-            name = self.get_text(metabolite, "name")
-            synonyms_elem = metabolite.find("hmdb:synonyms", self.namespace)
-            logp = self.get_experimental_properties(metabolite, "logp")
-            state = self.get_text(metabolite, "state")
-
             subject_node = {
                 "id": primary_id,
-                "name": name.lower() if name else None,
-                "synonym": self.get_list(synonyms_elem, "synonym")
-                if synonyms_elem is not None
-                else [],
-                "description": description,
+                "name": (name := self.get_text(metabolite, "name")) and name.lower(),
+                "synonym": self.get_list(
+                    metabolite.find("hmdb:synonyms", self.namespace), "synonym"
+                ),
+                "description": self.get_text(metabolite, "description"),
                 "chemical_formula": self.get_text(metabolite, "chemical_formula"),
                 "molecular_weight": self.get_molecular_weights(metabolite),
-                "state": state.lower() if state else None,
+                "state": (state := self.get_text(metabolite, "state")) and state.lower(),
                 "water_solubility": self.get_experimental_properties(
                     metabolite, "water_solubility"
                 ),
-                "logp": logp,
+                "logp": self.get_experimental_properties(metabolite, "logp"),
                 "melting_point": self.get_experimental_properties(metabolite, "melting_point"),
                 "type": "biolink:SmallMolecule",
                 "xrefs": xrefs,
             }
             subject_node = self.remove_empty_none_values(subject_node)
 
+            diseases = self.get_diseases(metabolite)
             diseases_elem = metabolite.find("hmdb:diseases", self.namespace)
             if diseases_elem is not None:
                 for disease_elem in diseases_elem.findall("hmdb:disease", self.namespace):
@@ -1188,39 +1167,76 @@ class HMDBParse:
                                 "subject": subject_node,
                             }
 
-    def parse_mepr(self):
+    def parse_meprot(self):
         """Parse the HMDB XML for metabolite-protein associations."""
         tree = ET.parse(self.input_xml)
         root = tree.getroot()
 
         for metabolite in root.findall("hmdb:metabolite", self.namespace):
             primary_id, xrefs = self.get_primary_id(metabolite)
-            description = self.get_text(metabolite, "description")
-
-            name = self.get_text(metabolite, "name")
-            synonyms_elem = metabolite.find("hmdb:synonyms", self.namespace)
-            logp = self.get_experimental_properties(metabolite, "logp")
-            state = self.get_text(metabolite, "state")
-
             subject_node = {
                 "id": primary_id,
-                "name": name.lower() if name else None,
-                "synonym": self.get_list(synonyms_elem, "synonym")
-                if synonyms_elem is not None
-                else [],
-                "description": description,
+                "name": (name := self.get_text(metabolite, "name")) and name.lower(),
+                "synonym": self.get_list(
+                    metabolite.find("hmdb:synonyms", self.namespace), "synonym"
+                ),
+                "description": self.get_text(metabolite, "description"),
                 "chemical_formula": self.get_text(metabolite, "chemical_formula"),
                 "molecular_weight": self.get_molecular_weights(metabolite),
-                "state": state.lower() if state else None,
+                "state": (state := self.get_text(metabolite, "state")) and state.lower(),
                 "water_solubility": self.get_experimental_properties(
                     metabolite, "water_solubility"
                 ),
-                "logp": logp,
+                "logp": self.get_experimental_properties(metabolite, "logp"),
                 "melting_point": self.get_experimental_properties(metabolite, "melting_point"),
                 "type": "biolink:SmallMolecule",
                 "xrefs": xrefs,
             }
             subject_node = self.remove_empty_none_values(subject_node)
+
+            prot_elem = metabolite.find("hmdb:protein_associations", self.namespace)
+            if prot_elem is None:
+                continue
+            for protein in prot_elem.findall("hmdb:protein", self.namespace):
+                object_node = {
+                    "id": None,
+                    "name": self.get_text(protein, "gene_name"),
+                    "full_name": self.get_text(protein, "name"),
+                    "description": None,
+                    "type": "biolink:Protein",
+                    "protein_type": (ptype := self.get_text(protein, "protein_type"))
+                    and ptype.lower(),
+                    "xrefs": {},
+                }
+
+                prot_accession = self.get_text(protein, "protein_accession")
+                object_node["xrefs"]["hmdbp"] = f"HMDBP:{prot_accession}"
+
+                uniprot_id = protein.findtext(
+                    "hmdb:uniprot_id", default="", namespaces=self.namespace
+                ).strip()
+                if uniprot_id:
+                    object_node["id"] = f"UniProtKB:{uniprot_id}"
+                    object_node["xrefs"]["uniprotkb"] = f"UniProtKB:{uniprot_id}"
+                    for d in self.cached_protein_function:
+                        if uniprot_id in d:
+                            object_node["description"] = d[uniprot_id]["description"]
+                elif prot_accession:
+                    object_node["id"] = f"HMDBP:{prot_accession}"
+
+                object_node = self.remove_empty_none_values(object_node)
+
+                association_node = {
+                    "predicate": "biolink:ChemicalGeneInteractionAssociation",
+                    "infores": "hmdb_v5",
+                }
+
+                yield {
+                    "_id": f"{subject_node['id'].split(':')[1]}_ChemicalGeneInteractionAssociation_{object_node['id'].split(':')[1]}",
+                    "association": association_node,
+                    "object": object_node,
+                    "subject": subject_node,
+                }
 
 
 if __name__ == "__main__":
@@ -1237,3 +1253,8 @@ if __name__ == "__main__":
     # save_pickle(medi_records, "hmdb_v5_metabolite_disease.pkl")
     # for record in medi_records:
     #     print(record)
+
+    meprot_records = [record for record in parser.parse_meprot()]
+    save_pickle(meprot_records, "hmdb_v5_metabolite_protein.pkl")
+    for record in meprot_records:
+        print(record)

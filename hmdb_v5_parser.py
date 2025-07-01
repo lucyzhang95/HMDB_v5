@@ -1232,7 +1232,7 @@ class HMDBParse:
                 }
 
                 yield {
-                    "_id": f"{subject_node['id'].split(':')[1]}_ChemicalGeneInteractionAssociation_{object_node['id'].split(':')[1]}",
+                    "_id": str(uuid.uuid4()),
                     "association": association_node,
                     "object": object_node,
                     "subject": subject_node,

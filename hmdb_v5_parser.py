@@ -406,57 +406,6 @@ def get_full_taxon_info(mapped_taxon_names: dict, taxon_info: dict) -> dict:
     return full_taxon
 
 
-class UMLSClient:
-    def __init__(self, api_key: str, max_concurrent: int = 10):
-        self.api_key = api_key
-        self.tgt_url: Optional[str] = None
-        self.semaphore = asyncio.Semaphore(max_concurrent)
-
-    async def get_tgt(self, session: aiohttp.ClientSession):
-        data = {"apikey": self.api_key}
-        async with session.post("https://utslogin.nlm.nih.gov/cas/v1/api-key", data=data) as resp:
-            if resp.status != 201:
-                raise RuntimeError(f"Failed to get TGT: {resp.status}")
-            self.tgt_url = resp.headers["location"]
-
-    async def get_st(self, session: aiohttp.ClientSession):
-        if not self.tgt_url:
-            await self.get_tgt(session)
-        data = {"service": "http://umlsks.nlm.nih.gov"}
-        async with session.post(self.tgt_url, data=data) as resp:
-            return await resp.text()
-
-    async def get_cui(self, session: aiohttp.ClientSession, term: str) -> Optional[str]:
-        async with self.semaphore:
-            try:
-                st = await self.get_st(session)
-                params = {"string": term, "ticket": st, "pageSize": 1, "searchType": "exact"}
-                url = "https://uts-ws.nlm.nih.gov/rest/search/current"
-                async with session.get(url, params=params) as resp:
-                    if resp.status != 200:
-                        print(f"Error querying {term}: status {resp.status}")
-                        return None
-                    data = await resp.json()
-                    results = data["result"]["results"]
-                    return f"UMLS:{results[0]['ui']}" if results else ""
-            except Exception as e:
-                print(f"Failed for {term}: {e}")
-                return None
-
-    async def query_cuis(self, terms: List[str]) -> Dict[str, Optional[str]]:
-        results = {}
-        async with aiohttp.ClientSession() as session:
-            if not self.tgt_url:
-                await self.get_tgt(session)
-            tasks = [self.get_cui(session, term) for term in terms]
-            cuis = await asyncio.gather(*tasks)
-            results = {
-                term: {"id": cui, "mapping_tool": "UMLS", "search_type": "exact"}
-                for term, cui in zip(terms, cuis)
-            }
-        return results
-
-
 def get_cuis_sync(api_key: str, disease_names: List[str]):
     client = UMLSClient(api_key=api_key)
 
@@ -852,6 +801,57 @@ def cache_data(input_xml):
     # cache SMPDB pathway descriptions
     smpdb_pathway_descr = get_smpdb_pathway_description()
     save_pickle(smpdb_pathway_descr, "smpdb_pathway_descriptions.pkl")
+
+
+class UMLSClient:
+    def __init__(self, api_key: str, max_concurrent: int = 10):
+        self.api_key = api_key
+        self.tgt_url: Optional[str] = None
+        self.semaphore = asyncio.Semaphore(max_concurrent)
+
+    async def get_tgt(self, session: aiohttp.ClientSession):
+        data = {"apikey": self.api_key}
+        async with session.post("https://utslogin.nlm.nih.gov/cas/v1/api-key", data=data) as resp:
+            if resp.status != 201:
+                raise RuntimeError(f"Failed to get TGT: {resp.status}")
+            self.tgt_url = resp.headers["location"]
+
+    async def get_st(self, session: aiohttp.ClientSession):
+        if not self.tgt_url:
+            await self.get_tgt(session)
+        data = {"service": "http://umlsks.nlm.nih.gov"}
+        async with session.post(self.tgt_url, data=data) as resp:
+            return await resp.text()
+
+    async def get_cui(self, session: aiohttp.ClientSession, term: str) -> Optional[str]:
+        async with self.semaphore:
+            try:
+                st = await self.get_st(session)
+                params = {"string": term, "ticket": st, "pageSize": 1, "searchType": "exact"}
+                url = "https://uts-ws.nlm.nih.gov/rest/search/current"
+                async with session.get(url, params=params) as resp:
+                    if resp.status != 200:
+                        print(f"Error querying {term}: status {resp.status}")
+                        return None
+                    data = await resp.json()
+                    results = data["result"]["results"]
+                    return f"UMLS:{results[0]['ui']}" if results else ""
+            except Exception as e:
+                print(f"Failed for {term}: {e}")
+                return None
+
+    async def query_cuis(self, terms: List[str]) -> Dict[str, Optional[str]]:
+        results = {}
+        async with aiohttp.ClientSession() as session:
+            if not self.tgt_url:
+                await self.get_tgt(session)
+            tasks = [self.get_cui(session, term) for term in terms]
+            cuis = await asyncio.gather(*tasks)
+            results = {
+                term: {"id": cui, "mapping_tool": "UMLS", "search_type": "exact"}
+                for term, cui in zip(terms, cuis)
+            }
+        return results
 
 
 class HMDBParse:

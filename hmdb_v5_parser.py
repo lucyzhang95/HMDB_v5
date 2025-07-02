@@ -1362,7 +1362,7 @@ if __name__ == "__main__":
     # for record in meprot_records:
     #     print(record)
 
-    mepwd_records = [record for record in parser.parse_me_pathway()]
-    save_pickle(mepwd_records, "hmdb_v5_metabolite_pathway.pkl")
-    for record in mepwd_records:
-        print(record)
+    # mepwd_records = [record for record in parser.parse_me_pathway()]
+    # save_pickle(mepwd_records, "hmdb_v5_metabolite_pathway.pkl")
+    # for record in mepwd_records:
+    #     print(record)

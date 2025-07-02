@@ -1163,7 +1163,6 @@ class HMDBParse:
             cache_data(self.input_xml)
 
         for metabolite in root.findall("hmdb:metabolite", self.namespace):
-            primary_id, xrefs = self.get_primary_id(metabolite)
             microbes = self.get_microbes(metabolite)
             description = self.get_text(metabolite, "description")
             references = self.get_references(description, microbes)

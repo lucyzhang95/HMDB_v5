@@ -1169,6 +1169,7 @@ class HMDBParse:
 
             association_node = {
                 "predicate": "biolink:OrganismTaxonToChemicalEntityAssociation",
+                "type": "has_metabolic_interaction_with",
                 "infores": "hmdb_v5",
                 "publication": references,
             }
@@ -1222,6 +1223,7 @@ class HMDBParse:
 
                     association_node = {
                         "predicate": "biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation",
+                        "type": "has_role_in",
                         "infores": "hmdb_v5",
                         "publication": references,
                     }
@@ -1288,6 +1290,7 @@ class HMDBParse:
 
                 association_node = {
                     "predicate": "biolink:ChemicalGeneInteractionAssociation",
+                    "type": "interacts_with",
                     "infores": "hmdb_v5",
                 }
 
@@ -1338,6 +1341,7 @@ class HMDBParse:
 
                 association_node = {
                     "predicate": "biolink:ChemicalToPathwayAssociation",
+                    "type": "participates_in",
                     "infores": "hmdb_v5",
                 }
 

@@ -1268,6 +1268,18 @@ class HMDBParse:
             }
             subject_node = self.remove_empty_none_values(subject_node)
 
+            bio_prop = metabolite.find("hmdb:biological_properties", self.namespace)
+            if bio_prop is None:
+                continue
+            pathways_elem = bio_prop.find("hmdb:pathways", self.namespace)
+            if pathways_elem is None:
+                continue
+            for pw in pathways_elem.findall("hmdb:pathway", self.namespace):
+                name = self.get_text(pw, "name").lower()
+                smpdb_id = self.get_text(pw, "smpdb_id")
+                kegg_map = self.get_text(pw, "kegg_map_id")
+
+
 
 
 

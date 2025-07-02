@@ -1036,6 +1036,38 @@ class HMDBParse:
 
         return {}
 
+    def get_anatomical_entities(self, metabolite):
+        output = {
+            "cellular_component": [],
+            "biosample": [],
+            "anatomical_entity": [],
+        }
+
+        bio_prop = metabolite.find("hmdb:biological_properties", self.namespace)
+        if bio_prop:
+            cell_elem = bio_prop.find("hmdb:cellular_locations", self.namespace)
+            if cell_elem is not None:
+                for cell in cell_elem.findall("hmdb:cellular", self.namespace):
+                    txt = cell.text.strip().lower()
+                    if txt and txt.lower() not in output["cellular_component"]:
+                        output["cellular_component"].append(txt.lower())
+
+            specimen_elem = bio_prop.find("hmdb:biospecimen_locations", self.namespace)
+            if specimen_elem is not None:
+                for specimen in specimen_elem.findall("hmdb:biospecimen", self.namespace):
+                    txt = specimen.text.strip()
+                    if txt and txt.lower() not in output["biosample"]:
+                        output["biosample"].append(txt.lower())
+
+            tissue_elem = bio_prop.find("hmdb:tissue_locations", self.namespace)
+            if tissue_elem is not None:
+                for tissue in tissue_elem.findall("hmdb:tissue", self.namespace):
+                    txt = tissue.text.strip()
+                    if txt and txt.lower() not in output["anatomical_entity"]:
+                        output["anatomical_entity"].append(txt.lower())
+
+        return output
+
     def remove_empty_none_values(self, obj):
         if isinstance(obj, dict):
             cleaned = {}
@@ -1279,6 +1311,7 @@ class HMDBParse:
 
         for metabolite in root.findall("hmdb:metabolite", self.namespace):
             primary_id, xrefs = self.get_primary_id(metabolite)
+            anatomical_entities = self.get_anatomical_entities(metabolite)
             subject_node = {
                 "id": primary_id,
                 "name": (name := self.get_text(metabolite, "name")) and name.lower(),
@@ -1295,6 +1328,9 @@ class HMDBParse:
                 "logp": self.get_experimental_properties(metabolite, "logp"),
                 "melting_point": self.get_experimental_properties(metabolite, "melting_point"),
                 "type": "biolink:SmallMolecule",
+                "cellular_component": anatomical_entities.get("cellular_component"),
+                "biosample": anatomical_entities.get("biosample"),
+                "anatomical_entity": anatomical_entities.get("anatomical_entity"),
                 "xrefs": xrefs,
             }
             subject_node = self.remove_empty_none_values(subject_node)
@@ -1362,7 +1398,7 @@ if __name__ == "__main__":
     # for record in meprot_records:
     #     print(record)
 
-    # mepwd_records = [record for record in parser.parse_me_pathway()]
-    # save_pickle(mepwd_records, "hmdb_v5_metabolite_pathway.pkl")
-    # for record in mepwd_records:
-    #     print(record)
+    mepwd_records = [record for record in parser.parse_me_pathway()]
+    save_pickle(mepwd_records, "hmdb_v5_metabolite_pathway.pkl")
+    for record in mepwd_records:
+        print(record)

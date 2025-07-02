@@ -1036,15 +1036,24 @@ class HMDBParse:
 
         return {}
 
-    def remove_empty_none_values(self, d):
-        if isinstance(d, dict):
-            return {
-                k: self.remove_empty_none_values(v) for k, v in d.items() if v not in (None, {}, [])
-            }
-        elif isinstance(d, list):
-            return [self.remove_empty_none_values(v) for v in d if v not in (None, {}, [])]
-        else:
-            return d
+    def remove_empty_none_values(self, obj):
+        if isinstance(obj, dict):
+            cleaned = {}
+            for k, v in obj.items():
+                v_clean = self.remove_empty_none_values(v)
+                if v_clean not in (None, {}, []):
+                    cleaned[k] = v_clean
+            return cleaned
+
+        if isinstance(obj, list):
+            cleaned_list = []
+            for v in obj:
+                v_clean = self.remove_empty_none_values(v)
+                if v_clean not in (None, {}, []):
+                    cleaned_list.append(v_clean)
+            return cleaned_list
+
+        return obj
 
     def get_diseases(self, metabolite):
         disease_names = set()

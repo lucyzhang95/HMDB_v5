@@ -861,6 +861,7 @@ class HMDBParse:
         self.cached_taxon_info = load_pickle("original_taxon_name2taxid.pkl")
         self.cached_disease_info = load_pickle("original_disease_name2id.pkl")
         self.cached_protein_function = load_pickle("uniprot_protein_functions.pkl")
+        self.cached_pathway_descr = load_pickle("smpdb_pathway_descriptions.pkl")
         self.parenthetical_pattern = re.compile(r"([^.?!]*?)\s*\(([^)]*?)\)")
 
     def get_text(self, elem, tag):
@@ -1262,7 +1263,7 @@ class HMDBParse:
                     "subject": subject_node,
                 }
 
-    def me_pathway(self):
+    def parse_me_pathway(self):
         """Parse the HMDB XML for metabolite-pathway associations."""
         tree = ET.parse(self.input_xml)
         root = tree.getroot()
@@ -1289,16 +1290,41 @@ class HMDBParse:
             }
             subject_node = self.remove_empty_none_values(subject_node)
 
+            smpdb_pw = self.cached_pathway_descr
             bio_prop = metabolite.find("hmdb:biological_properties", self.namespace)
-            if bio_prop is None:
-                continue
             pathways_elem = bio_prop.find("hmdb:pathways", self.namespace)
             if pathways_elem is None:
                 continue
             for pw in pathways_elem.findall("hmdb:pathway", self.namespace):
-                name = self.get_text(pw, "name").lower()
-                smpdb_id = self.get_text(pw, "smpdb_id")
+                pw_name = self.get_text(pw, "name")
                 kegg_map = self.get_text(pw, "kegg_map_id")
+                cache = smpdb_pw.get(pw_name.lower())
+                smpdb_id = cache["smpdb"] if cache else None
+                descr = cache["description"] if cache else None
+
+                object_node = {
+                    "id": smpdb_id or (f"KEGG:{kegg_map}" if kegg_map else None),
+                    "name": pw_name.lower(),
+                    "description": descr,
+                    "type": "biolink:Pathway",
+                    "xrefs": {
+                        "smpdb": smpdb_id,
+                        "kegg": f"KEGG:{kegg_map}" if kegg_map else None,
+                    },
+                }
+                object_node = self.remove_empty_none_values(object_node)
+
+                association_node = {
+                    "predicate": "biolink:ChemicalToPathwayAssociation",
+                    "infores": "hmdb_v5",
+                }
+
+                yield {
+                    "_id": str(uuid.uuid4()),
+                    "association": association_node,
+                    "object": object_node,
+                    "subject": subject_node,
+                }
 
 
 if __name__ == "__main__":
@@ -1320,3 +1346,8 @@ if __name__ == "__main__":
     # save_pickle(meprot_records, "hmdb_v5_metabolite_protein.pkl")
     # for record in meprot_records:
     #     print(record)
+
+    mepwd_records = [record for record in parser.parse_me_pathway()]
+    save_pickle(mepwd_records, "hmdb_v5_metabolite_pathway.pkl")
+    for record in mepwd_records:
+        print(record)

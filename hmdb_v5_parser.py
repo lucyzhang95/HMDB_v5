@@ -1328,8 +1328,14 @@ class HMDBParse:
                     "infores": "hmdb_v5",
                 }
 
+                _id = (
+                    f"{object_node['id']}_ChemicalToPathwayAssociation_{subject_node['id']}"
+                    if "id" in object_node and "id" in subject_node
+                    else str(uuid.uuid4())
+                )
+
                 yield {
-                    "_id": str(uuid.uuid4()),
+                    "_id": _id,
                     "association": association_node,
                     "object": object_node,
                     "subject": subject_node,

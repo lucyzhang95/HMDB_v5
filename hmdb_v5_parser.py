@@ -1364,16 +1364,16 @@ if __name__ == "__main__":
     hmdb_xml = extract_file_from_zip(zip_path, expected_filename="hmdb_metabolites.xml")
     parser = HMDBParse(hmdb_xml)
 
-    mime_records = [record for record in parser.parse_microbe_metabolite()]
-    save_pickle(mime_records, "hmdb_v5_microbe_metabolite.pkl")
-
-    medi_records = [record for record in parser.parse_metabolite_disease()]
-    save_pickle(medi_records, "hmdb_v5_metabolite_disease.pkl")
-
-    meprot_records = [record for record in parser.parse_metabolite_protein()]
-    save_pickle(meprot_records, "hmdb_v5_metabolite_protein.pkl")
-
-    mepwd_records = [record for record in parser.parse_metabolite_pathway()]
-    save_pickle(mepwd_records, "hmdb_v5_metabolite_pathway.pkl")
-    for record in mepwd_records:
-        print(record)
+    # mime_records = [record for record in parser.parse_microbe_metabolite()]
+    # save_pickle(mime_records, "hmdb_v5_microbe_metabolite.pkl")
+    #
+    # medi_records = [record for record in parser.parse_metabolite_disease()]
+    # save_pickle(medi_records, "hmdb_v5_metabolite_disease.pkl")
+    #
+    # meprot_records = [record for record in parser.parse_metabolite_protein()]
+    # save_pickle(meprot_records, "hmdb_v5_metabolite_protein.pkl")
+    #
+    # mepwd_records = [record for record in parser.parse_metabolite_pathway()]
+    # save_pickle(mepwd_records, "hmdb_v5_metabolite_pathway.pkl")
+    # for record in mepwd_records:
+    #     print(record)

@@ -421,7 +421,10 @@ Last Modified: 06/30/2025
 
 ## Metabolite-Pathway
 Last Modified: 07/01/2025
-- **Total records with potential duplicates: **
+- **Total records with pathways that do not have ids only names: 815803**
+- **Total unique records: 815,611 (192 fewer)**
+- **Total records with pathway ids: 813,854**
+- Unique pathway identifiers: 48,585
 
 ## Example Output
 ```json

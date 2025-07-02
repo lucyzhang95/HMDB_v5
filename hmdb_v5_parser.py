@@ -920,13 +920,15 @@ class HMDBParse:
                 prefix = classify_kegg(val)
 
             curie = f"{prefix}:{val}"
-            key = (
-                "foodb"
-                if prefix == "foodb.compound"
-                else "hmdb"
-                if prefix == "HMDB"
-                else prefix.lower().split(".")[0]
-            )
+            if prefix == "foodb.compound":
+                key = "foodb"
+            elif prefix == "HMDB":
+                key = "hmdb"
+            elif prefix == "METLIN":
+                key = "metlin"
+            else:
+                key = prefix.lower().split(".")[0]
+
             if primary_id is None:
                 primary_id = curie
 
@@ -1239,6 +1241,35 @@ class HMDBParse:
                     "subject": subject_node,
                 }
 
+    def me_pathway(self):
+        """Parse the HMDB XML for metabolite-pathway associations."""
+        tree = ET.parse(self.input_xml)
+        root = tree.getroot()
+
+        for metabolite in root.findall("hmdb:metabolite", self.namespace):
+            primary_id, xrefs = self.get_primary_id(metabolite)
+            subject_node = {
+                "id": primary_id,
+                "name": (name := self.get_text(metabolite, "name")) and name.lower(),
+                "synonym": self.get_list(
+                    metabolite.find("hmdb:synonyms", self.namespace), "synonym"
+                ),
+                "description": self.get_text(metabolite, "description"),
+                "chemical_formula": self.get_text(metabolite, "chemical_formula"),
+                "molecular_weight": self.get_molecular_weights(metabolite),
+                "state": (state := self.get_text(metabolite, "state")) and state.lower(),
+                "water_solubility": self.get_experimental_properties(
+                    metabolite, "water_solubility"
+                ),
+                "logp": self.get_experimental_properties(metabolite, "logp"),
+                "melting_point": self.get_experimental_properties(metabolite, "melting_point"),
+                "type": "biolink:SmallMolecule",
+                "xrefs": xrefs,
+            }
+            subject_node = self.remove_empty_none_values(subject_node)
+
+
+
 
 if __name__ == "__main__":
     zip_path = os.path.join("downloads", "hmdb_metabolites.zip")
@@ -1255,7 +1286,7 @@ if __name__ == "__main__":
     # for record in medi_records:
     #     print(record)
 
-    meprot_records = [record for record in parser.parse_meprot()]
-    save_pickle(meprot_records, "hmdb_v5_metabolite_protein.pkl")
-    for record in meprot_records:
-        print(record)
+    # meprot_records = [record for record in parser.parse_meprot()]
+    # save_pickle(meprot_records, "hmdb_v5_metabolite_protein.pkl")
+    # for record in meprot_records:
+    #     print(record)

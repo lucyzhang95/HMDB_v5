@@ -1363,18 +1363,12 @@ if __name__ == "__main__":
 
     mime_records = [record for record in parser.parse_microbe_metabolite()]
     save_pickle(mime_records, "hmdb_v5_microbe_metabolite.pkl")
-    for record in mime_records:
-        print(record)
 
     medi_records = [record for record in parser.parse_metabolite_disease()]
     save_pickle(medi_records, "hmdb_v5_metabolite_disease.pkl")
-    for record in medi_records:
-        print(record)
 
     meprot_records = [record for record in parser.parse_metabolite_protein()]
     save_pickle(meprot_records, "hmdb_v5_metabolite_protein.pkl")
-    for record in meprot_records:
-        print(record)
 
     mepwd_records = [record for record in parser.parse_metabolite_pathway()]
     save_pickle(mepwd_records, "hmdb_v5_metabolite_pathway.pkl")

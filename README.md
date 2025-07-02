@@ -416,3 +416,110 @@ Last Modified: 06/30/2025
    }
 }
 ```
+<br><br>
+***
+
+## Metabolite-Pathway
+Last Modified: 07/01/2025
+- **Total records with potential duplicates: **
+
+## Example Output
+```json
+{
+   "_id":"92135_participates_in_SMP0000071",
+   "association":{
+      "predicate":"biolink:ChemicalToPathwayAssociation",
+      "infores":"hmdb_v5"
+   },
+   "object":{
+      "id":"SMPDB:SMP0000071",
+      "name":"ketone body metabolism",
+      "description":"Ketone bodies are consisted of acetone, beta-hydroxybutyrate and acetoacetate. In liver cells' mitochondria, acetyl-CoA can synthesize acetoacetate and beta-hydroxybutyrate; and spontaneous decarboxylation of acetoacetate will form acetone. Metabolism of ketone body (also known as ketogenesis) contains several reactions. Acetoacetic acid (acetoacetate) will be catalyzed to form acetoacetyl-CoA irreversibly by 3-oxoacid CoA-transferase 1 that also coupled with interconversion of succinyl-CoA and succinic acid. Acetoacetic acid can also be catalyzed by mitochondrial D-beta-hydroxybutyrate dehydrogenase to form (R)-3-Hydroxybutyric acid with NADH. Ketogenesis occurs mostly during fasting and starvation.  Stored fatty acids will be broken down and mobilized to produce large amount of acetyl-CoA for ketogenesis in liver, which can reduce the demand of glucose for other tissues. Acetone cannot be converted back to acetyl-CoA; therefore, they are either breathed out through the lungs or excreted in urine. ",
+      "type":"biolink:Pathway",
+      "xrefs":{
+         "smpdb":"SMPDB:SMP0000071",
+         "kegg":"KEGG:map00072"
+      }
+   },
+   "subject":{
+      "id":"PUBCHEM.COMPOUND:92135",
+      "name":"3-hydroxybutyric acid",
+      "synonym":[
+         "(r)-(-)-beta-hydroxybutyric acid",
+         "(r)-3-hydroxybutanoic acid",
+         "3-d-hydroxybutyric acid",
+         "d-3-hydroxybutyric acid",
+         "d-beta-hydroxybutyric acid",
+         "(r)-(-)-b-hydroxybutyrate",
+         "(r)-(-)-b-hydroxybutyric acid",
+         "(r)-(-)-beta-hydroxybutyrate",
+         "(r)-(-)-β-hydroxybutyrate",
+         "(r)-(-)-β-hydroxybutyric acid",
+         "(r)-3-hydroxybutanoate",
+         "3-d-hydroxybutyrate",
+         "d-3-hydroxybutyrate",
+         "d-b-hydroxybutyrate",
+         "d-b-hydroxybutyric acid",
+         "d-beta-hydroxybutyrate",
+         "d-β-hydroxybutyrate",
+         "d-β-hydroxybutyric acid",
+         "(r)-3-hydroxybutyrate",
+         "3-delta-hydroxybutyrate",
+         "3-delta-hydroxybutyric acid",
+         "bhib",
+         "d-(-)-3-hydroxybutyrate",
+         "delta-(-)-3-hydroxybutyrate",
+         "delta-3-hydroxybutyrate",
+         "delta-3-hydroxybutyric acid",
+         "delta-beta-hydroxybutyrate",
+         "3r-hydroxy-butanoate",
+         "(r)-3-hydroxybutyric acid",
+         "(-)-3-hydroxy-n-butyric acid",
+         "(-)-3-hydroxybutyric acid",
+         "(3r)-3-hydroxybutanoic acid",
+         "(3r)-3-hydroxybutyric acid",
+         "(3r)-hydroxybutyrate",
+         "(r)-(-)-3-hydroxybutyric acid",
+         "(r)-beta-hydroxybutanoic acid",
+         "(r)-beta-hydroxybutyric acid",
+         "(r)-β-hydroxybutanoic acid",
+         "(r)-β-hydroxybutyric acid",
+         "3-hydroxy-n-butyric acid",
+         "3-hydroxybutanoic acid",
+         "3-hydroxybutyric acid",
+         "3r-hydroxybutanoic acid",
+         "d-(-)-3-hydroxybutanoic acid",
+         "d-(-)-3-hydroxybutyric acid",
+         "d-(-)-beta-hydroxybutyric acid",
+         "d-(-)-β-hydroxybutyric acid",
+         "beta-hydroxy-n-butyric acid",
+         "beta-hydroxybutanoic acid",
+         "beta-hydroxybutyric acid",
+         "β-hydroxy-n-butyric acid",
+         "β-hydroxybutanoic acid",
+         "β-hydroxybutyric acid"
+      ],
+      "description":"3-Hydroxybutyric acid (CAS: 300-85-6), also known as beta-hydroxybutanoic acid, is a typical partial-degradation product of branched-chain amino acids (primarily valine) released from muscle for hepatic and renal gluconeogenesis. This acid is metabolized by 3-hydroxybutyrate dehydrogenase (catalyzes the oxidation of 3-hydroxybutyrate to form acetoacetate, using NAD+ as an electron acceptor). The enzyme functions in nervous tissues and muscles, enabling the use of circulating hydroxybutyrate as a fuel. In the liver mitochondrial matrix, the enzyme can also catalyze the reverse reaction, a step in ketogenesis. 3-Hydroxybutyric acid is a chiral compound having two enantiomers, D-3-hydroxybutyric acid and L-3-hydroxybutyric acid, and is a ketone body. Like the other ketone bodies (acetoacetate and acetone), levels of 3-hydroxybutyrate in blood and urine are raised in ketosis. In humans, 3-hydroxybutyrate is synthesized in the liver from acetyl-CoA and can be used as an energy source by the brain when blood glucose is low. Blood levels of 3-hydroxybutyric acid levels may be monitored in diabetic patients to look for diabetic ketoacidosis. Persistent mild hyperketonemia is a common finding in newborns. Ketone bodies serve as an indispensable source of energy for extrahepatic tissues, especially the brain and lung of developing mammals. Another important function of ketone bodies is to provide acetoacetyl-CoA and acetyl-CoA for the synthesis of cholesterol, fatty acids, and complex lipids. During the early postnatal period, acetoacetate (AcAc) and beta-hydroxybutyrate are preferred over glucose as substrates for the synthesis of phospholipids and sphingolipids in accord with requirements for brain growth and myelination. Thus, during the first two weeks of postnatal development, when the accumulation of cholesterol and phospholipids accelerates, the proportion of ketone bodies incorporated into these lipids increases. On the other hand, an increased proportion of ketone bodies is utilized for cerebroside synthesis during the period of active myelination. In the lung, AcAc serves better than glucose as a precursor for the synthesis of lung phospholipids. The synthesized lipids, particularly dipalmitoylphosphatidylcholine, are incorporated into surfactant, and thus have a potential role in supplying adequate surfactant lipids to maintain lung function during the early days of life (PMID: 3884391). 3-Hydroxybutyric acid is found to be associated with fumarase deficiency and medium-chain acyl-CoA dehydrogenase deficiency, which are inborn errors of metabolism. 3-Hydroxybutyric acid is a metabolite of Alcaligenes and can be produced from plastic metabolization or incorporated into polymers, depending on the species (PMID: 7646009, 18615882).",
+      "chemical_formula":"C4H8O3",
+      "molecular_weight":{
+         "average_molecular_weight":104.1045,
+         "monoisotopic_molecular_weight":104.047344122
+      },
+      "state":"solid",
+      "melting_point":"49 - 50 °C",
+      "type":"biolink:SmallMolecule",
+      "xrefs":{
+         "pubchem":"PUBCHEM.COMPOUND:92135",
+         "inchikey":"INCHIKEY:WHBMMWSBFZVSSR-GSVOUGTGSA-N",
+         "chebi":"CHEBI:17066",
+         "hmdb":"HMDB:HMDB0000011",
+         "cas":"CAS:625-72-9",
+         "kegg":"KEGG.COMPOUND:C01089",
+         "chemspider":"chemspider:83181",
+         "foodb":"foodb.compound:FDB021869",
+         "bigg":"BIGG.METABOLITE:36784",
+         "vmh":"VMH:BHB"
+      }
+   }
+}
+```

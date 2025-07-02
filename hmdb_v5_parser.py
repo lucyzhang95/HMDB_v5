@@ -1329,7 +1329,7 @@ class HMDBParse:
                 }
 
                 _id = (
-                    f"{object_node['id']}_ChemicalToPathwayAssociation_{subject_node['id']}"
+                    f"{subject_node['id'].split(':')[1]}_participates_in_{object_node['id'].split(':')[1]}"
                     if "id" in object_node and "id" in subject_node
                     else str(uuid.uuid4())
                 )

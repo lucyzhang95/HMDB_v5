@@ -432,6 +432,7 @@ Last Modified: 07/01/2025
    "_id":"1738118_participates_in_SMP0000071",
    "association":{
       "predicate":"biolink:ChemicalToPathwayAssociation",
+      "type":"participates_in",
       "infores":"hmdb_v5"
    },
    "object":{
@@ -499,6 +500,18 @@ Last Modified: 07/01/2025
       "logp":"-0.59",
       "melting_point":"185 - 188 °C",
       "type":"biolink:SmallMolecule",
+      "xrefs":{
+         "pubchem":"PUBCHEM.COMPOUND:1738118",
+         "inchikey":"INCHIKEY:KDYFGRWQOYBRFD-UHFFFAOYSA-N",
+         "drugbank":"DRUGBANK:DB00139",
+         "chebi":"CHEBI:15741",
+         "hmdb":"HMDB:HMDB0000254",
+         "cas":"CAS:110-15-6",
+         "kegg":"KEGG.COMPOUND:C00042",
+         "chemspider":"chemspider:1078",
+         "foodb":"foodb.compound:FDB001931",
+         "vmh":"VMH:SUCC"
+      },
       "cellular_component":[
          "endoplasmic reticulum",
          "extracellular",
@@ -525,19 +538,7 @@ Last Modified: 07/01/2025
          "prostate",
          "skeletal muscle",
          "spleen"
-      ],
-      "xrefs":{
-         "pubchem":"PUBCHEM.COMPOUND:1738118",
-         "inchikey":"INCHIKEY:KDYFGRWQOYBRFD-UHFFFAOYSA-N",
-         "drugbank":"DRUGBANK:DB00139",
-         "chebi":"CHEBI:15741",
-         "hmdb":"HMDB:HMDB0000254",
-         "cas":"CAS:110-15-6",
-         "kegg":"KEGG.COMPOUND:C00042",
-         "chemspider":"chemspider:1078",
-         "foodb":"foodb.compound:FDB001931",
-         "vmh":"VMH:SUCC"
-      }
+      ]
    }
 }
 ```

@@ -431,6 +431,7 @@ Last Modified: 07/01/2025
 {
    "_id":"1738118_participates_in_SMP0000071",
    "association":{
+      "id":"RO:0000056",
       "predicate":"biolink:ChemicalToPathwayAssociation",
       "type":"participates_in",
       "infores":"hmdb_v5"

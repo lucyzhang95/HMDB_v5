@@ -894,6 +894,7 @@ class HMDBParse:
             ("accession", "HMDB"),
             ("cas_registry_number", "CAS"),
             ("kegg_id", None),
+            ("metlin_id", "METLIN"),
             ("chemspider_id", "chemspider"),
             ("foodb_id", "foodb.compound"),
             ("bigg_id", "BIGG.METABOLITE"),

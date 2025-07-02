@@ -854,7 +854,7 @@ class UMLSClient:
         return results
 
 
-class HMDBParse:
+class HMDB_Metabolite_Parse:
     def __init__(self, input_xml):
         self.namespace = {"hmdb": "http://www.hmdb.ca"}
         self.input_xml = input_xml
@@ -1360,12 +1360,26 @@ class HMDBParse:
                     "object": object_node,
                     "subject": subject_node,
                 }
+                
+
+class HMDB_Protein_Parse:
+    def __init__(self, input_xml):
+        self.namespace = {"hmdb": "http://www.hmdb.ca"}
+        self.input_xml = input_xml
+        self.cached_gene_summaries = load_pickle("entrezgene_summaries.pkl")
+
+    def get_text(self, elem, tag):
+        child = elem.find(f"hmdb:{tag}", self.namespace)
+        return child.text.strip() if child is not None and child.text else None
+
+    
+
 
 
 if __name__ == "__main__":
     zip_path = os.path.join("downloads", "hmdb_metabolites.zip")
     hmdb_xml = extract_file_from_zip(zip_path, expected_filename="hmdb_metabolites.xml")
-    parser = HMDBParse(hmdb_xml)
+    parser = HMDB_Metabolite_Parse(hmdb_xml)
 
     # mime_records = [record for record in parser.parse_microbe_metabolite()]
     # save_pickle(mime_records, "hmdb_v5_microbe_metabolite.pkl")

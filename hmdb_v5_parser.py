@@ -1044,7 +1044,7 @@ class HMDBParse:
         }
 
         bio_prop = metabolite.find("hmdb:biological_properties", self.namespace)
-        if bio_prop:
+        if bio_prop is not None:
             cell_elem = bio_prop.find("hmdb:cellular_locations", self.namespace)
             if cell_elem is not None:
                 for cell in cell_elem.findall("hmdb:cellular", self.namespace):

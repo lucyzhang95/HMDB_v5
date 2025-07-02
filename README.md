@@ -351,7 +351,7 @@ Last Modified: 06/30/2025
 ## Example Output
 ```json
 {
-   "_id":"3080612_ChemicalGeneInteractionAssociation_Q9NPD5",
+   "_id":"6baa1455-9ece-4ee3-8ab3-d142e3fa55d3",
    "association":{
       "predicate":"biolink:ChemicalGeneInteractionAssociation",
       "infores":"hmdb_v5"

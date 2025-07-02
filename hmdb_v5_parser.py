@@ -1290,8 +1290,8 @@ class HMDB_Metabolite_Parse:
                 object_node = self.remove_empty_none_values(object_node)
 
                 association_node = {
-                    "predicate": "biolink:ChemicalGeneInteractionAssociation",
                     "id": "RO:0002434",
+                    "predicate": "biolink:ChemicalGeneInteractionAssociation",
                     "type": "interacts_with",
                     "infores": "hmdb_v5",
                 }

@@ -12,6 +12,7 @@ from typing import Dict, Iterator, List, Optional, Union
 
 import aiohttp
 import biothings_client as bt
+import pandas as pd
 import requests
 import text2term
 from Bio import Entrez
@@ -49,13 +50,16 @@ def save_json(obj, f_name):
         json.dump(obj, out_f, indent=4)
 
 
-def extract_xml_from_zip(zip_path, expected_filename="hmdb_metabolites.xml"):
+def extract_file_from_zip(zip_path, expected_filename):
     extract_dir = os.path.dirname(zip_path)
     extracted_path = os.path.join(extract_dir, expected_filename)
 
-    if not os.path.exists(extracted_path):
+    if not os.path.isfile(extracted_path):
         with zipfile.ZipFile(zip_path, "r") as zip_f:
-            zip_f.extract(expected_filename, path=extract_dir)
+            if expected_filename in zip_f.namelist():
+                zip_f.extract(expected_filename, path=extract_dir)
+            else:
+                raise FileNotFoundError(f"{expected_filename} not found in {zip_path}")
 
     return extracted_path
 
@@ -724,6 +728,19 @@ async def get_batch_gene_summaries(gene_ids: List[str], batch_size=5, delay=1.0)
     return results
 
 
+def get_smpdb_pathway_description():
+    zip_path = os.path.join("downloads", "smpdb_pathways.csv.zip")
+    smpdb_csv = extract_file_from_zip(zip_path, "smpdb_pathways.csv")
+    smpdb_df = pd.read_csv(smpdb_csv, usecols=["SMPDB ID", "Name", "Description"])
+    return {
+        name.lower(): {
+            "smpdb": f"SMPDB:{sid}",
+            "description": descr,
+        }
+        for sid, name, descr in zip(smpdb_df["SMPDB ID"], smpdb_df["Name"], smpdb_df["Description"])
+    }
+
+
 def cache_data(input_xml):
     # cache mapped taxon
     microbe_names = get_all_microbe_names(input_xml)
@@ -831,6 +848,10 @@ def cache_data(input_xml):
     ]
     gene_descr = asyncio.run(get_batch_gene_summaries(entrezgenes))
     save_pickle(gene_descr, "entrezgene_summaries.pkl")
+
+    # cache SMPDB pathway descriptions
+    smpdb_pathway_descr = get_smpdb_pathway_description()
+    save_pickle(smpdb_pathway_descr, "smpdb_pathway_descriptions.pkl")
 
 
 class HMDBParse:
@@ -1280,12 +1301,9 @@ class HMDBParse:
                 kegg_map = self.get_text(pw, "kegg_map_id")
 
 
-
-
-
 if __name__ == "__main__":
     zip_path = os.path.join("downloads", "hmdb_metabolites.zip")
-    hmdb_xml = extract_xml_from_zip(zip_path)
+    hmdb_xml = extract_file_from_zip(zip_path, expected_filename="hmdb_metabolites.xml")
     parser = HMDBParse(hmdb_xml)
 
     # mime_records = [record for record in parser.parse_mime()]

@@ -1116,7 +1116,46 @@ class HMDBParse:
 
             return {"id": f"PMID:{pmids[0]}", "pmid": pmid_value, "type": "biolink:Publication"}
 
-    def parse_mime(self):
+    def build_metabolite_node(
+        self,
+        metabolite,
+        primary_id: str,
+        xrefs: dict,
+        anatomical_entities: dict | None = None,
+    ):
+        name = self.get_text(metabolite, "name")
+        state = self.get_text(metabolite, "state")
+
+        synonyms_elem = metabolite.find("hmdb:synonyms", self.namespace)
+        synonyms = self.get_list(synonyms_elem, "synonym") if synonyms_elem is not None else []
+
+        node = {
+            "id": primary_id,
+            "name": name.lower() if name else None,
+            "synonym": synonyms,
+            "description": self.get_text(metabolite, "description"),
+            "chemical_formula": self.get_text(metabolite, "chemical_formula"),
+            "molecular_weight": self.get_molecular_weights(metabolite),
+            "state": state.lower() if state else None,
+            "water_solubility": self.get_experimental_properties(metabolite, "water_solubility"),
+            "logp": self.get_experimental_properties(metabolite, "logp"),
+            "melting_point": self.get_experimental_properties(metabolite, "melting_point"),
+            "type": "biolink:SmallMolecule",
+            "xrefs": xrefs,
+        }
+
+        if anatomical_entities:
+            node.update(
+                {
+                    "cellular_component": anatomical_entities.get("cellular_component"),
+                    "biosample": anatomical_entities.get("biosample"),
+                    "anatomical_entity": anatomical_entities.get("anatomical_entity"),
+                }
+            )
+
+        return self.remove_empty_none_values(node)
+
+    def parse_microbe_metabolite(self):
         """Parse the HMDB XML for microbe-metabolite associations."""
         tree = ET.parse(self.input_xml)
         root = tree.getroot()
@@ -1136,31 +1175,13 @@ class HMDBParse:
             }
             association_node = self.remove_empty_none_values(association_node)
 
-            name = self.get_text(metabolite, "name")
-            synonyms_elem = metabolite.find("hmdb:synonyms", self.namespace)
-            logp = self.get_experimental_properties(metabolite, "logp")
-            state = self.get_text(metabolite, "state")
-            object_node = {
-                "id": primary_id,
-                "name": name.lower() if name else None,
-                "synonym": self.get_list(synonyms_elem, "synonym")
-                if synonyms_elem is not None
-                else []
-                if metabolite.find("hmdb:synonyms", self.namespace)
-                else [],
-                "description": description,
-                "chemical_formula": self.get_text(metabolite, "chemical_formula"),
-                "molecular_weight": self.get_molecular_weights(metabolite),
-                "state": state.lower() if state else None,
-                "water_solubility": self.get_experimental_properties(
-                    metabolite, "water_solubility"
-                ),
-                "logp": logp,
-                "melting_point": self.get_experimental_properties(metabolite, "melting_point"),
-                "type": "biolink:SmallMolecule",
-                "xrefs": xrefs,
-            }
-            object_node = self.remove_empty_none_values(object_node)
+            primary_id, xrefs = self.get_primary_id(metabolite)
+            object_node = self.build_metabolite_node(
+                metabolite,
+                primary_id,
+                xrefs,
+                anatomical_entities=self.get_anatomical_entities(metabolite),
+            )
 
             if not microbes:
                 continue
@@ -1178,32 +1199,19 @@ class HMDBParse:
                         "subject": subject_node,
                     }
 
-    def parse_medi(self):
+    def parse_metabolite_disease(self):
         """Parse the HMDB XML for metabolite-disease associations."""
         tree = ET.parse(self.input_xml)
         root = tree.getroot()
 
         for metabolite in root.findall("hmdb:metabolite", self.namespace):
             primary_id, xrefs = self.get_primary_id(metabolite)
-            subject_node = {
-                "id": primary_id,
-                "name": (name := self.get_text(metabolite, "name")) and name.lower(),
-                "synonym": self.get_list(
-                    metabolite.find("hmdb:synonyms", self.namespace), "synonym"
-                ),
-                "description": self.get_text(metabolite, "description"),
-                "chemical_formula": self.get_text(metabolite, "chemical_formula"),
-                "molecular_weight": self.get_molecular_weights(metabolite),
-                "state": (state := self.get_text(metabolite, "state")) and state.lower(),
-                "water_solubility": self.get_experimental_properties(
-                    metabolite, "water_solubility"
-                ),
-                "logp": self.get_experimental_properties(metabolite, "logp"),
-                "melting_point": self.get_experimental_properties(metabolite, "melting_point"),
-                "type": "biolink:SmallMolecule",
-                "xrefs": xrefs,
-            }
-            subject_node = self.remove_empty_none_values(subject_node)
+            subject_node = self.build_metabolite_node(
+                metabolite,
+                primary_id,
+                xrefs,
+                anatomical_entities=self.get_anatomical_entities(metabolite),
+            )
 
             diseases = self.get_diseases(metabolite)
             diseases_elem = metabolite.find("hmdb:diseases", self.namespace)
@@ -1233,32 +1241,19 @@ class HMDBParse:
                                 "subject": subject_node,
                             }
 
-    def parse_meprot(self):
+    def parse_metabolite_protein(self):
         """Parse the HMDB XML for metabolite-protein associations."""
         tree = ET.parse(self.input_xml)
         root = tree.getroot()
 
         for metabolite in root.findall("hmdb:metabolite", self.namespace):
             primary_id, xrefs = self.get_primary_id(metabolite)
-            subject_node = {
-                "id": primary_id,
-                "name": (name := self.get_text(metabolite, "name")) and name.lower(),
-                "synonym": self.get_list(
-                    metabolite.find("hmdb:synonyms", self.namespace), "synonym"
-                ),
-                "description": self.get_text(metabolite, "description"),
-                "chemical_formula": self.get_text(metabolite, "chemical_formula"),
-                "molecular_weight": self.get_molecular_weights(metabolite),
-                "state": (state := self.get_text(metabolite, "state")) and state.lower(),
-                "water_solubility": self.get_experimental_properties(
-                    metabolite, "water_solubility"
-                ),
-                "logp": self.get_experimental_properties(metabolite, "logp"),
-                "melting_point": self.get_experimental_properties(metabolite, "melting_point"),
-                "type": "biolink:SmallMolecule",
-                "xrefs": xrefs,
-            }
-            subject_node = self.remove_empty_none_values(subject_node)
+            subject_node = self.build_metabolite_node(
+                metabolite,
+                primary_id,
+                xrefs,
+                anatomical_entities=self.get_anatomical_entities(metabolite),
+            )
 
             prot_elem = metabolite.find("hmdb:protein_associations", self.namespace)
             if prot_elem is None:
@@ -1304,36 +1299,19 @@ class HMDBParse:
                     "subject": subject_node,
                 }
 
-    def parse_me_pathway(self):
+    def parse_metabolite_pathway(self):
         """Parse the HMDB XML for metabolite-pathway associations."""
         tree = ET.parse(self.input_xml)
         root = tree.getroot()
 
         for metabolite in root.findall("hmdb:metabolite", self.namespace):
             primary_id, xrefs = self.get_primary_id(metabolite)
-            anatomical_entities = self.get_anatomical_entities(metabolite)
-            subject_node = {
-                "id": primary_id,
-                "name": (name := self.get_text(metabolite, "name")) and name.lower(),
-                "synonym": self.get_list(
-                    metabolite.find("hmdb:synonyms", self.namespace), "synonym"
-                ),
-                "description": self.get_text(metabolite, "description"),
-                "chemical_formula": self.get_text(metabolite, "chemical_formula"),
-                "molecular_weight": self.get_molecular_weights(metabolite),
-                "state": (state := self.get_text(metabolite, "state")) and state.lower(),
-                "water_solubility": self.get_experimental_properties(
-                    metabolite, "water_solubility"
-                ),
-                "logp": self.get_experimental_properties(metabolite, "logp"),
-                "melting_point": self.get_experimental_properties(metabolite, "melting_point"),
-                "type": "biolink:SmallMolecule",
-                "cellular_component": anatomical_entities.get("cellular_component"),
-                "biosample": anatomical_entities.get("biosample"),
-                "anatomical_entity": anatomical_entities.get("anatomical_entity"),
-                "xrefs": xrefs,
-            }
-            subject_node = self.remove_empty_none_values(subject_node)
+            subject_node = self.build_metabolite_node(
+                metabolite,
+                primary_id,
+                xrefs,
+                anatomical_entities=self.get_anatomical_entities(metabolite),
+            )
 
             smpdb_pw = self.cached_pathway_descr
             bio_prop = metabolite.find("hmdb:biological_properties", self.namespace)
@@ -1383,22 +1361,22 @@ if __name__ == "__main__":
     hmdb_xml = extract_file_from_zip(zip_path, expected_filename="hmdb_metabolites.xml")
     parser = HMDBParse(hmdb_xml)
 
-    # mime_records = [record for record in parser.parse_mime()]
-    # save_pickle(mime_records, "hmdb_v5_microbe_metabolite.pkl")
-    # for record in mime_records:
-    #     print(record)
+    mime_records = [record for record in parser.parse_microbe_metabolite()]
+    save_pickle(mime_records, "hmdb_v5_microbe_metabolite.pkl")
+    for record in mime_records:
+        print(record)
 
-    # medi_records = [record for record in parser.parse_medi()]
-    # save_pickle(medi_records, "hmdb_v5_metabolite_disease.pkl")
-    # for record in medi_records:
-    #     print(record)
+    medi_records = [record for record in parser.parse_metabolite_disease()]
+    save_pickle(medi_records, "hmdb_v5_metabolite_disease.pkl")
+    for record in medi_records:
+        print(record)
 
-    # meprot_records = [record for record in parser.parse_meprot()]
-    # save_pickle(meprot_records, "hmdb_v5_metabolite_protein.pkl")
-    # for record in meprot_records:
-    #     print(record)
+    meprot_records = [record for record in parser.parse_metabolite_protein()]
+    save_pickle(meprot_records, "hmdb_v5_metabolite_protein.pkl")
+    for record in meprot_records:
+        print(record)
 
-    mepwd_records = [record for record in parser.parse_me_pathway()]
+    mepwd_records = [record for record in parser.parse_metabolite_pathway()]
     save_pickle(mepwd_records, "hmdb_v5_metabolite_pathway.pkl")
     for record in mepwd_records:
         print(record)

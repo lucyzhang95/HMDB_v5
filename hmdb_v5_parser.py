@@ -1222,6 +1222,7 @@ class HMDBParse:
                         continue
 
                     association_node = {
+                        "id": "RO:0000087",  # corresponds to has role
                         "predicate": "biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation",
                         "type": "has_role_in",
                         "infores": "hmdb_v5",
@@ -1290,6 +1291,7 @@ class HMDBParse:
 
                 association_node = {
                     "predicate": "biolink:ChemicalGeneInteractionAssociation",
+                    "id": "RO:0002434",
                     "type": "interacts_with",
                     "infores": "hmdb_v5",
                 }
@@ -1340,6 +1342,7 @@ class HMDBParse:
                 object_node = self.remove_empty_none_values(object_node)
 
                 association_node = {
+                    "id": "RO:0000056",
                     "predicate": "biolink:ChemicalToPathwayAssociation",
                     "type": "participates_in",
                     "infores": "hmdb_v5",

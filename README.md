@@ -15,7 +15,7 @@ According to the publication, 9,445,375 highly quality predicted spectral datase
 <br><br>
 ***
 
-## Microbe-Metabolite
+## 1. Microbe-Metabolite
 Last Modified: 05/28/2025
 - **Total Microbe-Metabolite records: 922, 35 records fewer than the full data (957)** <br>
 **~ 96.3% of the entire records** <br>
@@ -172,7 +172,7 @@ Last Modified: 05/28/2025
 <br><br>
 ***
 
-## Metabolite-Disease
+## 2. Metabolite-Disease
 Last Modified: 06/02/2025
 - **Total Metabolite-Disease records: 92,892**
 - **Total unique Metabolite-Disease records: 27,575** <br>
@@ -343,7 +343,7 @@ Last Modified: 06/02/2025
 <br><br>
 ***
 
-## Metabolite-Protein
+## 3. Metabolite-Protein
 Last Modified: 06/30/2025
 - **Total records with potential duplicates: 863,759**
 - **Total unique records:  863,333 (426 fewer)**
@@ -419,7 +419,7 @@ Last Modified: 06/30/2025
 <br><br>
 ***
 
-## Metabolite-Pathway
+## 4. Metabolite-Pathway
 Last Modified: 07/01/2025
 - **Total records with pathways that do not have ids only names: 815803**
 - **Total unique records: 815,611 (192 fewer)**
@@ -546,7 +546,7 @@ Last Modified: 07/01/2025
 
 <br><br>
 ***
-## Protein-Pathway
+## 5. Protein-Pathway
 Last Modified: 07/03/2025
 
 - **Total records: **
@@ -646,7 +646,7 @@ Last Modified: 07/03/2025
 <br><br>
 ***
 
-## Protein-Biological Process
+## 6. Protein-Biological Process
 Last Modified: 07/03/2025
 
 - **Total records: **

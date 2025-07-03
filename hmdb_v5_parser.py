@@ -885,7 +885,7 @@ def cache_data(input_xml):
 
     # cache GO terms from HMDBP
     go_terms = get_all_go_terms_from_hmdbp(input_xml)
-    go_descr = asyncio.run(get_batch_gene_summaries(go_terms))
+    go_descr = asyncio.run(get_go_definitions(go_terms))
     save_pickle(go_descr, "hmdbp_go_definitions.pkl")
 
 
@@ -1761,7 +1761,7 @@ class HMDB_Protein_Parse(XMLParseHelper):
                     if "id" in object_node and "id" in subject_node
                     else str(uuid.uuid4())
                 )
-                return {
+                yield {
                     "_id": _id,
                     "association": association_node,
                     "object": object_node,
@@ -1803,7 +1803,3 @@ if __name__ == "__main__":
     save_pickle(prot_bp_records, "hmdb_v5_protein_biological_process.pkl")
     for rec in prot_bp_records:
         print(rec)
-
-    go_terms = get_all_go_terms_from_hmdbp(hmdb_protein_xml)
-    go_descr = asyncio.run(get_batch_gene_summaries(go_terms))
-    save_pickle(go_descr, "hmdbp_go_definitions.pkl")

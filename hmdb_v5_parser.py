@@ -1468,7 +1468,9 @@ class HMDB_Protein_Parse(XMLParseHelper):
 
             chrom_loc = None
             if chrom_loc_raw:
-                candidate = chrom_loc_raw.split(":", 1)[-1]
+                candidate = (
+                    chrom_loc_raw.split(":", 1)[-1] if ":" in chrom_loc_raw else int(chrom_loc_raw)
+                )
                 try:
                     chrom_loc = int(candidate)
                 except ValueError:

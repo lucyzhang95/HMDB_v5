@@ -1536,8 +1536,9 @@ class HMDB_Protein_Parse(XMLParseHelper):
 
         uniprot_id = self.get_text(protein, "uniprot_id")
         if uniprot_id:
-            entrezgene = self.uniprot2entrezgene.get(uniprot_id)["gene_id"].split(":")[1]
             prot_descr = self.protein_func.get(uniprot_id).get("description")
+            entrezgene = self.uniprot2entrezgene.get(uniprot_id)["gene_id"].split(":")[1]
+            xrefs["entrezgene"] = f"NCBIGene:{entrezgene}"
             gene_descr = self.gene_summary.get(entrezgene).get("description")
 
         protein_node = {

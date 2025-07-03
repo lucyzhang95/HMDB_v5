@@ -705,6 +705,58 @@ def get_smpdb_pathway_description():
     }
 
 
+async def get_go_definitions(
+    go_ids: List[str], batch_size: int = 200, delay: float = 0.25
+) -> Dict[str, str]:
+    BASE = "https://www.ebi.ac.uk/QuickGO/services/ontology/go/terms/"
+
+    def chunks(lst, n):
+        for i in range(0, len(lst), n):
+            yield lst[i : i + n]
+
+    async def query(session: aiohttp.ClientSession, ids: List[str]) -> Dict[str, str]:
+        url = BASE + ",".join(ids)
+        params = {"fields": "id,definition"}
+        async with session.get(url, params=params, headers={"Accept": "application/json"}) as r:
+            r.raise_for_status()
+            js = await r.json()
+
+        output_d = {}
+        for term in js.get("results", []):
+            go_id = term.get("id")
+            descr = term.get("definition", {}).get("text")
+            if go_id and descr:
+                output_d[go_id] = {"description": descr, "annotation_tool": "EBI_QuickGO"}
+        return output_d
+
+    results = {}
+    timeout = aiohttp.ClientTimeout(total=None, connect=10, sock_read=30)
+
+    async with aiohttp.ClientSession(timeout=timeout) as session:
+        for group in chunks(go_ids, batch_size):
+            results.update(await query(session, group))
+            await asyncio.sleep(delay)
+
+    return results
+
+
+def get_all_go_terms_from_hmdbp(input_xml):
+    namespace = {"hmdb": "http://www.hmdb.ca"}
+    tree = ET.parse(input_xml)
+    root = tree.getroot()
+
+    go_terms = set()
+    for protein in root.findall("hmdb:protein", namespace):
+        go_elem = protein.find("hmdb:go_classifications", namespace)
+        if go_elem is None:
+            continue
+        for go_class in go_elem.findall("hmdb:go_class", namespace):
+            go_id_elem = go_class.find("hmdb:go_id", namespace)
+            if go_id_elem is not None and go_id_elem.text:
+                go_terms.add(go_id_elem.text.strip())
+    return list(go_terms)
+
+
 def cache_data(input_xml):
     # cache mapped taxon
     microbe_names = get_all_microbe_names(input_xml)
@@ -830,6 +882,11 @@ def cache_data(input_xml):
     ]
     hmdbp_gene_descr = asyncio.run(get_batch_gene_summaries(entrezgenes))
     save_pickle(hmdbp_gene_descr, "hmdbp_entrezgene_summaries.pkl")
+
+    # cache GO terms from HMDBP
+    go_terms = get_all_go_terms_from_hmdbp(input_xml)
+    go_descr = asyncio.run(get_batch_gene_summaries(go_terms))
+    save_pickle(go_descr, "hmdbp_go_definitions.pkl")
 
 
 class UMLSClient:
@@ -1412,6 +1469,7 @@ class HMDB_Protein_Parse(XMLParseHelper):
             for entrezgene, info in d.items()
         }
         self.cached_pathway_descr = load_pickle("smpdb_pathway_descriptions.pkl")
+        self.cached_go_descr = load_pickle("hmdbp_go_definitions.pkl")
 
     def get_list_of_region_list(self, elem, tag):
         ranges = []
@@ -1660,6 +1718,56 @@ class HMDB_Protein_Parse(XMLParseHelper):
                     "subject": subject_node,
                 }
 
+    def parse_protein_biological_process(self):
+        """Parse the HMDB XML for protein-biological process associations."""
+        tree = ET.parse(self.input_xml)
+        root = tree.getroot()
+
+        for protein in root.findall("hmdb:protein", self.namespace):
+            subject_node = self.build_protein_node(protein)
+            publication = self.get_references(protein)
+
+            bp_elem = protein.find("hmdb:go_classifications", self.namespace)
+            if bp_elem is None:
+                continue
+            for bp in bp_elem.findall("hmdb:go_class", self.namespace):
+                if self.get_text(bp, "category") != "Biological process":
+                    continue
+
+                go_name = self.get_text(bp, "description")
+                go_id = self.get_text(bp, "go_id")
+                go_descr = self.cached_go_descr.get(go_id, {}).get("description") if go_id else None
+
+                object_node = {
+                    "id": go_id,
+                    "name": go_name.lower() if go_name else None,
+                    "description": go_descr,
+                    "type": "biolink:BiologicalProcess",
+                    "xrefs": {"go": go_id} if go_id else {},
+                }
+                object_node = self.remove_empty_none_values(object_node)
+
+                association_node = {
+                    "id": "RO:0002331",
+                    "predicate": "biolink:MacromolecularMachineToBiologicalProcessAssociation",
+                    "type": "involved_in",
+                    "infores": "hmdb_v5",
+                    "publication": publication,
+                }
+                association_node = self.remove_empty_none_values(association_node)
+
+                _id = (
+                    f"{subject_node['id'].split(':', 1)[1]}_involved_in_{object_node['id'].split(':', 1)[1]}"
+                    if "id" in object_node and "id" in subject_node
+                    else str(uuid.uuid4())
+                )
+                return {
+                    "_id": _id,
+                    "association": association_node,
+                    "object": object_node,
+                    "subject": subject_node,
+                }
+
 
 if __name__ == "__main__":
     me_zip_path = os.path.join("downloads", "hmdb_metabolites.zip")
@@ -1686,7 +1794,16 @@ if __name__ == "__main__":
     # for record in mepwd_records:
     #     print(record)
 
-    prot_records = [rec for rec in prot_parser.parse_protein_pathway()]
-    save_pickle(prot_records, "hmdb_v5_protein_pathway.pkl")
-    for rec in prot_records:
+    # prot_records = [rec for rec in prot_parser.parse_protein_pathway()]
+    # save_pickle(prot_records, "hmdb_v5_protein_pathway.pkl")
+    # for rec in prot_records:
+    #     print(rec)
+
+    prot_bp_records = [rec for rec in prot_parser.parse_protein_biological_process()]
+    save_pickle(prot_bp_records, "hmdb_v5_protein_biological_process.pkl")
+    for rec in prot_bp_records:
         print(rec)
+
+    go_terms = get_all_go_terms_from_hmdbp(hmdb_protein_xml)
+    go_descr = asyncio.run(get_batch_gene_summaries(go_terms))
+    save_pickle(go_descr, "hmdbp_go_definitions.pkl")

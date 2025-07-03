@@ -854,15 +854,11 @@ class UMLSClient:
         return results
 
 
-class HMDB_Metabolite_Parse:
+class XMLParseHelper:
+    namespace = {"hmdb": "http://www.hmdb.ca"}
+
     def __init__(self, input_xml):
-        self.namespace = {"hmdb": "http://www.hmdb.ca"}
         self.input_xml = input_xml
-        self.cached_taxon_info = load_pickle("original_taxon_name2taxid.pkl")
-        self.cached_disease_info = load_pickle("original_disease_name2id.pkl")
-        self.cached_protein_function = load_pickle("uniprot_protein_functions.pkl")
-        self.cached_pathway_descr = load_pickle("smpdb_pathway_descriptions.pkl")
-        self.parenthetical_pattern = re.compile(r"([^.?!]*?)\s*\(([^)]*?)\)")
 
     def get_text(self, elem, tag):
         child = elem.find(f"hmdb:{tag}", self.namespace)
@@ -870,6 +866,34 @@ class HMDB_Metabolite_Parse:
 
     def get_list(self, elem, tag):
         return [e.text.lower() for e in elem.findall(f"hmdb:{tag}", self.namespace) if e.text]
+
+    def remove_empty_none_values(self, obj):
+        if isinstance(obj, dict):
+            cleaned = {}
+            for k, v in obj.items():
+                v_clean = self.remove_empty_none_values(v)
+                if v_clean not in (None, {}, []):
+                    cleaned[k] = v_clean
+            return cleaned
+
+        if isinstance(obj, list):
+            cleaned_list = []
+            for v in obj:
+                v_clean = self.remove_empty_none_values(v)
+                if v_clean not in (None, {}, []):
+                    cleaned_list.append(v_clean)
+            return cleaned_list
+        return obj
+
+
+class HMDB_Metabolite_Parse(XMLParseHelper):
+    def __init__(self, input_xml):
+        super().__init__(input_xml)
+        self.parenthetical_pattern = re.compile(r"([^.?!]*?)\s*\(([^)]*?)\)")
+        self.cached_taxon_info = load_pickle("original_taxon_name2taxid.pkl")
+        self.cached_disease_info = load_pickle("original_disease_name2id.pkl")
+        self.cached_protein_function = load_pickle("uniprot_protein_functions.pkl")
+        self.cached_pathway_descr = load_pickle("smpdb_pathway_descriptions.pkl")
 
     def get_experimental_properties(self, metabolite, prop_name):
         props = metabolite.find("hmdb:experimental_properties", self.namespace)
@@ -1067,25 +1091,6 @@ class HMDB_Metabolite_Parse:
                         output["anatomical_entity"].append(txt.lower())
 
         return output
-
-    def remove_empty_none_values(self, obj):
-        if isinstance(obj, dict):
-            cleaned = {}
-            for k, v in obj.items():
-                v_clean = self.remove_empty_none_values(v)
-                if v_clean not in (None, {}, []):
-                    cleaned[k] = v_clean
-            return cleaned
-
-        if isinstance(obj, list):
-            cleaned_list = []
-            for v in obj:
-                v_clean = self.remove_empty_none_values(v)
-                if v_clean not in (None, {}, []):
-                    cleaned_list.append(v_clean)
-            return cleaned_list
-
-        return obj
 
     def get_diseases(self, metabolite):
         disease_names = set()
@@ -1360,20 +1365,21 @@ class HMDB_Metabolite_Parse:
                     "object": object_node,
                     "subject": subject_node,
                 }
-                
+
 
 class HMDB_Protein_Parse:
     def __init__(self, input_xml):
-        self.namespace = {"hmdb": "http://www.hmdb.ca"}
+        super().__init__(input_xml)
         self.input_xml = input_xml
+        self.cached_protein_function = load_pickle("uniprot_protein_functions.pkl")
         self.cached_gene_summaries = load_pickle("entrezgene_summaries.pkl")
 
-    def get_text(self, elem, tag):
-        child = elem.find(f"hmdb:{tag}", self.namespace)
-        return child.text.strip() if child is not None and child.text else None
-
-    
-
+    def get_list_of_tuple(self, elem, tag):
+        return [
+            (e.text.lower().split("-")[0], e.text.lower().split("-")[1])
+            for e in elem.findall(f"hmdb:{tag}", self.namespace)
+            if e.text and "-" in e.text
+        ]
 
 
 if __name__ == "__main__":
@@ -1383,13 +1389,13 @@ if __name__ == "__main__":
 
     # mime_records = [record for record in parser.parse_microbe_metabolite()]
     # save_pickle(mime_records, "hmdb_v5_microbe_metabolite.pkl")
-    # 
+    #
     # medi_records = [record for record in parser.parse_metabolite_disease()]
     # save_pickle(medi_records, "hmdb_v5_metabolite_disease.pkl")
-    # 
+    #
     # meprot_records = [record for record in parser.parse_metabolite_protein()]
     # save_pickle(meprot_records, "hmdb_v5_metabolite_protein.pkl")
-    # 
+    #
     # mepwd_records = [record for record in parser.parse_metabolite_pathway()]
     # save_pickle(mepwd_records, "hmdb_v5_metabolite_pathway.pkl")
     # for record in mepwd_records:

@@ -781,7 +781,7 @@ def cache_data(input_xml):
     save_pickle(original_di_name_all, "original_disease_name2id.pkl")
 
     # cache mapped proteins and protein functions
-    mapped_proteins = get_all_uniprot_ids_from_hmdb(hmdb_xml)
+    mapped_proteins = get_all_uniprot_ids_from_hmdb(input_xml)
     save_pickle(mapped_proteins, "all_protein_name2uniprot.pkl")
     uniprot_ids = [uniprot for name, uniprot in mapped_proteins.items()]
     mapped_protein_descr = asyncio.run(get_batch_protein_functions(uniprot_ids))
@@ -895,6 +895,33 @@ class HMDB_Metabolite_Parse(XMLParseHelper):
         self.cached_protein_function = load_pickle("uniprot_protein_functions.pkl")
         self.cached_pathway_descr = load_pickle("smpdb_pathway_descriptions.pkl")
 
+    def get_microbes(self, metabolite):
+        ontology = metabolite.find("hmdb:ontology", self.namespace)
+        for root in ontology.findall("hmdb:root", self.namespace):
+            if self.get_text(root, "term") != "Disposition":
+                continue
+            for d in root.findall(".//hmdb:descendant", self.namespace):
+                if self.get_text(d, "term") == "Microbe":
+                    return sorted(
+                        {
+                            t.text.lower().strip()
+                            for t in d.findall(".//hmdb:term", self.namespace)
+                            if t.text and t.text.strip().lower() != "microbe"
+                        }
+                    )
+
+    def get_diseases(self, metabolite):
+        disease_names = set()
+        diseases_elem = metabolite.find("hmdb:diseases", self.namespace)
+        if diseases_elem is not None:
+            for disease_elem in diseases_elem.findall("hmdb:disease", self.namespace):
+                name_elem = disease_elem.find("hmdb:name", self.namespace)
+                if name_elem is not None and name_elem.text:
+                    disease_name = name_elem.text.strip().lower()
+                    disease_names.add(disease_name)
+
+        return sorted(disease_names)
+
     def get_experimental_properties(self, metabolite, prop_name):
         props = metabolite.find("hmdb:experimental_properties", self.namespace)
         if props is not None:
@@ -914,21 +941,6 @@ class HMDB_Metabolite_Parse(XMLParseHelper):
         if mono:
             weights["monoisotopic_molecular_weight"] = float(mono)
         return weights
-
-    def get_microbes(self, metabolite):
-        ontology = metabolite.find("hmdb:ontology", self.namespace)
-        for root in ontology.findall("hmdb:root", self.namespace):
-            if self.get_text(root, "term") != "Disposition":
-                continue
-            for d in root.findall(".//hmdb:descendant", self.namespace):
-                if self.get_text(d, "term") == "Microbe":
-                    return sorted(
-                        {
-                            t.text.lower().strip()
-                            for t in d.findall(".//hmdb:term", self.namespace)
-                            if t.text and t.text.strip().lower() != "microbe"
-                        }
-                    )
 
     def get_primary_id(self, metabolite):
         id_hierarchy = [
@@ -1091,18 +1103,6 @@ class HMDB_Metabolite_Parse(XMLParseHelper):
                         output["anatomical_entity"].append(txt.lower())
 
         return output
-
-    def get_diseases(self, metabolite):
-        disease_names = set()
-        diseases_elem = metabolite.find("hmdb:diseases", self.namespace)
-        if diseases_elem is not None:
-            for disease_elem in diseases_elem.findall("hmdb:disease", self.namespace):
-                name_elem = disease_elem.find("hmdb:name", self.namespace)
-                if name_elem is not None and name_elem.text:
-                    disease_name = name_elem.text.strip().lower()
-                    disease_names.add(disease_name)
-
-        return sorted(disease_names)
 
     def get_medi_references(self, disease_elem):
         pmids = []
@@ -1373,19 +1373,160 @@ class HMDB_Protein_Parse:
         self.input_xml = input_xml
         self.cached_protein_function = load_pickle("uniprot_protein_functions.pkl")
         self.cached_gene_summaries = load_pickle("entrezgene_summaries.pkl")
+        self.cached_pathway_descr = load_pickle("smpdb_pathway_descriptions.pkl")
 
     def get_list_of_tuple(self, elem, tag):
         return [
-            (e.text.lower().split("-")[0], e.text.lower().split("-")[1])
+            (int(e.text.lower().split("-")[0]), int(e.text.lower().split("-")[1]))
             for e in elem.findall(f"hmdb:{tag}", self.namespace)
             if e.text and "-" in e.text
         ]
 
+    def get_protein_properties(self, protein):
+        props = protein.find("hmdb:protein_properties", self.namespace)
+        if props is not None:
+            residue_num = self.get_text(props, "residue_number")
+            molecular_weight = self.get_text(props, "molecular_weight")
+            pi = self.get_text(props, "theoretical_pi")
+            tm_elem = props.find("hmdb:transmembrane_regions", self.namespace)
+            tm_regions = self.get_list_of_tuple(tm_elem, "region") if tm_elem is not None else []
+            sig_elem = props.find("hmdb:signal_regions", self.namespace)
+            sig_regions = self.get_list_of_tuple(sig_elem, "region") if sig_elem is not None else []
+            prot_seq = self.get_text(props, "polypeptide_sequence")
+            pfams_elem = props.find("hmdb:pfams", self.namespace)
+            pfams = self.get_list(pfams_elem, "pfam") if pfams_elem is not None else []
+            return {
+                "residue_num": int(residue_num) if residue_num else None,
+                "molecular_weight": float(molecular_weight) if molecular_weight else None,
+                "theoretical_pi": float(pi) if pi else None,
+                "transmembrane_region": tm_regions if tm_regions else None,
+                "signal_region": sig_regions if sig_regions else None,
+                "protein_seq": prot_seq if prot_seq else None,
+                "pfam": pfams if pfams else None,
+            }
+
+    def get_gene_properties(self, protein):
+        props = protein.find("hmdb:gene_properties", self.namespace)
+        if props is not None:
+            chrom_loc = self.get_text(props, "chromosomal_location")
+            locus = self.get_text(props, "locus")
+            gene_seq = self.get_text(props, "gene_sequence")
+            return {
+                "chromosomal_location": int(chrom_loc.split(":")[1])
+                if ":" in chrom_loc
+                else int(chrom_loc)
+                if chrom_loc
+                else None,
+                "locus": locus if locus else None,
+                "gene_sequence": gene_seq if gene_seq else None,
+            }
+
+    def get_primary_id(self, protein):
+        """
+        Extract primary ID with hiearchy. pfams and pdbs are not included in the hierarchy yet.
+        :param protein:
+        :return:
+        """
+        id_hierarchy = [
+            ("uniprot_id", "UniProtKB"),
+            ("hgnc_id", "HGNC"),
+            ("genbank_protein_id", "GBP"),
+            ("genbank_gene_id", "GBG"),
+            ("genecard_id", "GENECARD"),
+            ("geneatlas_id", "GENEATLAS"),
+            ("accession", "HMDBP"),
+        ]
+
+        xrefs, primary_id = {}, None
+        for tag, prefix in id_hierarchy:
+            val = self.get_text(protein, tag)
+            if not val:
+                continue
+
+            curie = f"{prefix}:{val}"
+            if prefix == "GBP":
+                key = "genbank_prot"
+            elif prefix == "HMDBP":
+                key = "hmdbp"
+            elif prefix == "GBG":
+                key = "genbank_gene"
+            else:
+                key = prefix.lower()
+
+            if primary_id is None:
+                primary_id = curie
+
+            xrefs.setdefault(key, curie)
+        return primary_id, xrefs
+
+    def build_protein_node(self, protein):
+        name = self.get_text(protein, "gene_name")
+        full_name = self.get_text(protein, "name")
+        synonyms_elem = protein.find("hmdb:synonyms", self.namespace)
+        synonyms = self.get_list(synonyms_elem, "synonym") if synonyms_elem is not None else []
+        primary_id, xrefs = self.get_primary_id(protein)
+        prot_func = self.get_text(protein, "general_function")
+        prot_spec_func = self.get_text(protein, "specific_function")
+        prot_type = self.get_text(protein, "protein_type")
+        cellular_com_elem = protein.find("hmdb:subcellular_locations", self.namespace)
+        cellular_components = (
+            self.get_list(cellular_com_elem, "subcellular_location")
+            if cellular_com_elem is not None
+            else []
+        )
+        pdb_elem = protein.find("hmdb:pdb_ids", self.namespace)
+        pdbs = self.get_list(pdb_elem, "pdb_id") if pdb_elem is not None else []
+        xrefs["pdb"] = pdbs if pdb_elem is not None else []
+
+        prot_props = self.get_protein_properties(protein)
+        xrefs["pfam"] = prot_props["pfam"] if "pfam" in prot_props else []
+        gene_props = self.get_gene_properties(protein)
+
+        uniprots = get_all_uniprot_ids_from_hmdb(self.input_xml)
+        entrezgenes = uniprot_id2entrezgene(uniprots)
+        if "uniprotkb" in xrefs:
+            prot_descr = self.cached_protein_function.get(xrefs["uniprotkb"])
+            if xrefs["uniprotkb"] in entrezgenes:
+                entrezgene_id = entrezgenes[xrefs["uniprotkb"]["gene_id"]]
+                if entrezgene_id:
+                    xrefs["entrezgene"] = f"NCBIGene:{entrezgene_id}"
+                    if entrezgene_id in self.cached_gene_summaries:
+                        gene_descr = self.cached_gene_summaries[entrezgene_id]
+
+        protein_node = {
+            "id": primary_id,
+            "name": name if name else None,
+            "full_name": full_name.lower() if full_name else None,
+            "synonym": synonyms,
+            "description": prot_descr,
+            "function": prot_func,
+            "specific_function": prot_spec_func,
+            "residue_num": prot_props.get("residue_num"),
+            "molecular_weight": prot_props.get("molecular_weight"),
+            "theoretical_pi": prot_props.get("theoretical_pi"),
+            "transmembrane_region": prot_props.get("transmembrane_region"),
+            "signal_region": prot_props.get("signal_region"),
+            "protein_seq": prot_props.get("protein_seq"),
+            "chromosomal_location": gene_props.get("chromosomal_location"),
+            "locus": gene_props.get("locus"),
+            "gene_seq": gene_props.get("gene_sequence"),
+            "gene_description": gene_descr if gene_descr else None,
+            "type": "biolink:Protein",
+            "protein_type": prot_type.lower() if prot_type else None,
+            "cellular_component": cellular_components,
+            "xrefs": xrefs,
+        }
+        return self.remove_empty_none_values(protein_node)
+
 
 if __name__ == "__main__":
-    zip_path = os.path.join("downloads", "hmdb_metabolites.zip")
-    hmdb_xml = extract_file_from_zip(zip_path, expected_filename="hmdb_metabolites.xml")
-    parser = HMDB_Metabolite_Parse(hmdb_xml)
+    me_zip_path = os.path.join("downloads", "hmdb_metabolites.zip")
+    prot_zip_path = os.path.join("downloads", "hmdb_proteins.zip")
+    hmdb_metabolite_xml = extract_file_from_zip(
+        me_zip_path, expected_filename="hmdb_metabolites.xml"
+    )
+    parser = HMDB_Metabolite_Parse(hmdb_metabolite_xml)
+    hmdb_protein_xml = extract_file_from_zip(prot_zip_path, expected_filename="hmdb_proteins.xml")
 
     # mime_records = [record for record in parser.parse_microbe_metabolite()]
     # save_pickle(mime_records, "hmdb_v5_microbe_metabolite.pkl")

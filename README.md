@@ -548,6 +548,7 @@ Last Modified: 07/01/2025
 ***
 ## Protein-Pathway
 Last Modified: 07/03/2025
+
 - **Total records: **
 
 ## Example Output
@@ -641,3 +642,114 @@ Last Modified: 07/03/2025
    }
 }
 ```
+
+<br><br>
+***
+
+## Protein-Biological Process
+Last Modified: 07/03/2025
+
+- **Total records: **
+
+## Example Output
+```json
+{
+   "_id":"P43220_involved_in_0007189",
+   "association":{
+      "id":"RO:0002331",
+      "predicate":"biolink:MacromolecularMachineToBiologicalProcessAssociation",
+      "type":"involved_in",
+      "infores":"hmdb_v5",
+      "publication":{
+         "id":"PMID:7517895",
+         "pmid":[
+            7517895,
+            7843404,
+            8216285,
+            8404634,
+            8405712,
+            9213353,
+            14574404,
+            15489334,
+            18287102,
+            19861722,
+            20869417,
+            21901419,
+            22412906,
+            27196125,
+            28514449
+         ],
+         "type":"biolink:Publication"
+      }
+   },
+   "object":{
+      "id":"GO:0007189",
+      "name":"adenylate cyclase-activating g-protein coupled receptor signaling pathway",
+      "description":"A G protein-coupled receptor signaling pathway in which the signal is transmitted via the activation of adenylyl cyclase activity which results in an increase in the intracellular concentration of cyclic AMP (cAMP). This pathway is negatively regulated by phosphodiesterase, which cleaves cAMP and terminates the signaling.",
+      "type":"biolink:BiologicalProcess",
+      "xrefs":{
+         "go":"GO:0007189"
+      }
+   },
+   "subject":{
+      "id":"UniProtKB:P43220",
+      "name":"GLP1R",
+      "full_name":"glucagon-like peptide 1 receptor",
+      "synonym":[
+         "glp-1 receptor",
+         "glp-1-r",
+         "glp-1r"
+      ],
+      "description":"G-protein coupled receptor for glucagon-like peptide 1 (GLP-1) (PubMed:19861722, PubMed:26308095, PubMed:27196125, PubMed:28514449, PubMed:7517895, PubMed:8216285, PubMed:8405712). Ligand binding triggers activation of a signaling cascade that leads to the activation of adenylyl cyclase and increased intracellular cAMP levels (PubMed:19861722, PubMed:26308095, PubMed:27196125, PubMed:28514449, PubMed:7517895, PubMed:8216285, PubMed:8405712). Plays a role in regulating insulin secretion in response to GLP-1 (By similarity)",
+      "specific_function":"G-protein coupled receptor for glucagon-like peptide 1 (GLP-1) (PubMed:8405712, PubMed:8216285, PubMed:7517895, PubMed:19861722, PubMed:26308095, PubMed:27196125, PubMed:28514449). Ligand binding triggers activation of a signaling cascade that leads to the activation of adenylyl cyclase and increased intracellular cAMP levels (PubMed:8405712, PubMed:8216285, PubMed:7517895, PubMed:19861722, PubMed:26308095, PubMed:27196125, PubMed:28514449). Plays a role in regulating insulin secretion in response to GLP-1 (By similarity).",
+      "residue_num":463,
+      "molecular_weight":53025.22,
+      "theoretical_pi":8.137,
+      "gene_description":"This gene encodes a 7-transmembrane protein that functions as a receptor for glucagon-like peptide 1 (GLP-1) hormone, which stimulates glucose-induced insulin secretion. This receptor, which functions at the cell surface, becomes internalized in response to GLP-1 and GLP-1 analogs, and it plays an important role in the signaling cascades leading to insulin secretion. It also displays neuroprotective effects in animal models. Polymorphisms in this gene are associated with diabetes. The protein is an important drug target for the treatment of type 2 diabetes and stroke. Alternative splicing of this gene results in multiple transcript variants. [provided by RefSeq, Apr 2016]",
+      "type":"biolink:Protein",
+      "protein_type":"unknown",
+      "xrefs":{
+         "uniprotkb":"UniProtKB:P43220",
+         "hmdbp":"HMDBP:HMDBP14647",
+         "pdb":[
+            "3c59",
+            " 3c5t",
+            " 3iol",
+            " 4zgm",
+            " 5e94",
+            " 5nx2",
+            " 5ott",
+            " 5otu",
+            " 5otv",
+            " 5otw",
+            " 5otx",
+            " 5vew",
+            " 5vex",
+            " 6b3j",
+            " 6gb1",
+            " 6orv",
+            " 6vcb",
+            " 6x18",
+            " 6x19",
+            " 6x1a",
+            " 6xox",
+            " 7c2e",
+            " 7lci",
+            " 7lcj",
+            " 7lck"
+         ],
+         "pfam":[
+            {
+               "id":"PFAM:PF00002",
+               "name":"7tm_2"
+            },
+            {
+               "id":"PFAM:PF02793",
+               "name":"hrm"
+            }
+         ],
+         "entrezgene":"NCBIGene:2740"
+      }
+   }
+}
+``` 

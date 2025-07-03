@@ -1407,14 +1407,18 @@ class HMDB_Protein_Parse(XMLParseHelper):
             for d in load_pickle("hmdbp_entrezgene_summaries.pkl")
             for entrezgene, info in d.items()
         }
-        self.pathway_descr = load_pickle("smpdb_pathway_descriptions.pkl")
+        self.cached_pathway_descr = load_pickle("smpdb_pathway_descriptions.pkl")
 
     def get_list_of_tuple(self, elem, tag):
-        return [
-            (int(e.text.lower().split("-")[0]), int(e.text.lower().split("-")[1]))
-            for e in elem.findall(f"hmdb:{tag}", self.namespace)
-            if e.text and "-" in e.text
-        ]
+        ranges = []
+        for e in elem.findall(f"hmdb:{tag}", self.namespace):
+            if not e.text or "-" not in e.text:
+                continue
+            start, end = (part.strip() for part in e.text.split("-", 1))
+            if start.isdigit() and end.isdigit():
+                ranges.append((int(start), int(end)))
+                continue
+        return ranges
 
     def get_protein_properties(self, protein):
         props = protein.find("hmdb:protein_properties", self.namespace)
@@ -1428,7 +1432,15 @@ class HMDB_Protein_Parse(XMLParseHelper):
             sig_regions = self.get_list_of_tuple(sig_elem, "region") if sig_elem is not None else []
             prot_seq = self.get_text(props, "polypeptide_sequence")
             pfams_elem = props.find("hmdb:pfams", self.namespace)
-            pfams = self.get_list(pfams_elem, "pfam") if pfams_elem is not None else []
+            pfam_list = [
+                {
+                    "id": pfam_id,
+                    "name": name.lower() if name else None,
+                }
+                for pfam in pfams_elem.findall("hmdb:pfam", self.namespace)
+                if (pfam_id := self.get_text(pfam, "pfam_id"))
+                and (name := self.get_text(pfam, "name"))
+            ]
             return {
                 "residue_num": int(residue_num) if residue_num else None,
                 "molecular_weight": float(molecular_weight) if molecular_weight else None,
@@ -1436,7 +1448,7 @@ class HMDB_Protein_Parse(XMLParseHelper):
                 "transmembrane_region": tm_regions if tm_regions else None,
                 "signal_region": sig_regions if sig_regions else None,
                 "protein_seq": prot_seq if prot_seq else None,
-                "pfam": pfams if pfams else None,
+                "pfam": pfam_list if pfam_list else None,
             }
 
     def get_gene_properties(self, protein):
@@ -1514,6 +1526,19 @@ class HMDB_Protein_Parse(XMLParseHelper):
             pmid_value = pmids[0] if len(pmids) == 1 else pmids
             return {"id": f"PMID:{pmids[0]}", "pmid": pmid_value, "type": "biolink:Publication"}
 
+    def lookup_uniprot(self, uniprot_id: str) -> tuple[str | None, str | None]:
+        descr = self.protein_func.get(uniprot_id, {}).get("description")
+        entrez_map = self.uniprot2entrezgene.get(uniprot_id, {})
+        entrez_curie = entrez_map.get("gene_id")
+        return descr, entrez_curie
+
+    def lookup_entrez(self, entrez_curie: str | None) -> tuple[str | None, str | None]:
+        if not entrez_curie or ":" not in entrez_curie:
+            return None, None
+        entrez_id = entrez_curie.split(":", 1)[1]
+        gene_descr = self.gene_summary.get(entrez_id, {}).get("description")
+        return entrez_id, gene_descr
+
     def build_protein_node(self, protein):
         name = self.get_text(protein, "gene_name")
         full_name = self.get_text(protein, "name")
@@ -1538,11 +1563,13 @@ class HMDB_Protein_Parse(XMLParseHelper):
         gene_props = self.get_gene_properties(protein)
 
         uniprot_id = self.get_text(protein, "uniprot_id")
-        if uniprot_id:
-            prot_descr = self.protein_func.get(uniprot_id).get("description")
-            entrezgene = self.uniprot2entrezgene.get(uniprot_id)["gene_id"].split(":")[1]
-            xrefs["entrezgene"] = f"NCBIGene:{entrezgene}"
-            gene_descr = self.gene_summary.get(entrezgene).get("description")
+        if not uniprot_id:
+            return None
+        prot_descr, entrez_curie = self.lookup_uniprot(uniprot_id)
+        entrez_id, gene_descr = self.lookup_entrez(entrez_curie)
+
+        if entrez_id:
+            xrefs["entrezgene"] = f"NCBIGene:{entrez_id}"
 
         protein_node = {
             "id": primary_id,
@@ -1561,7 +1588,7 @@ class HMDB_Protein_Parse(XMLParseHelper):
             "chromosomal_location": gene_props.get("chromosomal_location"),
             "locus": gene_props.get("locus"),
             "gene_seq": gene_props.get("gene_sequence"),
-            "gene_description": gene_descr if gene_descr else None,
+            "gene_description": gene_descr,
             "type": "biolink:Protein",
             "protein_type": prot_type.lower() if prot_type else None,
             "cellular_component": cellular_components,
@@ -1633,7 +1660,7 @@ if __name__ == "__main__":
 
     prot_zip_path = os.path.join("downloads", "hmdb_proteins.zip")
     hmdb_protein_xml = extract_file_from_zip(prot_zip_path, expected_filename="hmdb_proteins.xml")
-    # prot_parser = HMDB_Protein_Parse(hmdb_protein_xml)
+    prot_parser = HMDB_Protein_Parse(hmdb_protein_xml)
 
     # mime_records = [record for record in parser.parse_microbe_metabolite()]
     # save_pickle(mime_records, "hmdb_v5_microbe_metabolite.pkl")
@@ -1649,15 +1676,7 @@ if __name__ == "__main__":
     # for record in mepwd_records:
     #     print(record)
 
-    # prot_records = [node for node in prot_parser.parse_protein_pathway()]
-    # for record in prot_records:
-    #     print(record)
-
-    hmdbp_uniprot_ids = get_all_uniprot_ids_from_hmdbp(hmdb_protein_xml)
-    entrezgene2uniprot = uniprot_id2entrezgene(hmdbp_uniprot_ids)
-    save_pickle(entrezgene2uniprot, "hmdbp_uniprot2entrezgene.pkl")
-    entrezgenes = [
-        gene_info["gene_id"].split(":")[1] for uniprot, gene_info in entrezgene2uniprot.items()
-    ]
-    hmdbp_gene_descr = asyncio.run(get_batch_gene_summaries(entrezgenes))
-    save_pickle(hmdbp_gene_descr, "hmdbp_entrezgene_summaries.pkl")
+    prot_records = [rec for rec in prot_parser.parse_protein_pathway()]
+    save_pickle("hmdb_v5_protein_pathway.pkl", prot_records)
+    for rec in prot_records:
+        print(rec)

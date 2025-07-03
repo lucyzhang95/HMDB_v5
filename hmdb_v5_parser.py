@@ -1413,14 +1413,14 @@ class HMDB_Protein_Parse(XMLParseHelper):
         }
         self.cached_pathway_descr = load_pickle("smpdb_pathway_descriptions.pkl")
 
-    def get_list_of_tuple(self, elem, tag):
+    def get_list_of_region_list(self, elem, tag):
         ranges = []
         for e in elem.findall(f"hmdb:{tag}", self.namespace):
             if not e.text or "-" not in e.text:
                 continue
             start, end = (part.strip() for part in e.text.split("-", 1))
             if start.isdigit() and end.isdigit():
-                ranges.append((int(start), int(end)))
+                ranges.append([int(start), int(end)])
                 continue
         return ranges
 
@@ -1431,9 +1431,13 @@ class HMDB_Protein_Parse(XMLParseHelper):
             molecular_weight = self.get_text(props, "molecular_weight")
             pi = self.get_text(props, "theoretical_pi")
             tm_elem = props.find("hmdb:transmembrane_regions", self.namespace)
-            tm_regions = self.get_list_of_tuple(tm_elem, "region") if tm_elem is not None else []
+            tm_regions = (
+                self.get_list_of_region_list(tm_elem, "region") if tm_elem is not None else []
+            )
             sig_elem = props.find("hmdb:signal_regions", self.namespace)
-            sig_regions = self.get_list_of_tuple(sig_elem, "region") if sig_elem is not None else []
+            sig_regions = (
+                self.get_list_of_region_list(sig_elem, "region") if sig_elem is not None else []
+            )
             prot_seq = self.get_text(props, "polypeptide_sequence")
             pfams_elem = props.find("hmdb:pfams", self.namespace)
             pfam_list = [

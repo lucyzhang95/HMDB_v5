@@ -1367,7 +1367,7 @@ class HMDB_Metabolite_Parse(XMLParseHelper):
                 }
 
 
-class HMDB_Protein_Parse:
+class HMDB_Protein_Parse(XMLParseHelper):
     def __init__(self, input_xml):
         super().__init__(input_xml)
         self.input_xml = input_xml
@@ -1408,18 +1408,25 @@ class HMDB_Protein_Parse:
     def get_gene_properties(self, protein):
         props = protein.find("hmdb:gene_properties", self.namespace)
         if props is not None:
-            chrom_loc = self.get_text(props, "chromosomal_location")
+            chrom_loc_raw = self.get_text(props, "chromosomal_location")
             locus = self.get_text(props, "locus")
             gene_seq = self.get_text(props, "gene_sequence")
-            return {
-                "chromosomal_location": int(chrom_loc.split(":")[1])
-                if ":" in chrom_loc
-                else int(chrom_loc)
-                if chrom_loc
-                else None,
-                "locus": locus if locus else None,
-                "gene_sequence": gene_seq if gene_seq else None,
-            }
+
+            chrom_loc = None
+            if chrom_loc_raw:
+                candidate = chrom_loc_raw.split(":", 1)[-1]
+                try:
+                    chrom_loc = int(candidate)
+                except ValueError:
+                    chrom_loc = candidate.strip()
+
+            return self.remove_empty_none_values(
+                {
+                    "chromosomal_location": chrom_loc,
+                    "locus": locus,
+                    "gene_sequence": gene_seq,
+                }
+            )
 
     def get_primary_id(self, protein):
         """
@@ -1458,6 +1465,20 @@ class HMDB_Protein_Parse:
 
             xrefs.setdefault(key, curie)
         return primary_id, xrefs
+
+    def get_references(self, protein):
+        pmids = []
+        ref_elem = protein.find("hmdb:general_references", self.namespace)
+        if ref_elem is not None:
+            for ref in ref_elem.findall("hmdb:reference", self.namespace):
+                pmid_elem = ref.find("hmdb:pubmed_id", self.namespace)
+                if pmid_elem is not None and pmid_elem.text:
+                    pmids.append(int(pmid_elem.text.strip()))
+
+        if pmids:
+            pmids = sorted(set(pmids))
+            pmid_value = pmids[0] if len(pmids) == 1 else pmids
+            return {"id": f"PMID:{pmids[0]}", "pmid": pmid_value, "type": "biolink:Publication"}
 
     def build_protein_node(self, protein):
         name = self.get_text(protein, "gene_name")
@@ -1518,15 +1539,72 @@ class HMDB_Protein_Parse:
         }
         return self.remove_empty_none_values(protein_node)
 
+    def parse_protein_pathway(self):
+        """Parse the HMDB XML for protein-pathway associations."""
+        tree = ET.parse(self.input_xml)
+        root = tree.getroot()
+
+        for protein in root.findall("hmdb:protein", self.namespace):
+            subject_node = self.build_protein_node(protein)
+
+            smpdb_pw = self.cached_pathway_descr
+            pathways_elem = protein.find("hmdb:pathways", self.namespace)
+            if pathways_elem is None:
+                continue
+            for pw in pathways_elem.findall("hmdb:pathway", self.namespace):
+                pw_name = self.get_text(pw, "name")
+                kegg_map = self.get_text(pw, "kegg_map_id")
+                cache = smpdb_pw.get(pw_name.lower())
+                smpdb_id = cache["smpdb"] if cache else None
+                descr = cache["description"] if cache else None
+
+                object_node = {
+                    "id": smpdb_id or (f"KEGG:{kegg_map}" if kegg_map else None),
+                    "name": pw_name.lower(),
+                    "description": descr,
+                    "type": "biolink:Pathway",
+                    "xrefs": {
+                        "smpdb": smpdb_id,
+                        "kegg": f"KEGG:{kegg_map}" if kegg_map else None,
+                    },
+                }
+                object_node = self.remove_empty_none_values(object_node)
+
+                publication = self.get_references(protein)
+                association_node = {
+                    "id": "RO:0000056",
+                    "predicate": "biolink:GeneToPathwayAssociation",
+                    "type": "participates_in",
+                    "infores": "hmdb_v5",
+                    "publication": publication,
+                }
+                association_node = self.remove_empty_none_values(association_node)
+
+                _id = (
+                    f"{subject_node['id'].split(':')[1]}_participates_in_{object_node['id'].split(':')[1]}"
+                    if "id" in object_node and "id" in subject_node
+                    else str(uuid.uuid4())
+                )
+
+                yield {
+                    "_id": _id,
+                    "association": association_node,
+                    "object": object_node,
+                    "subject": subject_node,
+                }
+
 
 if __name__ == "__main__":
     me_zip_path = os.path.join("downloads", "hmdb_metabolites.zip")
     prot_zip_path = os.path.join("downloads", "hmdb_proteins.zip")
+
     hmdb_metabolite_xml = extract_file_from_zip(
         me_zip_path, expected_filename="hmdb_metabolites.xml"
     )
     parser = HMDB_Metabolite_Parse(hmdb_metabolite_xml)
+
     hmdb_protein_xml = extract_file_from_zip(prot_zip_path, expected_filename="hmdb_proteins.xml")
+    prot_parser = HMDB_Protein_Parse(hmdb_protein_xml)
 
     # mime_records = [record for record in parser.parse_microbe_metabolite()]
     # save_pickle(mime_records, "hmdb_v5_microbe_metabolite.pkl")
@@ -1541,3 +1619,7 @@ if __name__ == "__main__":
     # save_pickle(mepwd_records, "hmdb_v5_metabolite_pathway.pkl")
     # for record in mepwd_records:
     #     print(record)
+
+    prot_records = [node for node in prot_parser.parse_protein_pathway()]
+    for record in prot_records:
+        print(record)

@@ -617,6 +617,21 @@ def get_all_uniprot_ids_from_hmdb(input_xml) -> dict[str, str]:
     return protein2uniport
 
 
+def get_all_uniprot_ids_from_hmdbp(input_xml) -> dict[str, str]:
+    namespace = {"hmdb": "http://www.hmdb.ca"}
+    tree = ET.parse(input_xml)
+    root = tree.getroot()
+
+    uniprot_ids = [
+        elem.text.strip()
+        for protein in root.findall("hmdb:protein", namespace)
+        if (elem := protein.find("hmdb:uniprot_id", namespace)) is not None
+        and elem.text
+        and elem.text.strip()
+    ]
+    return uniprot_ids
+
+
 def uniprot_id2entrezgene(uniprot_ids: list[str]) -> dict:
     """
 

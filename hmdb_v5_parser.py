@@ -679,7 +679,7 @@ async def get_gene_summary(session, gene_id):
         print(gene_id, f"Error: {str(e)}")
 
 
-async def get_batch_gene_summaries(gene_ids: List[str], batch_size=5, delay=1.0):
+async def get_batch_gene_summaries(gene_ids: List[str], batch_size=10, delay=1.0):
     results = []
     connector = aiohttp.TCPConnector(limit=batch_size)
     async with aiohttp.ClientSession(connector=connector) as session:

@@ -1462,14 +1462,14 @@ class HMDB_Protein_Parse(XMLParseHelper):
     def get_gene_properties(self, protein):
         props = protein.find("hmdb:gene_properties", self.namespace)
         if props is not None:
-            chrom_loc_raw = self.get_text(props, "chromosomal_location")
+            chrom_loc_raw = self.get_text(props, "chromosome_location")
             locus = self.get_text(props, "locus")
             gene_seq = self.get_text(props, "gene_sequence")
 
             chrom_loc = None
             if chrom_loc_raw:
                 candidate = (
-                    chrom_loc_raw.split(":", 1)[-1] if ":" in chrom_loc_raw else int(chrom_loc_raw)
+                    chrom_loc_raw.split(":", 1)[-1] if ":" in chrom_loc_raw else chrom_loc_raw
                 )
                 try:
                     chrom_loc = int(candidate)

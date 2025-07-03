@@ -543,3 +543,101 @@ Last Modified: 07/01/2025
    }
 }
 ```
+
+<br><br>
+***
+## Protein-Pathway
+Last Modified: 07/03/2025
+- **Total records: **
+
+## Example Output
+```json
+{
+   "_id":"O00180_participates_in_SMP0000375",
+   "association":{
+      "id":"RO:0000056",
+      "predicate":"biolink:GeneToPathwayAssociation",
+      "type":"participates_in",
+      "infores":"hmdb_v5",
+      "publication":{
+         "id":"PMID:8605869",
+         "pmid":[
+            8605869,
+            9362344,
+            9462864,
+            15489334,
+            16710414
+         ],
+         "type":"biolink:Publication"
+      }
+   },
+   "object":{
+      "id":"SMPDB:SMP0000375",
+      "name":"verapamil action pathway",
+      "description":"Verapamil is a phenylalkylamine calcium channel blocker (CCB) or antagonist. There are at least five different types of calcium channels in Homo sapiens: L-, N-, P/Q-, R- and T-type. CCBs target L-type calcium channels, the major channel in muscle cells that mediates contraction. Verapamil, an organic cation, is thought to primarily block L-type calcium channels in their open state by interfering with the binding of calcium ions to the extracellular opening of the channel. It is one of only two clinically used CCBs that are cardioselective. Verapamil and diltiazem and, the other cardioselective CCB, shows greater activity against cardiac calcium channels than those of the peripheral vasculature. Other CCBs, such as nifedipine and amlodipine, have little to no effect on cardiac cells (cardiac myocytes and cells of the SA and AV nodes). Due to its cardioselective properties, verapamil may be used to treat arrhythmias (e.g. atrial fibrillation) as well as hypertension. \r\r\r\rThe first part of this pathway depicts the pharmacological action of verapamil on cardiac myocytes and peripheral arterioles and coronary arteries. Verapamil decreases cardiac myocyte contractility by inhibiting the influx of calcium ions. Calcium ions entering the cell through L-type calcium channels bind to calmodulin. Calcium-bound calmodulin then binds to and activates myosin light chain kinase (MLCK). Activated MLCK catalyzes the phosphorylation of the regulatory light chain subunit of myosin, a key step in muscle contraction. Signal amplification is achieved by calcium-induced calcium release from the sarcoplasmic reticulum through ryanodine receptors. Inhibition of the initial influx of calcium decreases the contractile activity of cardiac myocytes and results in an overall decreased force of contraction by the heart. Verapamil affects smooth muscle contraction and subsequent vasoconstriction in peripheral arterioles and coronary arteries by the same mechanism.  Decreased cardiac contractility and vasodilation lower blood pressure. \r\r\r\rThe second part of this pathway illustrates the effect of calcium channel antagonism on the cardiac action potentials. Contractile activity of cardiac myocytes is elicited via action potentials mediated by a number of ion channel proteins. During rest, or diastole, cells maintain a negative membrane potential; i.e. the inside of the cell is negatively charged relative to the cells\\x8a\\x97È extracellular environment. Membrane ion pumps, such as the sodium-potassium ATPase and sodium-calcium exchanger (NCX), maintain low intracellular sodium (5 mM) and calcium (100 nM) concentrations and high intracellular potassium (140 mM) concentrations. Conversely, extracellular concentrations of sodium (140 mM) and calcium (1.8 mM) are relatively high and extracellular potassium concentrations are low (5 mM). At rest, the cardiac cell membrane is impermeable to sodium and calcium ions, but is permeable to potassium ions via inward rectifier potassium channels (I-K1), which allow an outward flow of potassium ions down their concentration gradient. The positive outflow of potassium ions aids in maintaining the negative intracellular electric potential. When cells reach a critical threshold potential, voltage-gated sodium channels (I-Na) open and the rapid influx of positive sodium ions into the cell occurs as the ions travel down their electrochemical gradient. This is known as the rapid depolarization or upstroke phase of the cardiac action potential. Sodium channels then close and rapidly activated potassium channels such as the voltage-gated transient outward delayed rectifying potassium channel (I-Kto) and the voltage-gated ultra rapid delayed rectifying potassium channel (I-Kur) open. These events make up the early repolarization phase during which potassium ions flow out of the cell and sodium ions are continually pumped out. During the next phase, known as the plateau phase, calcium L-type channels (I-CaL) open and the resulting influx of calcium ions roughly balances the outward flow of potassium channels. During the final repolarization phase, the voltage-gated rapid (I-Kr) and slow (I-Ks) delayed rectifying potassium channels open increasing the outflow of potassium ions and repolarizing the cell. The extra sodium and calcium ions that entered the cell during the action potential are extruded via sodium-potassium ATPases and NCX and intra- and extracellular ion concentrations are restored. In specialized pacemaker cells, gradual depolarization to threshold occurs via funny channels (I-f). Blocking L-type calcium channels decreases conduction and increases the refractory period. Verapamil\\x8a\\x97Ès effects on pacemaker cells enable its use as a rate-controlling agent in atrial fibrillation. \r\r",
+      "type":"biolink:Pathway",
+      "xrefs":{
+         "smpdb":"SMPDB:SMP0000375"
+      }
+   },
+   "subject":{
+      "id":"UniProtKB:O00180",
+      "name":"KCNK1",
+      "full_name":"potassium channel subfamily k member 1",
+      "synonym":[
+         "inward rectifying potassium channel protein twik-1",
+         "potassium channel kcno1"
+      ],
+      "description":"Ion channel that contributes to passive transmembrane potassium transport and to the regulation of the resting membrane potential in brain astrocytes, but also in kidney and in other tissues (PubMed:15820677, PubMed:21653227). Forms dimeric channels through which potassium ions pass in accordance with their electrochemical gradient. The channel is selective for K(+) ions at physiological potassium concentrations and at neutral pH, but becomes permeable to Na(+) at subphysiological K(+) levels and upon acidification of the extracellular medium (PubMed:21653227, PubMed:22431633). The homodimer has very low potassium channel activity, when expressed in heterologous systems, and can function as weakly inward rectifying potassium channel (PubMed:15820677, PubMed:21653227, PubMed:22431633, PubMed:23169818, PubMed:25001086, PubMed:8605869, PubMed:8978667). Channel activity is modulated by activation of serotonin receptors (By similarity). Heterodimeric channels containing KCNK1 and KCNK2 have much higher activity, and may represent the predominant form in astrocytes (By similarity). Heterodimeric channels containing KCNK1 and KCNK3 or KCNK9 have much higher activity (PubMed:23169818). Heterodimeric channels formed by KCNK1 and KCNK9 may contribute to halothane-sensitive currents (PubMed:23169818). Mediates outward rectifying potassium currents in dentate gyrus granule cells and contributes to the regulation of their resting membrane potential (By similarity). Contributes to the regulation of action potential firing in dentate gyrus granule cells and down-regulates their intrinsic excitability (By similarity). In astrocytes, the heterodimer formed by KCNK1 and KCNK2 is required for rapid glutamate release in response to activation of G-protein coupled receptors, such as F2R and CNR1 (By similarity). Required for normal ion and water transport in the kidney (By similarity). Contributes to the regulation of the resting membrane potential of pancreatic beta cells (By similarity). The low channel activity of homodimeric KCNK1 may be due to sumoylation (PubMed:15820677, PubMed:20498050, PubMed:23169818). The low channel activity may be due to rapid internalization from the cell membrane and retention in recycling endosomes (PubMed:19959478). Permeable to monovalent cations with ion selectivity for K(+) > Rb(+) >> NH4(+) >> Cs(+) = Na(+) = Li(+)",
+      "function":"Involved in potassium channel activity",
+      "specific_function":"Weakly inward rectifying potassium channel",
+      "residue_num":336,
+      "molecular_weight":38142.8,
+      "theoretical_pi":6.34,
+      "transmembrane_region":[
+         [
+            21,
+            41
+         ],
+         [
+            133,
+            153
+         ],
+         [
+            178,
+            198
+         ],
+         [
+            247,
+            267
+         ]
+      ],
+      "protein_seq":">Potassium channel subfamily K member 1\nMLQSLAGSSCVRLVERHRSAWCFGFLVLGYLLYLVFGAVVFSSVELPYEDLLRQELRKLK\nRRFLEEHECLSEQQLEQFLGRVLEASNYGVSVLSNASGNWNWDFTSALFFASTVLSTTGY\nGHTVPLSDGGKAFCIIYSVIGIPFTLLFLTAVVQRITVHVTRRPVLYFHIRWGFSKQVVA\nIVHAVLLGFVTVSCFFFIPAAVFSVLEDDWNFLESFYFCFISLSTIGLGDYVPGEGYNQK\nFRELYKIGITCYLLLGLIAMLVVLETFCELHELKKFRKMFYVKKDKDEDQVHIIEHDQLS\nFSSITDQAAGMKEDQKQNEPFVATQSSACVDGPANH",
+      "chromosomal_location":1,
+      "locus":"1q42-q43",
+      "gene_seq":">1011 bp\nATGCTGCAGTCCCTGGCCGGCAGCTCGTGCGTGCGCCTGGTGGAGCGGCACCGCTCGGCC\nTGGTGCTTCGGCTTCCTGGTGCTGGGCTACTTGCTCTACCTGGTCTTCGGCGCAGTGGTC\nTTCTCCTCGGTGGAGCTGCCCTATGAGGACCTGCTGCGCCAGGAGCTGCGCAAGCTGAAG\nCGACGCTTCTTGGAGGAGCACGAGTGCCTGTCTGAGCAGCAGCTGGAGCAGTTCCTGGGC\nCGGGTGCTGGAGGCCAGCAACTACGGCGTGTCGGTGCTCAGCAACGCCTCGGGCAACTGG\nAACTGGGACTTCACCTCCGCGCTCTTCTTCGCCAGCACCGTGCTCTCCACCACAGGTTAT\nGGCCACACCGTGCCCTTGTCAGATGGAGGTAAGGCCTTCTGCATCATCTACTCCGTCATT\nGGCATTCCCTTCACCCTCCTGTTCCTGACGGCTGTGGTCCAGCGCATCACCGTGCACGTC\nACCCGCAGGCCGGTCCTCTACTTCCACATCCGCTGGGGCTTCTCCAAGCAGGTGGTGGCC\nATCGTCCATGCCGTGCTCCTTGGGTTTGTCACTGTGTCCTGCTTCTTCTTCATCCCGGCC\nGCTGTCTTCTCAGTCCTGGAGGATGACTGGAACTTCCTGGAATCCTTTTATTTTTGTTTT\nATTTCCCTGAGCACCATTGGCCTGGGGGATTATGTGCCTGGGGAAGGCTACAATCAAAAA\nTTCAGAGAGCTCTATAAGATTGGGATCACGTGTTACCTGCTACTTGGCCTTATTGCCATG\nTTGGTAGTTCTGGAAACCTTCTGTGAACTCCATGAGCTGAAAAAATTCAGAAAAATGTTC\nTATGTGAAGAAGGACAAGGACGAGGATCAGGTGCACATCATAGAGCATGACCAACTGTCC\nTTCTCCTCGATCACAGACCAGGCAGCTGGCATGAAAGAGGACCAGAAGCAAAATGAGCCT\nTTTGTGGCCACCCAGTCATCTGCCTGCGTGGATGGCCCTGCAAACCATTGA",
+      "gene_description":"This gene encodes one of the members of the superfamily of potassium channel proteins containing two pore-forming P domains. The product of this gene has not been shown to be a functional channel, however, it may require other non-pore-forming proteins for activity. [provided by RefSeq, Jul 2008]",
+      "type":"biolink:Protein",
+      "protein_type":"unknown",
+      "cellular_component":[
+         "membrane",
+         "multi-pass membrane protein (potential)"
+      ],
+      "xrefs":{
+         "uniprotkb":"UniProtKB:O00180",
+         "hgnc":"HGNC:HGNC:6272",
+         "genbank_gene":"GBG:U33632",
+         "genecard":"GENECARD:KCNK1",
+         "geneatlas":"GENEATLAS:KCNK1",
+         "hmdbp":"HMDBP:HMDBP10851",
+         "pfam":[
+            {
+               "id":"PFAM:PF07885",
+               "name":"ion_trans_2"
+            }
+         ],
+         "entrezgene":"NCBIGene:3775"
+      }
+   }
+}
+```

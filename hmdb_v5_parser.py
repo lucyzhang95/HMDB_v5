@@ -819,10 +819,13 @@ def cache_data(input_xml):
 
     # cache gene summaries from HMDBP uniprot ids
     hmdbp_uniprot_ids = get_all_uniprot_ids_from_hmdbp(input_xml)
-    entrezgenes = uniprot_id2entrezgene(hmdbp_uniprot_ids)
-    save_pickle(entrezgenes, "hmdbp_uniprot2entrezgene.pkl")
-    hmdbp_gene_descr = asyncio.run(get_batch_gene_summaries(list(entrezgenes.keys())))
-    save_pickle(hmdbp_gene_descr, "hmdbp_gene_summaries.pkl")
+    entrezgene2uniprot = uniprot_id2entrezgene(hmdbp_uniprot_ids)
+    save_pickle(entrezgene2uniprot, "hmdbp_uniprot2entrezgene.pkl")
+    entrezgenes = [
+        gene_info["gene_id"].split(":")[1] for uniprot, gene_info in entrezgene2uniprot.items()
+    ]
+    hmdbp_gene_descr = asyncio.run(get_batch_gene_summaries(entrezgenes))
+    save_pickle(hmdbp_gene_descr, "hmdbp_entrezgene_summaries.pkl")
 
 
 class UMLSClient:
@@ -1623,15 +1626,14 @@ class HMDB_Protein_Parse(XMLParseHelper):
 
 if __name__ == "__main__":
     me_zip_path = os.path.join("downloads", "hmdb_metabolites.zip")
-    prot_zip_path = os.path.join("downloads", "hmdb_proteins.zip")
-
     hmdb_metabolite_xml = extract_file_from_zip(
         me_zip_path, expected_filename="hmdb_metabolites.xml"
     )
     parser = HMDB_Metabolite_Parse(hmdb_metabolite_xml)
 
+    prot_zip_path = os.path.join("downloads", "hmdb_proteins.zip")
     hmdb_protein_xml = extract_file_from_zip(prot_zip_path, expected_filename="hmdb_proteins.xml")
-    prot_parser = HMDB_Protein_Parse(hmdb_protein_xml)
+    # prot_parser = HMDB_Protein_Parse(hmdb_protein_xml)
 
     # mime_records = [record for record in parser.parse_microbe_metabolite()]
     # save_pickle(mime_records, "hmdb_v5_microbe_metabolite.pkl")
@@ -1652,7 +1654,10 @@ if __name__ == "__main__":
     #     print(record)
 
     hmdbp_uniprot_ids = get_all_uniprot_ids_from_hmdbp(hmdb_protein_xml)
-    entrezgenes = uniprot_id2entrezgene(hmdbp_uniprot_ids)
-    save_pickle(entrezgenes, "hmdbp_uniprot2entrezgene.pkl")
-    hmdbp_gene_descr = asyncio.run(get_batch_gene_summaries(list(entrezgenes.keys())))
+    entrezgene2uniprot = uniprot_id2entrezgene(hmdbp_uniprot_ids)
+    save_pickle(entrezgene2uniprot, "hmdbp_uniprot2entrezgene.pkl")
+    entrezgenes = [
+        gene_info["gene_id"].split(":")[1] for uniprot, gene_info in entrezgene2uniprot.items()
+    ]
+    hmdbp_gene_descr = asyncio.run(get_batch_gene_summaries(entrezgenes))
     save_pickle(hmdbp_gene_descr, "hmdbp_entrezgene_summaries.pkl")

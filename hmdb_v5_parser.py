@@ -817,8 +817,12 @@ def cache_data(input_xml):
     smpdb_pathway_descr = get_smpdb_pathway_description()
     save_pickle(smpdb_pathway_descr, "smpdb_pathway_descriptions.pkl")
 
-    # cache gene summaries from HMDBP uniprot ids
+    # cache HMDBP protein functions
     hmdbp_uniprot_ids = get_all_uniprot_ids_from_hmdbp(input_xml)
+    hmdbp_prot_func = asyncio.run(get_batch_protein_functions(hmdbp_uniprot_ids))
+    save_pickle(hmdbp_prot_func, "hmdbp_uniprot_protein_functions.pkl")
+
+    # cache gene summaries from HMDBP uniprot ids
     entrezgene2uniprot = uniprot_id2entrezgene(hmdbp_uniprot_ids)
     save_pickle(entrezgene2uniprot, "hmdbp_uniprot2entrezgene.pkl")
     entrezgenes = [
@@ -1399,7 +1403,7 @@ class HMDB_Protein_Parse(XMLParseHelper):
         self.uniprot2entrezgene = load_pickle("hmdbp_uniprot2entrezgene.pkl")
         self.protein_func = {
             uniprot: info
-            for d in load_pickle("uniprot_protein_functions.pkl")
+            for d in load_pickle("hmdbp_uniprot_protein_functions.pkl")
             for uniprot, info in d.items()
         }
         self.gene_summary = {
@@ -1434,12 +1438,12 @@ class HMDB_Protein_Parse(XMLParseHelper):
             pfams_elem = props.find("hmdb:pfams", self.namespace)
             pfam_list = [
                 {
-                    "id": pfam_id,
-                    "name": name.lower() if name else None,
+                    "id": f"PFAM:{pfam_id}",
+                    "name": name if name else None,
                 }
                 for pfam in pfams_elem.findall("hmdb:pfam", self.namespace)
                 if (pfam_id := self.get_text(pfam, "pfam_id"))
-                and (name := self.get_text(pfam, "name"))
+                and (name := self.get_text(pfam, "name") and name.lower())
             ]
             return {
                 "residue_num": int(residue_num) if residue_num else None,
@@ -1660,7 +1664,7 @@ if __name__ == "__main__":
 
     prot_zip_path = os.path.join("downloads", "hmdb_proteins.zip")
     hmdb_protein_xml = extract_file_from_zip(prot_zip_path, expected_filename="hmdb_proteins.xml")
-    prot_parser = HMDB_Protein_Parse(hmdb_protein_xml)
+    # prot_parser = HMDB_Protein_Parse(hmdb_protein_xml)
 
     # mime_records = [record for record in parser.parse_microbe_metabolite()]
     # save_pickle(mime_records, "hmdb_v5_microbe_metabolite.pkl")
@@ -1676,7 +1680,11 @@ if __name__ == "__main__":
     # for record in mepwd_records:
     #     print(record)
 
-    prot_records = [rec for rec in prot_parser.parse_protein_pathway()]
-    save_pickle("hmdb_v5_protein_pathway.pkl", prot_records)
-    for rec in prot_records:
-        print(rec)
+    hmdbp_uniprot_ids = get_all_uniprot_ids_from_hmdbp(hmdb_protein_xml)
+    hmdbp_prot_func = asyncio.run(get_batch_protein_functions(hmdbp_uniprot_ids))
+    save_pickle(hmdbp_prot_func, "hmdbp_uniprot_protein_functions.pkl")
+
+    # prot_records = [rec for rec in prot_parser.parse_protein_pathway()]
+    # save_pickle("hmdb_v5_protein_pathway.pkl", prot_records)
+    # for rec in prot_records:
+    #     print(rec)

@@ -825,7 +825,6 @@ def cache_data(input_xml):
     save_pickle(hmdbp_gene_descr, "hmdbp_gene_summaries.pkl")
 
 
-
 class UMLSClient:
     def __init__(self, api_key: str, max_concurrent: int = 10):
         self.api_key = api_key

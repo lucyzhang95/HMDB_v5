@@ -817,6 +817,14 @@ def cache_data(input_xml):
     smpdb_pathway_descr = get_smpdb_pathway_description()
     save_pickle(smpdb_pathway_descr, "smpdb_pathway_descriptions.pkl")
 
+    # cache gene summaries from HMDBP uniprot ids
+    hmdbp_uniprot_ids = get_all_uniprot_ids_from_hmdbp(input_xml)
+    entrezgenes = uniprot_id2entrezgene(hmdbp_uniprot_ids)
+    save_pickle(entrezgenes, "hmdbp_uniprot2entrezgene.pkl")
+    hmdbp_gene_descr = asyncio.run(get_batch_gene_summaries(list(entrezgenes.keys())))
+    save_pickle(hmdbp_gene_descr, "hmdbp_gene_summaries.pkl")
+
+
 
 class UMLSClient:
     def __init__(self, api_key: str, max_concurrent: int = 10):
@@ -1386,9 +1394,18 @@ class HMDB_Protein_Parse(XMLParseHelper):
     def __init__(self, input_xml):
         super().__init__(input_xml)
         self.input_xml = input_xml
-        self.cached_protein_function = load_pickle("uniprot_protein_functions.pkl")
-        self.cached_gene_summaries = load_pickle("entrezgene_summaries.pkl")
-        self.cached_pathway_descr = load_pickle("smpdb_pathway_descriptions.pkl")
+        self.uniprot2entrezgene = load_pickle("hmdbp_uniprot2entrezgene.pkl")
+        self.protein_func = {
+            uniprot: info
+            for d in load_pickle("uniprot_protein_functions.pkl")
+            for uniprot, info in d.items()
+        }
+        self.gene_summary = {
+            str(entrezgene): info
+            for d in load_pickle("hmdbp_entrezgene_summaries.pkl")
+            for entrezgene, info in d.items()
+        }
+        self.pathway_descr = load_pickle("smpdb_pathway_descriptions.pkl")
 
     def get_list_of_tuple(self, elem, tag):
         return [
@@ -1518,16 +1535,11 @@ class HMDB_Protein_Parse(XMLParseHelper):
         xrefs["pfam"] = prot_props["pfam"] if "pfam" in prot_props else []
         gene_props = self.get_gene_properties(protein)
 
-        uniprots = get_all_uniprot_ids_from_hmdb(self.input_xml)
-        entrezgenes = uniprot_id2entrezgene(uniprots)
-        if "uniprotkb" in xrefs:
-            prot_descr = self.cached_protein_function.get(xrefs["uniprotkb"])
-            if xrefs["uniprotkb"] in entrezgenes:
-                entrezgene_id = entrezgenes[xrefs["uniprotkb"]["gene_id"]]
-                if entrezgene_id:
-                    xrefs["entrezgene"] = f"NCBIGene:{entrezgene_id}"
-                    if entrezgene_id in self.cached_gene_summaries:
-                        gene_descr = self.cached_gene_summaries[entrezgene_id]
+        uniprot_id = self.get_text(protein, "uniprot_id")
+        if uniprot_id:
+            entrezgene = self.uniprot2entrezgene.get(uniprot_id)["gene_id"].split(":")[1]
+            prot_descr = self.protein_func.get(uniprot_id).get("description")
+            gene_descr = self.gene_summary.get(entrezgene).get("description")
 
         protein_node = {
             "id": primary_id,
@@ -1635,6 +1647,12 @@ if __name__ == "__main__":
     # for record in mepwd_records:
     #     print(record)
 
-    prot_records = [node for node in prot_parser.parse_protein_pathway()]
-    for record in prot_records:
-        print(record)
+    # prot_records = [node for node in prot_parser.parse_protein_pathway()]
+    # for record in prot_records:
+    #     print(record)
+
+    hmdbp_uniprot_ids = get_all_uniprot_ids_from_hmdbp(hmdb_protein_xml)
+    entrezgenes = uniprot_id2entrezgene(hmdbp_uniprot_ids)
+    save_pickle(entrezgenes, "hmdbp_uniprot2entrezgene.pkl")
+    hmdbp_gene_descr = asyncio.run(get_batch_gene_summaries(list(entrezgenes.keys())))
+    save_pickle(hmdbp_gene_descr, "hmdbp_entrezgene_summaries.pkl")

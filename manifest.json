@@ -5,7 +5,8 @@
     "description": "The Human Metabolome Database",
     "license": "CC BY 4.0",
     "source_last_modified": "02/16/2022",
-    "source_download_date": "05/13/2025"
+    "source_download_date": "05/13/2025",
+    "source_last_parsed": "07/03/2025"
   },
   "display_name": "HMDBv5",
   "biothing_type": "association",
@@ -18,7 +19,7 @@
     "Bio",
     "ete3",
     "lxml",
-    "zipfile"
+    "dotenv"
   ],
   "dumper": {
     "data_url": [

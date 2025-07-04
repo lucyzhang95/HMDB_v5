@@ -1,5 +1,5 @@
 {
-  "version": "5.0",
+  "version": "1.0",
   "__metadata__": {
     "url": "https://hmdb.ca/",
     "description": "The Human Metabolome Database",
@@ -10,15 +10,26 @@
   "display_name": "HMDBv5",
   "biothing_type": "association",
   "requires": [
+    "asyncio",
+    "aiohttp",
+    "pandas",
+    "requests",
+    "text2term",
+    "Bio",
+    "ete3",
+    "lxml",
+    "zipfile"
   ],
   "dumper": {
     "data_url": [
-      "https://hmdb.ca/system/downloads/current/hmdb_metabolites.zip"
+      "https://hmdb.ca/system/downloads/current/hmdb_metabolites.zip",
+      "https://hmdb.ca/system/downloads/current/hmdb_proteins.zip",
+      "https://smpdb.ca/downloads/smpdb_pathways.csv.zip"
     ],
     "release": "version:get_release"
   },
   "uploader": {
-    "parser": "hmdb_v5_parser:load_hmdbv5_data",
+    "parser": "hmdb_v5_parser:load_hmdb_data",
     "on_duplicates": "error"
   }
 }

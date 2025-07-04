@@ -1800,4 +1800,4 @@ if __name__ == "__main__":
     for record in load_hmdb_data():
         print(record)
     end = time.time()
-    print(f"Total time: {(end - start)/60:.2f} minutes with cache.")  # it took 26.82 minutes
+    print(f"Total time: {(end - start)/60:.2f} minutes.")  # it took 26.82 minutes with cache

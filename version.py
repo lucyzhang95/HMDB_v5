@@ -12,38 +12,38 @@ def get_release(self, max_retries=3, base_delay=2):
 
     :returns: The current version number of the HMDB if found, else None.
     """
-    url = "https://hmdb.ca/downloads"
-    headers = {
-        "User-Agent": (
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-            "AppleWebKit/537.36 (KHTML, like Gecko) "
-            "Chrome/124.0 Safari/537.36"
-        )
-    }
-    for attempt in range(1, max_retries + 1):
-        try:
-            print(f"Attempt {attempt} to fetch HMDB version...")
-            response = requests.get(url, headers=headers, timeout=30)
-            response.raise_for_status()
-
-            soup = BeautifulSoup(response.text, "html.parser")
-            active_li = soup.select_one("#download_tabs li.active a")
-            if active_li:
-                match = re.search(r"\(([\d.]+)\)", active_li.text)
-                if match:
-                    version = match.group(1)
-                    return version
-            print("HMDB version pattern not found.")
-            return None
-
-        except requests.RequestException as e:
-            print(
-                f"HMDB attempt {attempt} failed ({e}); retrying in {base_delay * (2 ** (attempt - 1))}s"
-            )
-            time.sleep(base_delay * (2 ** (attempt - 1)))
-
-    print("Failed to fetch HMDB version after multiple attempts.")
-    return None
+    # url = "https://hmdb.ca/downloads"
+    # headers = {
+    #     "User-Agent": (
+    #         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+    #         "AppleWebKit/537.36 (KHTML, like Gecko) "
+    #         "Chrome/124.0 Safari/537.36"
+    #     )
+    # }
+    # for attempt in range(1, max_retries + 1):
+    #     try:
+    #         print(f"Attempt {attempt} to fetch HMDB version...")
+    #         response = requests.get(url, headers=headers, timeout=30)
+    #         response.raise_for_status()
+    #
+    #         soup = BeautifulSoup(response.text, "html.parser")
+    #         active_li = soup.select_one("#download_tabs li.active a")
+    #         if active_li:
+    #             match = re.search(r"\(([\d.]+)\)", active_li.text)
+    #             if match:
+    #                 version = match.group(1)
+    #                 return version
+    #         print("HMDB version pattern not found.")
+    #         return None
+    #
+    #     except requests.RequestException as e:
+    #         print(
+    #             f"HMDB attempt {attempt} failed ({e}); retrying in {base_delay * (2 ** (attempt - 1))}s"
+    #         )
+    #         time.sleep(base_delay * (2 ** (attempt - 1)))
+    #
+    # print("Failed to fetch HMDB version after multiple attempts.")
+    return "5.0"  # TODO: hardcoded for now
 
 
 if __name__ == "__main__":

@@ -73,9 +73,8 @@ Last Modified: 05/28/2025
 ```json
 {"PMID": 645, "JournalArticle (url)": 81, "doi": 2} 
 ```
-</details>
 
-## Example output
+### Example output
 ```json
 {
    "_id":"a29b50df-da09-41e9-8ee9-39fda90b08b6",
@@ -168,6 +167,8 @@ Last Modified: 05/28/2025
    }
 }
 ```
+
+</details>
 
 <br><br>
 ***
@@ -273,9 +274,8 @@ Last Modified: 06/02/2025
    "HP":258
 }
 ```
-</details>
 
-## Example Output
+### Example Output
 
 ```json
 {
@@ -340,6 +340,9 @@ Last Modified: 06/02/2025
    }
 }
 ```
+
+</details>
+
 <br><br>
 ***
 
@@ -348,7 +351,10 @@ Last Modified: 06/30/2025
 - **Total records with potential duplicates: 863,759**
 - **Total unique records:  863,333 (426 fewer)**
 
-## Example Output
+<details>
+<summary>Details</summary>
+
+### Example Output
 ```json
 {
    "_id":"6baa1455-9ece-4ee3-8ab3-d142e3fa55d3",
@@ -416,6 +422,9 @@ Last Modified: 06/30/2025
    }
 }
 ```
+
+</details>
+
 <br><br>
 ***
 
@@ -426,7 +435,10 @@ Last Modified: 07/01/2025
 - **Total records with pathway ids: 813,854**
 - Unique pathway identifiers: 48,585
 
-## Example Output
+<details>
+<summary>Details</summary>
+
+### Example Output
 ```json
 {
    "_id":"1738118_participates_in_SMP0000071",
@@ -544,6 +556,8 @@ Last Modified: 07/01/2025
 }
 ```
 
+</details>
+
 <br><br>
 ***
 ## 5. Protein-Pathway
@@ -551,7 +565,10 @@ Last Modified: 07/03/2025
 
 - **Total records: **
 
-## Example Output
+<details>
+<summary>Details</summary>
+
+### Example Output
 ```json
 {
    "_id":"O00180_participates_in_SMP0000375",
@@ -643,6 +660,8 @@ Last Modified: 07/03/2025
 }
 ```
 
+</details>
+
 <br><br>
 ***
 
@@ -651,7 +670,11 @@ Last Modified: 07/03/2025
 
 - **Total records: **
 
-## Example Output
+<details>
+<summary>Details</summary>
+
+
+### Example Output
 ```json
 {
    "_id":"P43220_involved_in_0007189",
@@ -752,4 +775,6 @@ Last Modified: 07/03/2025
       }
    }
 }
-``` 
+```
+
+</details>

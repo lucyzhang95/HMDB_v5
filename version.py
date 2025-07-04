@@ -5,7 +5,7 @@ import requests
 from bs4 import BeautifulSoup
 
 
-def get_release(max_retries=3, base_delay=2):
+def get_release(self, max_retries=3, base_delay=2):
     """Retrieves the current version number of the HMDB from the downloads page.
     HMDB website is very slow and unstable sometimes,
     so need to wait for at least 30 sec.
@@ -47,5 +47,5 @@ def get_release(max_retries=3, base_delay=2):
 
 
 if __name__ == "__main__":
-    version = get_release()
+    version = get_release(self)
     print("Current HMDB version", version)

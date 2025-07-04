@@ -21,9 +21,9 @@ from dotenv import load_dotenv
 from ete3 import NCBITaxa
 from lxml import etree as ET
 
+load_dotenv()
 CACHE_DIR = os.path.join(os.getcwd(), "cache")
 os.makedirs(CACHE_DIR, exist_ok=True)
-load_dotenv()
 
 
 def save_pickle(obj, f_name):
@@ -32,22 +32,19 @@ def save_pickle(obj, f_name):
     :param f_name: files should only be existing in the cache directory
     :return:
     """
-    f_path = os.path.join(CACHE_DIR, f_name)
-    with open(f_path, "wb") as in_f:
-        pickle.dump(obj, in_f)
+    with open(os.path.join(CACHE_DIR, f_name), "wb") as out_f:
+        pickle.dump(obj, out_f)
 
 
 def load_pickle(f_name):
-    f_path = os.path.join(CACHE_DIR, f_name)
-    if os.path.exists(f_path):
-        with open(f_path, "rb") as in_f:
-            return pickle.load(in_f)
-    return None
+    path = os.path.join(CACHE_DIR, f_name)
+    return (
+        pickle.load(open(path, "rb")) if os.path.exists(path) else print("The file does not exist.")
+    )
 
 
 def save_json(obj, f_name):
-    f_path = os.path.join(CACHE_DIR, f_name)
-    with open(f_path, "w") as out_f:
+    with open(os.path.join(CACHE_DIR, f_name), "w") as out_f:
         json.dump(obj, out_f, indent=4)
 
 
@@ -74,10 +71,7 @@ def strip_tag_namespace(tag: str) -> str:
     :param tag: element tags (e.g. <accession>HMDB0000001</accession>)
     :return: original tag without namespace
     """
-    idx = tag.rfind("}")  # rfind() "not found" == -1
-    if idx != -1:  # if idx is not "not found"
-        tag = tag[idx + 1 :]
-    return tag
+    return tag.split("}", 1)[-1] if "}" in tag else tag
 
 
 def get_all_microbe_names(input_xml: str | pathlib.Path) -> Iterator[str]:
@@ -345,7 +339,7 @@ def get_ncit_taxon_description(taxon_names):
     [NCIT]',
     'xrefs': {'ncit': 'C86010', }} ...}
     """
-    API_KEY = os.getenv("NCIT_API_KEY")
+    NCIT_API_KEY = os.getenv("NCIT_API_KEY")
     search_url = "https://data.bioontology.org/search"
     taxon_names = set(taxon_names)
     mapping_result = {}
@@ -353,7 +347,7 @@ def get_ncit_taxon_description(taxon_names):
         params = {
             "q": name,
             "ontologies": "NCIT",
-            "apikey": API_KEY,
+            "apikey": NCIT_API_KEY,
         }
         response = requests.get(search_url, params=params)
         data = response.json()
@@ -1806,4 +1800,4 @@ if __name__ == "__main__":
     for record in load_hmdb_data():
         print(record)
     end = time.time()
-    print(f"Total time: {(end - start)/60:.2f} minutes with cache.")   # it took 26.82 minutes
+    print(f"Total time: {(end - start)/60:.2f} minutes with cache.")  # it took 26.82 minutes

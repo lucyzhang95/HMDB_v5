@@ -8,6 +8,7 @@ import ssl
 import time
 import uuid
 import zipfile
+from itertools import chain
 from typing import Dict, Iterator, List, Optional, Union
 
 import aiohttp
@@ -1769,37 +1770,40 @@ class HMDB_Protein_Parse(XMLParseHelper):
                 }
 
 
-if __name__ == "__main__":
-    me_zip_path = os.path.join("downloads", "hmdb_metabolites.zip")
-    hmdb_metabolite_xml = extract_file_from_zip(
-        me_zip_path, expected_filename="hmdb_metabolites.xml"
+def load_hmdb_data(data_dir="downloads"):
+    """
+    Load HMDB all association data including:
+    - Microbe-Metabolite
+    - Metabolite-Disease, Metabolite-Protein, Metabolite-Pathway
+    - Protein-Pathway, Protein-Biological Process
+    """
+    data_dir = os.path.abspath(data_dir)
+    metabolite_xml = os.path.join(data_dir, "hmdb_metabolites.xml")
+    if not os.path.isfile(metabolite_xml):
+        metabolite_zip = os.path.join(data_dir, "hmdb_metabolites.zip")
+        metabolite_xml = extract_file_from_zip(metabolite_zip, "hmdb_metabolites.xml")
+
+    protein_xml = os.path.join(data_dir, "hmdb_proteins.xml")
+    if not os.path.isfile(protein_xml):
+        protein_zip = os.path.join(data_dir, "hmdb_proteins.zip")
+        protein_xml = extract_file_from_zip(protein_zip, "hmdb_proteins.xml")
+
+    metabolite_parser = HMDB_Metabolite_Parse(metabolite_xml)
+    protein_parser = HMDB_Protein_Parse(protein_xml)
+
+    yield from chain(
+        metabolite_parser.parse_microbe_metabolite(),
+        metabolite_parser.parse_metabolite_disease(),
+        metabolite_parser.parse_metabolite_protein(),
+        metabolite_parser.parse_metabolite_pathway(),
+        protein_parser.parse_protein_pathway(),
+        protein_parser.parse_protein_biological_process(),
     )
-    parser = HMDB_Metabolite_Parse(hmdb_metabolite_xml)
 
-    prot_zip_path = os.path.join("downloads", "hmdb_proteins.zip")
-    hmdb_protein_xml = extract_file_from_zip(prot_zip_path, expected_filename="hmdb_proteins.xml")
-    prot_parser = HMDB_Protein_Parse(hmdb_protein_xml)
 
-    # mime_records = [record for record in parser.parse_microbe_metabolite()]
-    # save_pickle(mime_records, "hmdb_v5_microbe_metabolite.pkl")
-    #
-    # medi_records = [record for record in parser.parse_metabolite_disease()]
-    # save_pickle(medi_records, "hmdb_v5_metabolite_disease.pkl")
-    #
-    # meprot_records = [record for record in parser.parse_metabolite_protein()]
-    # save_pickle(meprot_records, "hmdb_v5_metabolite_protein.pkl")
-    #
-    # mepwd_records = [record for record in parser.parse_metabolite_pathway()]
-    # save_pickle(mepwd_records, "hmdb_v5_metabolite_pathway.pkl")
-    # for record in mepwd_records:
-    #     print(record)
-
-    # prot_records = [rec for rec in prot_parser.parse_protein_pathway()]
-    # save_pickle(prot_records, "hmdb_v5_protein_pathway.pkl")
-    # for rec in prot_records:
-    #     print(rec)
-
-    prot_bp_records = [rec for rec in prot_parser.parse_protein_biological_process()]
-    save_pickle(prot_bp_records, "hmdb_v5_protein_biological_process.pkl")
-    for rec in prot_bp_records:
-        print(rec)
+if __name__ == "__main__":
+    start = time.time()
+    for record in load_hmdb_data():
+        print(record)
+    end = time.time()
+    print(f"Total time: {(end - start)/60:.2f} minutes.")

@@ -1027,6 +1027,7 @@ class HMDB_Metabolite_Parse(XMLParseHelper):
         id_hierarchy = [
             ("pubchem_compound_id", "PUBCHEM.COMPOUND"),
             ("inchikey", "INCHIKEY"),
+            ("smiles", None),
             ("drugbank_id", "DRUGBANK"),
             ("chebi_id", "CHEBI"),
             ("chembl_id", "CHEMBL.COMPOUND"),
@@ -1061,6 +1062,8 @@ class HMDB_Metabolite_Parse(XMLParseHelper):
             curie = f"{prefix}:{val}"
             if prefix == "foodb.compound":
                 key = "foodb"
+            elif prefix == "smiles":
+                key = ""
             elif prefix == "HMDB":
                 key = "hmdb"
             elif prefix == "METLIN":

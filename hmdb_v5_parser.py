@@ -752,6 +752,26 @@ def get_all_go_terms_from_hmdbp(input_xml):
     return list(go_terms)
 
 
+def get_organism_type(node) -> str:
+    """
+    Inspect node['lineage'] for known taxids.
+    Return the matching biolink CURIE, or Other if no match.
+    Types include: 3 domains of life (Bacteria, Archaea, Eukaryota) and Virus.
+    """
+    taxon_map = {
+        2: "biolink:Bacterium",
+        2157: "Archaeon",
+        2759: "Eukaryote",
+        10239: "biolink:Virus",
+    }
+
+    for taxid, biolink_type in taxon_map.items():
+        if taxid in node.get("lineage", []):
+            return biolink_type
+
+    return "Other"
+
+
 def cache_data(input_xml):
     # cache mapped taxon
     microbe_names = get_all_microbe_names(input_xml)
@@ -1280,6 +1300,7 @@ class HMDB_Metabolite_Parse(XMLParseHelper):
                     subject_node = self.cached_taxon_info[microbe].copy()
                     subject_node["original_name"] = microbe.lower().strip()
                     subject_node["type"] = "biolink:OrganismTaxon"
+                    subject_node["organism_type"] = get_organism_type(subject_node)
                     subject_node = self.remove_empty_none_values(subject_node)
 
                     yield {

@@ -1024,6 +1024,7 @@ class HMDB_Metabolite_Parse(XMLParseHelper):
         return weights
 
     def get_primary_id(self, metabolite):
+        # (tag, prefix) pairs for ID hierarchy
         id_hierarchy = [
             ("pubchem_compound_id", "PUBCHEM.COMPOUND"),
             ("inchikey", "INCHIKEY"),
@@ -1058,12 +1059,12 @@ class HMDB_Metabolite_Parse(XMLParseHelper):
                 continue
             if tag == "kegg_id":
                 prefix = classify_kegg(val)
+            elif tag == "smiles":
+                prefix = ""
 
             curie = f"{prefix}:{val}"
-            if prefix == "foodb.compound":
-                key = "foodb"
-            elif prefix == "smiles":
-                key = ""
+            if prefix == "PUBCHEM.COMPOUND":
+                key = "pubchem_cid"
             elif prefix == "HMDB":
                 key = "hmdb"
             elif prefix == "METLIN":

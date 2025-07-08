@@ -313,7 +313,7 @@ def get_taxon_info_from_bt(taxids) -> dict:
     for info in taxon_info:
         if "notfound" not in info.keys():
             taxon[info["query"]] = {
-                "id": f"taxid:{int(info['_id'])}",
+                "id": f"NCBITaxon:{int(info['_id'])}",
                 "taxid": int(info["_id"]),
                 "name": info["scientific_name"],
                 "parent_taxid": int(info["parent_taxid"]),
@@ -322,7 +322,7 @@ def get_taxon_info_from_bt(taxids) -> dict:
             }
         else:
             taxon[info["query"]] = {
-                "id": f"taxid:{int(info['query'])}",
+                "id": f"NCBITaxon:{int(info['query'])}",
                 "taxid": int(info["query"]),
             }
     return taxon

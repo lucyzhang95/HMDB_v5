@@ -1283,6 +1283,10 @@ class HMDB_Metabolite_Parse(XMLParseHelper):
                 "infores": "hmdb_v5",
                 "publication": references,
             }
+            if "publication" in association_node:
+                association_node["infores_type"] = "manual_curation"
+            else:
+                association_node["infores_type"] = "unknown"
             association_node = self.remove_empty_none_values(association_node)
 
             primary_id, xrefs = self.get_primary_id(metabolite)
@@ -1337,6 +1341,7 @@ class HMDB_Metabolite_Parse(XMLParseHelper):
                         "predicate": "biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation",
                         "type": "has_role_in",
                         "infores": "hmdb_v5",
+                        "infores_type": "manual_curation",
                         "publication": references,
                     }
                     association_node = self.remove_empty_none_values(association_node)
@@ -1405,6 +1410,7 @@ class HMDB_Metabolite_Parse(XMLParseHelper):
                     "predicate": "biolink:ChemicalGeneInteractionAssociation",
                     "type": "interacts_with",
                     "infores": "hmdb_v5",
+                    "infores_type": "unknown",
                 }
 
                 yield {
@@ -1457,6 +1463,7 @@ class HMDB_Metabolite_Parse(XMLParseHelper):
                     "predicate": "biolink:ChemicalToPathwayAssociation",
                     "type": "participates_in",
                     "infores": "hmdb_v5",
+                    "infores_type": "unknown",
                 }
 
                 _id = (
@@ -1721,6 +1728,7 @@ class HMDB_Protein_Parse(XMLParseHelper):
                     "predicate": "biolink:GeneToPathwayAssociation",
                     "type": "participates_in",
                     "infores": "hmdb_v5",
+                    "infores_type": "manual_curation",
                     "publication": publication,
                 }
                 association_node = self.remove_empty_none_values(association_node)
@@ -1772,6 +1780,7 @@ class HMDB_Protein_Parse(XMLParseHelper):
                     "predicate": "biolink:MacromolecularMachineToBiologicalProcessAssociation",
                     "type": "involved_in",
                     "infores": "hmdb_v5",
+                    "infores_type": "manual_curation",
                     "publication": publication,
                 }
                 association_node = self.remove_empty_none_values(association_node)

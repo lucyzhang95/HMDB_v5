@@ -1280,13 +1280,13 @@ class HMDB_Metabolite_Parse(XMLParseHelper):
             association_node = {
                 "predicate": "biolink:OrganismTaxonToChemicalEntityAssociation",
                 "type": "has_metabolic_interaction_with",
-                "infores": "hmdb_v5",
+                "primary_knowledge_source": "infores:hmdb_v5",
                 "publication": references,
             }
             if "publication" in association_node:
-                association_node["infores_type"] = "manual_curation"
+                association_node["evidence_type"] = "ECO:0000305"   # manual assertion
             else:
-                association_node["infores_type"] = "unknown"
+                association_node["evidence_type"] = "ECO:0000000"   # unknown evidence
             association_node = self.remove_empty_none_values(association_node)
 
             primary_id, xrefs = self.get_primary_id(metabolite)
@@ -1340,8 +1340,8 @@ class HMDB_Metabolite_Parse(XMLParseHelper):
                         "id": "RO:0000087",  # corresponds to has role
                         "predicate": "biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation",
                         "type": "has_role_in",
-                        "infores": "hmdb_v5",
-                        "infores_type": "manual_curation",
+                        "primary_knowledge_source": "infores:hmdb_v5",
+                        "evidence_type": "ECO:0000305",  # manual assertion
                         "publication": references,
                     }
                     association_node = self.remove_empty_none_values(association_node)
@@ -1409,8 +1409,8 @@ class HMDB_Metabolite_Parse(XMLParseHelper):
                     "id": "RO:0002434",
                     "predicate": "biolink:ChemicalGeneInteractionAssociation",
                     "type": "interacts_with",
-                    "infores": "hmdb_v5",
-                    "infores_type": "unknown",
+                    "primary_knowledge_source": "infores:hmdb_v5",
+                    "evidence_type": "ECO:0000000",  # unknown evidence
                 }
 
                 yield {
@@ -1462,8 +1462,8 @@ class HMDB_Metabolite_Parse(XMLParseHelper):
                     "id": "RO:0000056",
                     "predicate": "biolink:ChemicalToPathwayAssociation",
                     "type": "participates_in",
-                    "infores": "hmdb_v5",
-                    "infores_type": "unknown",
+                    "primary_knowledge_source": "infores:hmdb_v5",
+                    "evidence_type": "ECO:0000000",  # unknown evidence
                 }
 
                 _id = (
@@ -1727,8 +1727,8 @@ class HMDB_Protein_Parse(XMLParseHelper):
                     "id": "RO:0000056",
                     "predicate": "biolink:GeneToPathwayAssociation",
                     "type": "participates_in",
-                    "infores": "hmdb_v5",
-                    "infores_type": "manual_curation",
+                    "primary_knowledge_source": "infores:hmdb_v5",
+                    "evidence_type": "ECO:0000305",  # manual assertion
                     "publication": publication,
                 }
                 association_node = self.remove_empty_none_values(association_node)
@@ -1779,8 +1779,8 @@ class HMDB_Protein_Parse(XMLParseHelper):
                     "id": "RO:0002331",
                     "predicate": "biolink:MacromolecularMachineToBiologicalProcessAssociation",
                     "type": "involved_in",
-                    "infores": "hmdb_v5",
-                    "infores_type": "manual_curation",
+                    "primary_knowledge_source": "infores:hmdb_v5",
+                    "evidence_type": "ECO:0000305",  # manual assertion
                     "publication": publication,
                 }
                 association_node = self.remove_empty_none_values(association_node)

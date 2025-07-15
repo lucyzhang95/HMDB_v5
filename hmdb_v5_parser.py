@@ -384,7 +384,9 @@ def get_full_taxon_info(mapped_taxon_names: dict, taxon_info: dict) -> dict:
     :param mapped_taxon_names: Mapping of taxon name to a dict with taxon taxid, lineage, rank...
     {'clostridia propionicum': {'taxid': 28446, 'mapping_tool': 'manual'} ...}
     :param taxon_info: Mapping of taxid (as str) to a dictionary with mapped taxon names and taxid.
-    '28450': {'id': 'NCBITaxon:28450', 'taxid': 28450, 'name': 'burkholderia pseudomallei', 'parent_taxid': 111527, 'lineage': [28450, 111527, 32008, 119060, 80840, 28216, 1224, 3379134, 2, 131567, 1], 'rank': 'species', 'description': 'A species of aerobic, Gram-negative, rod shaped bacteria assigned to the phylum Proteobacteria.
+    '28450': {'id': 'NCBITaxon:28450', 'taxid': 28450, 'name': 'burkholderia pseudomallei', 'parent_taxid': 111527,
+    'lineage': [28450, 111527, 32008, 119060, 80840, 28216, 1224, 3379134, 2, 131567, 1], 'rank': 'species',
+    'description': 'A species of aerobic, Gram-negative, rod shaped bacteria assigned to the phylum Proteobacteria.
     This species is motile, non-spore forming, oxidase and catalase positive and indole negative.
     B. pseudomallei is found in contaminated soil, water,
     and produce and causes melioidosis in humans with the highest rate of disease occurring in southeast Asia.
@@ -452,14 +454,14 @@ def manual_disease_name2id(disease_names: list[str]) -> dict:
     raw_mapping = {
         "early preeclampsia": "MONDO:0005081",  # preeclampsia
         "late-onset preeclampsia": "MONDO:0005081",  # preeclampsia
-        "perillyl alcohol administration for cancer treatment": "GO:0018457",  # perillyl-alcohol dehydrogenase (NAD+) activity
+        "perillyl alcohol administration for cancer treatment": "GO:0018457",   # perillyl-alcohol dehydrogenase (NAD+) activity
         "3-hydroxyisobutyric acid dehydrogenase deficiency": "MONDO:0009371",  # 3-hydroxyisobutyric aciduria
         "attachment loss": "UMLS:C0206114",  # periodontal attachment loss
         "periodontal probing depth": "UMLS:C1882338",  # periodontal probing
         "methylmalonic aciduria mitochondrial encephelopathy leigh-like": "UMLS:C1855119",  # methylmalonic aciduria
         "functional hypothalamic amenorrhea": "UMLS:C0341862",  # hypothalamic amenorrhea
         "peroxisomal disorders, new type, liver": "UMLS:C5568675",  # liver disease due to peroxisomal disease
-        "dopamine-serotonin vesicular transport defect": "MONDO:0018130",  # brain dopamine-serotonin vesicular transport disease
+        "dopamine-serotonin vesicular transport defect": "MONDO:0018130",   # brain dopamine-serotonin vesicular transport disease
         "prosthesis/missing teeth": "UMLS:C0080233",  # tooth Loss
         "small intestinal malabsorption": "UMLS:C1833057",  # malabsorption (small intestine)
         "refractory localization-related epilepsy": "UMLS:C0472349",  # localization-related symptomatic epilepsy
@@ -467,7 +469,7 @@ def manual_disease_name2id(disease_names: list[str]) -> dict:
         "methyl formate exposure": "ECTO:9001470",  # exposure to methyl formate
         "formic acid intoxication": "ECTO:9000376",  # exposure to formic acid
         "idiopathic oro-facial pain": "MONDO:0018362",  # persistent idiopathic facial pain
-        "serine deficiency syndrome, infantile": "MONDO:0035004",  # serine biosynthesis pathway deficiency, infantile/juvenile form
+        "serine deficiency syndrome, infantile": "MONDO:0035004",   # serine biosynthesis pathway deficiency, infantile/juvenile form
         "hepatic and biliary malignancies": "MONDO:0002514",  # hepatobiliary neoplasm
         "acute seizures": "UMLS:C0036572",  # seizures
         "methamphetamine (map) psychosis": "MONDO:0005465",  # methamphetamine-induced psychosis
@@ -475,7 +477,7 @@ def manual_disease_name2id(disease_names: list[str]) -> dict:
         "homozygous sickle cell disease": "MONDO:0011382",  # sickle cell disease
         "prepartum depression": "UMLS:C0011570",  # mental depressionm -> only postpartum depression exists
         "nucleotide depletion syndrome": "MONDO:0018158",  # mitochondrial DNA depletion syndrome
-        "terminal aldosterone biosynthesis defects": "MONDO:0018541",  # familial hypoaldosteronism (Aldosterone synthase deficiency is a rare inherited defect of the final step of aldosterone biosynthesis)
+        "terminal aldosterone biosynthesis defects": "MONDO:0018541",   # familial hypoaldosteronism (Aldosterone synthase deficiency is a rare inherited defect of the final step of aldosterone biosynthesis)
         "glutaryl-coa dehydrogenase deficiency (gdhd)": "MONDO:0009281",  # glutaryl-CoA dehydrogenase deficiency
         "cancer with metastatic bone disease": "UMLS:C5444038",  # metastatic bone disease
         "neuroinfection": "UMLS:C0870953",  # neuroinfections
@@ -612,7 +614,8 @@ def get_all_uniprot_ids_from_hmdb(input_xml) -> dict[str, str]:
     return protein2uniport
 
 
-def get_all_uniprot_ids_from_hmdbp(input_xml) -> dict[str, str]:
+def get_all_uniprot_ids_from_hmdbp(input_xml) -> list:
+    """Extracts all UniProt IDs from HMDBP XML file."""
     namespace = {"hmdb": "http://www.hmdb.ca"}
     tree = ET.parse(input_xml)
     root = tree.getroot()
@@ -621,8 +624,8 @@ def get_all_uniprot_ids_from_hmdbp(input_xml) -> dict[str, str]:
         elem.text.strip()
         for protein in root.findall("hmdb:protein", namespace)
         if (elem := protein.find("hmdb:uniprot_id", namespace)) is not None
-        and elem.text
-        and elem.text.strip()
+           and elem.text
+           and elem.text.strip()
     ]
     return uniprot_ids
 

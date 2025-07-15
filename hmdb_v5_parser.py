@@ -153,33 +153,44 @@ def ete3_taxon_name2taxid(taxon_names: list) -> dict:
 
 def entrez_taxon_name2taxid(
     taxon_names: list[str],
-    email,
-    sleep=0.34,
+    email: str,
+    sleep: float = 0.34,
+    retries: int = 3,
+    backoff_factor: int = 2,
 ) -> dict:
-    """Map taxonomy names to NCBI taxonomy ids using entrez API
-    Entrez is good at mapping recent reclassified taxonomy names that are outdated
-    but very slow due to no batch query allowed, so expensive to query, recommend cache the output
+    """Map taxonomy names to NCBI taxonomy ids using the Entrez API with retry logic.
 
-    :param taxon_names:
-    :param email:
-    :param sleep:
-    :return: a dictionary mapping taxon names to taxids,
-    e.g., {'cellulomonas galba': {'taxid': 401861, 'mapping_tool': 'entrez'}, ...}
+    :param taxon_names: A list of taxonomy names to query.
+    :param email: Your email address for NCBI Entrez.
+    :param sleep: The base time to sleep between different queries.
+    :param retries: The maximum number of retry attempts for a failed query.
+    :param backoff_factor: The factor by which to increase the delay between retries.
+    :return: A dictionary mapping taxon names to taxids.
     """
     Entrez.email = email
     entrez_mapped = {}
 
     for name in set(taxon_names):
-        try:
-            handle = Entrez.esearch(db="taxonomy", term=name, retmode="xml", retmax=1)
-            record = Entrez.read(handle)
-            handle.close()
-            if record["IdList"]:
-                taxid = int(record["IdList"][0])
-                entrez_mapped[name] = {"taxid": taxid, "mapping_tool": "entrez"}
-        except Exception as e:
-            print(f"Entrez query failed for '{name}': {e}")  # TODO: need to add retry logic
+        delay = 5
+        for attempt in range(retries):
+            try:
+                handle = Entrez.esearch(db="taxonomy", term=name, retmode="xml", retmax=1)
+                record = Entrez.read(handle)
+                handle.close()
+                if record["IdList"]:
+                    taxid = int(record["IdList"][0])
+                    entrez_mapped[name] = {"taxid": taxid, "mapping_tool": "entrez"}
+                break
+            except Exception as e:
+                print(f"Entrez query failed for '{name}' on attempt {attempt + 1}/{retries}: {e}")
+                if attempt < retries - 1:
+                    print(f"Retrying in {delay} seconds...")
+                    time.sleep(delay)
+                    delay *= backoff_factor
+                else:
+                    print(f"All retry attempts failed for '{name}'.")
         time.sleep(sleep)
+
     return entrez_mapped
 
 
@@ -454,14 +465,14 @@ def manual_disease_name2id(disease_names: list[str]) -> dict:
     raw_mapping = {
         "early preeclampsia": "MONDO:0005081",  # preeclampsia
         "late-onset preeclampsia": "MONDO:0005081",  # preeclampsia
-        "perillyl alcohol administration for cancer treatment": "GO:0018457",   # perillyl-alcohol dehydrogenase (NAD+) activity
+        "perillyl alcohol administration for cancer treatment": "GO:0018457",  # perillyl-alcohol dehydrogenase (NAD+) activity
         "3-hydroxyisobutyric acid dehydrogenase deficiency": "MONDO:0009371",  # 3-hydroxyisobutyric aciduria
         "attachment loss": "UMLS:C0206114",  # periodontal attachment loss
         "periodontal probing depth": "UMLS:C1882338",  # periodontal probing
         "methylmalonic aciduria mitochondrial encephelopathy leigh-like": "UMLS:C1855119",  # methylmalonic aciduria
         "functional hypothalamic amenorrhea": "UMLS:C0341862",  # hypothalamic amenorrhea
         "peroxisomal disorders, new type, liver": "UMLS:C5568675",  # liver disease due to peroxisomal disease
-        "dopamine-serotonin vesicular transport defect": "MONDO:0018130",   # brain dopamine-serotonin vesicular transport disease
+        "dopamine-serotonin vesicular transport defect": "MONDO:0018130",  # brain dopamine-serotonin vesicular transport disease
         "prosthesis/missing teeth": "UMLS:C0080233",  # tooth Loss
         "small intestinal malabsorption": "UMLS:C1833057",  # malabsorption (small intestine)
         "refractory localization-related epilepsy": "UMLS:C0472349",  # localization-related symptomatic epilepsy
@@ -469,7 +480,7 @@ def manual_disease_name2id(disease_names: list[str]) -> dict:
         "methyl formate exposure": "ECTO:9001470",  # exposure to methyl formate
         "formic acid intoxication": "ECTO:9000376",  # exposure to formic acid
         "idiopathic oro-facial pain": "MONDO:0018362",  # persistent idiopathic facial pain
-        "serine deficiency syndrome, infantile": "MONDO:0035004",   # serine biosynthesis pathway deficiency, infantile/juvenile form
+        "serine deficiency syndrome, infantile": "MONDO:0035004",  # serine biosynthesis pathway deficiency, infantile/juvenile form
         "hepatic and biliary malignancies": "MONDO:0002514",  # hepatobiliary neoplasm
         "acute seizures": "UMLS:C0036572",  # seizures
         "methamphetamine (map) psychosis": "MONDO:0005465",  # methamphetamine-induced psychosis
@@ -477,7 +488,7 @@ def manual_disease_name2id(disease_names: list[str]) -> dict:
         "homozygous sickle cell disease": "MONDO:0011382",  # sickle cell disease
         "prepartum depression": "UMLS:C0011570",  # mental depressionm -> only postpartum depression exists
         "nucleotide depletion syndrome": "MONDO:0018158",  # mitochondrial DNA depletion syndrome
-        "terminal aldosterone biosynthesis defects": "MONDO:0018541",   # familial hypoaldosteronism (Aldosterone synthase deficiency is a rare inherited defect of the final step of aldosterone biosynthesis)
+        "terminal aldosterone biosynthesis defects": "MONDO:0018541",  # familial hypoaldosteronism (Aldosterone synthase deficiency is a rare inherited defect of the final step of aldosterone biosynthesis)
         "glutaryl-coa dehydrogenase deficiency (gdhd)": "MONDO:0009281",  # glutaryl-CoA dehydrogenase deficiency
         "cancer with metastatic bone disease": "UMLS:C5444038",  # metastatic bone disease
         "neuroinfection": "UMLS:C0870953",  # neuroinfections
@@ -624,8 +635,8 @@ def get_all_uniprot_ids_from_hmdbp(input_xml) -> list:
         elem.text.strip()
         for protein in root.findall("hmdb:protein", namespace)
         if (elem := protein.find("hmdb:uniprot_id", namespace)) is not None
-           and elem.text
-           and elem.text.strip()
+        and elem.text
+        and elem.text.strip()
     ]
     return uniprot_ids
 
@@ -1274,7 +1285,7 @@ class HMDB_Metabolite_Parse(XMLParseHelper):
         tree = ET.parse(self.input_xml)
         root = tree.getroot()
         if not self.cached_taxon_info:
-            cache_data(self.input_xml)
+            cache_metabolite_data(self.input_xml)
 
         for metabolite in root.findall("hmdb:metabolite", self.namespace):
             microbes = self.get_microbes(metabolite)
@@ -1387,7 +1398,8 @@ class HMDB_Metabolite_Parse(XMLParseHelper):
                     "full_name": self.get_text(protein, "name"),
                     "description": None,
                     "type": "biolink:Protein",
-                    "protein_type": (ptype := self.get_text(protein, "protein_type")) and ptype.lower(),
+                    "protein_type": (ptype := self.get_text(protein, "protein_type"))
+                    and ptype.lower(),
                     "xrefs": {},
                 }
 
@@ -1535,7 +1547,7 @@ class HMDB_Protein_Parse(XMLParseHelper):
                 }
                 for pfam in pfams_elem.findall("hmdb:pfam", self.namespace)
                 if (pfam_id := self.get_text(pfam, "pfam_id"))
-                   and (name := self.get_text(pfam, "name"))
+                and (name := self.get_text(pfam, "name"))
             ]
             return {
                 "residue_num": int(residue_num) if residue_num else None,
@@ -1698,6 +1710,8 @@ class HMDB_Protein_Parse(XMLParseHelper):
         """Parse the HMDB XML for protein-pathway associations."""
         tree = ET.parse(self.input_xml)
         root = tree.getroot()
+        if not self.uniprot2entrezgene:
+            cache_protein_data(self.input_xml)
 
         for protein in root.findall("hmdb:protein", self.namespace):
             subject_node = self.build_protein_node(protein)

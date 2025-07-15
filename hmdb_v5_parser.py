@@ -1873,13 +1873,6 @@ def cache_hmdb_db(data_dir="downloads"):
     metabolite_parser = HMDB_Metabolite_Parse(metabolite_xml)
     protein_parser = HMDB_Protein_Parse(protein_xml)
 
-    metabolite_parser.parse_microbe_metabolite(),
-    metabolite_parser.parse_metabolite_disease(),
-    metabolite_parser.parse_metabolite_protein(),
-    metabolite_parser.parse_metabolite_pathway(),
-    protein_parser.parse_protein_pathway(),
-    protein_parser.parse_protein_biological_process(),
-
     hmdb_combined = {
         "microbe-metabolite": list(metabolite_parser.parse_microbe_metabolite()),
         "metabolite-disease": list(metabolite_parser.parse_metabolite_disease()),

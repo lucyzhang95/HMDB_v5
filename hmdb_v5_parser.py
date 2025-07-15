@@ -785,7 +785,7 @@ def get_organism_type(node) -> str:
 
     return "Other"
 
-
+# TODO: Need to write a function check if cache files exist
 def cache_metabolite_data(input_xml):
     # cache mapped taxon
     microbe_names = get_all_microbe_names(input_xml)

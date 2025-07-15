@@ -1,8 +1,8 @@
-import re
-import time
+# import re
+# import time
 
-import requests
-from bs4 import BeautifulSoup
+# import requests
+# from bs4 import BeautifulSoup
 
 
 def get_release(self, max_retries=3, base_delay=2):

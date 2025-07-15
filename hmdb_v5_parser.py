@@ -20,6 +20,7 @@ from Bio import Entrez
 from dotenv import load_dotenv
 from ete3 import NCBITaxa
 from lxml import etree as ET
+from tqdm.auto import tqdm
 
 load_dotenv()
 CACHE_DIR = os.path.join(os.getcwd(), "cache")
@@ -43,9 +44,7 @@ def load_pickle(f_name):
     :return:
     """
     path = os.path.join(CACHE_DIR, f_name)
-    return (
-        pickle.load(open(path, "rb")) if os.path.exists(path) else None
-    )
+    return pickle.load(open(path, "rb")) if os.path.exists(path) else None
 
 
 def save_json(obj, f_name):
@@ -157,11 +156,11 @@ def ete3_taxon_name2taxid(taxon_names: list) -> dict:
 
 
 def entrez_taxon_name2taxid(
-        taxon_names: list[str],
-        email: str,
-        sleep: float = 0.34,
-        retries: int = 3,
-        backoff_factor: int = 2,
+    taxon_names: list[str],
+    email: str,
+    sleep: float = 0.34,
+    retries: int = 3,
+    backoff_factor: int = 2,
 ) -> dict:
     """Map taxonomy names to NCBI taxonomy ids using the Entrez API with retry logic.
 
@@ -429,7 +428,7 @@ def get_cuis_sync(api_key: str, disease_names: List[str]):
 
 
 def text2term_disease_name2id(
-        disease_names, ontology="MONDO", ontology_url="http://purl.obolibrary.org/obo/mondo.owl"
+    disease_names, ontology="MONDO", ontology_url="http://purl.obolibrary.org/obo/mondo.owl"
 ):
     """
 
@@ -640,8 +639,8 @@ def get_all_uniprot_ids_from_hmdbp(input_xml) -> list:
         elem.text.strip()
         for protein in root.findall("hmdb:protein", namespace)
         if (elem := protein.find("hmdb:uniprot_id", namespace)) is not None
-           and elem.text
-           and elem.text.strip()
+        and elem.text
+        and elem.text.strip()
     ]
     return uniprot_ids
 
@@ -720,7 +719,8 @@ def get_smpdb_pathway_description():
 
 
 async def get_go_definitions(
-        go_ids: List[str], batch_size: int = 200, delay: float = 0.25) -> Dict[str, str]:
+    go_ids: List[str], batch_size: int = 200, delay: float = 0.25
+) -> Dict[str, str]:
     """
 
     :param go_ids:
@@ -795,6 +795,7 @@ def get_organism_type(node) -> str:
             return biolink_type
 
     return "Other"
+
 
 # TODO: Need to write a function check if cache files exist
 def cache_metabolite_data(input_xml):
@@ -1859,6 +1860,7 @@ def load_hmdb_data(data_dir="downloads"):
 
 def cache_hmdb_db(data_dir="downloads"):
     """Cache HMDB data for faster access in the future."""
+    print(f"--- Caching HMDB data in {data_dir}... ---")
     data_dir = os.path.abspath(data_dir)
     metabolite_xml = os.path.join(data_dir, "hmdb_metabolites.xml")
     if not os.path.isfile(metabolite_xml):
@@ -1874,23 +1876,27 @@ def cache_hmdb_db(data_dir="downloads"):
     protein_parser = HMDB_Protein_Parse(protein_xml)
 
     hmdb_combined = {
-        "microbe-metabolite": list(metabolite_parser.parse_microbe_metabolite()),
-        "metabolite-disease": list(metabolite_parser.parse_metabolite_disease()),
-        "metabolite-protein": list(metabolite_parser.parse_metabolite_protein()),
-        "metabolite-pathway": list(metabolite_parser.parse_metabolite_pathway()),
-        "protein-biological_process": list(protein_parser.parse_protein_biological_process()),
-        "protein-pathway": list(protein_parser.parse_protein_pathway()),
+        "microbe-metabolite": list(tqdm(metabolite_parser.parse_microbe_metabolite())),
+        "metabolite-disease": list(tqdm(metabolite_parser.parse_metabolite_disease())),
+        "metabolite-protein": list(tqdm(metabolite_parser.parse_metabolite_protein())),
+        "metabolite-pathway": list(tqdm(metabolite_parser.parse_metabolite_pathway())),
+        "protein-biological_process": list(tqdm(protein_parser.parse_protein_biological_process())),
+        "protein-pathway": list(tqdm(protein_parser.parse_protein_pathway())),
     }
+
+    print("--- Saving parsed records to pickle file... ---")
     save_pickle(
         hmdb_combined,
         "hmdb_v5_parsed_records.pkl",
     )
+    print("--- Caching complete. ---")
 
 
 if __name__ == "__main__":
     start = time.time()
-    cache_metabolite_data(os.path.join("downloads", "hmdb_metabolites.xml"))
-    cache_protein_data(os.path.join("downloads", "hmdb_proteins.xml"))
+    cache_hmdb_db()
+    # cache_metabolite_data(os.path.join("downloads", "hmdb_metabolites.xml"))
+    # cache_protein_data(os.path.join("downloads", "hmdb_proteins.xml"))
     # recs = [rec for rec in load_hmdb_data()]
     # for rec in recs:
     #     print(rec)

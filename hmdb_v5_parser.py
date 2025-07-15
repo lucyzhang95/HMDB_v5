@@ -87,7 +87,7 @@ def get_all_microbe_names(input_xml: str | pathlib.Path) -> Iterator[str]:
     descendant_tag = f"{{{ns_uri}}}descendant"
     ontology_tag = f"{{{ns_uri}}}ontology"
 
-    for _, elem in ET.iterparse(str(input_xml), events=("end",), tag=f"{{{ns_uri}}}metabolite"):
+    for _, elem in ET.iterparse(input_xml, events=("end",), tag=f"{{{ns_uri}}}metabolite"):
         ontology = elem.find(ontology_tag)
         if ontology is not None:
             for root in ontology.findall(f"{f'{{{ns_uri}}}root'}"):
@@ -772,7 +772,7 @@ def get_organism_type(node) -> str:
     return "Other"
 
 
-def cache_data(input_xml):
+def cache_metabolite_data(input_xml):
     # cache mapped taxon
     microbe_names = get_all_microbe_names(input_xml)
     microbes4query = list(set(microbe_names))
@@ -834,9 +834,8 @@ def cache_data(input_xml):
     }
     save_pickle(filtered_all_mapped_disease_names, "all_disease_name2id.pkl")
 
-    di2id_path = os.path.join("cache", "all_disease_name2id.pkl")
-    if os.path.exists(di2id_path):
-        all_di_mapped = load_pickle("all_disease_name2id.pkl")
+    # TODO: need to check if the file exists before loading
+    all_di_mapped = load_pickle("all_disease_name2id.pkl")
 
     di_ids = [
         mapped["id"]
@@ -884,6 +883,8 @@ def cache_data(input_xml):
     smpdb_pathway_descr = get_smpdb_pathway_description()
     save_pickle(smpdb_pathway_descr, "smpdb_pathway_descriptions.pkl")
 
+
+def cache_protein_data(input_xml):
     # cache HMDBP protein functions
     hmdbp_uniprot_ids = get_all_uniprot_ids_from_hmdbp(input_xml)
     hmdbp_prot_func = asyncio.run(get_batch_protein_functions(hmdbp_uniprot_ids))
@@ -1284,9 +1285,9 @@ class HMDB_Metabolite_Parse(XMLParseHelper):
                 "publication": references,
             }
             if "publication" in association_node:
-                association_node["evidence_type"] = "ECO:0000305"   # manual assertion
+                association_node["evidence_type"] = "ECO:0000305"  # manual assertion
             else:
-                association_node["evidence_type"] = "ECO:0000000"   # unknown evidence
+                association_node["evidence_type"] = "ECO:0000000"  # unknown evidence
             association_node = self.remove_empty_none_values(association_node)
 
             primary_id, xrefs = self.get_primary_id(metabolite)
@@ -1829,9 +1830,49 @@ def load_hmdb_data(data_dir="downloads"):
     )
 
 
+def cache_hmdb_db(data_dir="downloads"):
+    """Cache HMDB data for faster access in the future."""
+    data_dir = os.path.abspath(data_dir)
+    metabolite_xml = os.path.join(data_dir, "hmdb_metabolites.xml")
+    if not os.path.isfile(metabolite_xml):
+        metabolite_zip = os.path.join(data_dir, "hmdb_metabolites.zip")
+        metabolite_xml = extract_file_from_zip(metabolite_zip, "hmdb_metabolites.xml")
+
+    protein_xml = os.path.join(data_dir, "hmdb_proteins.xml")
+    if not os.path.isfile(protein_xml):
+        protein_zip = os.path.join(data_dir, "hmdb_proteins.zip")
+        protein_xml = extract_file_from_zip(protein_zip, "hmdb_proteins.xml")
+
+    metabolite_parser = HMDB_Metabolite_Parse(metabolite_xml)
+    protein_parser = HMDB_Protein_Parse(protein_xml)
+
+    metabolite_parser.parse_microbe_metabolite(),
+    metabolite_parser.parse_metabolite_disease(),
+    metabolite_parser.parse_metabolite_protein(),
+    metabolite_parser.parse_metabolite_pathway(),
+    protein_parser.parse_protein_pathway(),
+    protein_parser.parse_protein_biological_process(),
+
+    hmdb_combined = {
+        "microbe-metabolite": metabolite_parser.parse_microbe_metabolite(),
+        "metabolite-disease": metabolite_parser.parse_metabolite_disease(),
+        "metabolite-protein": metabolite_parser.parse_metabolite_protein(),
+        "metabolite-pathway": metabolite_parser.parse_metabolite_pathway(),
+        "protein-biological_process": protein_parser.parse_protein_biological_process(),
+        "protein-pathway": protein_parser.parse_protein_pathway(),
+    }
+    save_pickle(
+        hmdb_combined,
+        "hmdb_v5_parsed_records.pkl",
+    )
+
+
 if __name__ == "__main__":
     start = time.time()
-    for record in load_hmdb_data():
-        print(record)
+    cache_metabolite_data(os.path.join("downloads", "hmdb_metabolites.xml"))
+    cache_protein_data(os.path.join("downloads", "hmdb_proteins.xml"))
+    # recs = [rec for rec in load_hmdb_data()]
+    # for rec in recs:
+    #     print(rec)
     end = time.time()
     print(f"Total time: {(end - start)/60:.2f} minutes.")  # it took ~28 minutes with cache

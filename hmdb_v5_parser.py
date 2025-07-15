@@ -1387,8 +1387,7 @@ class HMDB_Metabolite_Parse(XMLParseHelper):
                     "full_name": self.get_text(protein, "name"),
                     "description": None,
                     "type": "biolink:Protein",
-                    "protein_type": (ptype := self.get_text(protein, "protein_type"))
-                    and ptype.lower(),
+                    "protein_type": (ptype := self.get_text(protein, "protein_type")) and ptype.lower(),
                     "xrefs": {},
                 }
 
@@ -1536,7 +1535,7 @@ class HMDB_Protein_Parse(XMLParseHelper):
                 }
                 for pfam in pfams_elem.findall("hmdb:pfam", self.namespace)
                 if (pfam_id := self.get_text(pfam, "pfam_id"))
-                and (name := self.get_text(pfam, "name"))
+                   and (name := self.get_text(pfam, "name"))
             ]
             return {
                 "residue_num": int(residue_num) if residue_num else None,

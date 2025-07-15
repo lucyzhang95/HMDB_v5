@@ -178,7 +178,7 @@ def entrez_taxon_name2taxid(
                 taxid = int(record["IdList"][0])
                 entrez_mapped[name] = {"taxid": taxid, "mapping_tool": "entrez"}
         except Exception as e:
-            print(f"Entrez query failed for '{name}': {e}")
+            print(f"Entrez query failed for '{name}': {e}")  # TODO: need to add retry logic
         time.sleep(sleep)
     return entrez_mapped
 

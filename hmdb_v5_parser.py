@@ -282,7 +282,7 @@ def get_taxon_info_from_bt(taxids) -> dict:
     :return:
         {
        "28450":{
-          "id":"taxid:28450",
+          "id":"NCBITaxon:28450",
           "taxid":28450,
           "name":"burkholderia pseudomallei",
           "parent_taxid":111527,
@@ -384,7 +384,7 @@ def get_full_taxon_info(mapped_taxon_names: dict, taxon_info: dict) -> dict:
     :param mapped_taxon_names: Mapping of taxon name to a dict with taxon taxid, lineage, rank...
     {'clostridia propionicum': {'taxid': 28446, 'mapping_tool': 'manual'} ...}
     :param taxon_info: Mapping of taxid (as str) to a dictionary with mapped taxon names and taxid.
-    '28450': {'id': 'taxid:28450', 'taxid': 28450, 'name': 'burkholderia pseudomallei', 'parent_taxid': 111527, 'lineage': [28450, 111527, 32008, 119060, 80840, 28216, 1224, 3379134, 2, 131567, 1], 'rank': 'species', 'description': 'A species of aerobic, Gram-negative, rod shaped bacteria assigned to the phylum Proteobacteria.
+    '28450': {'id': 'NCBITaxon:28450', 'taxid': 28450, 'name': 'burkholderia pseudomallei', 'parent_taxid': 111527, 'lineage': [28450, 111527, 32008, 119060, 80840, 28216, 1224, 3379134, 2, 131567, 1], 'rank': 'species', 'description': 'A species of aerobic, Gram-negative, rod shaped bacteria assigned to the phylum Proteobacteria.
     This species is motile, non-spore forming, oxidase and catalase positive and indole negative.
     B. pseudomallei is found in contaminated soil, water,
     and produce and causes melioidosis in humans with the highest rate of disease occurring in southeast Asia.

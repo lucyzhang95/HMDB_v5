@@ -1856,12 +1856,12 @@ def cache_hmdb_db(data_dir="downloads"):
     protein_parser.parse_protein_biological_process(),
 
     hmdb_combined = {
-        "microbe-metabolite": metabolite_parser.parse_microbe_metabolite(),
-        "metabolite-disease": metabolite_parser.parse_metabolite_disease(),
-        "metabolite-protein": metabolite_parser.parse_metabolite_protein(),
-        "metabolite-pathway": metabolite_parser.parse_metabolite_pathway(),
-        "protein-biological_process": protein_parser.parse_protein_biological_process(),
-        "protein-pathway": protein_parser.parse_protein_pathway(),
+        "microbe-metabolite": list(metabolite_parser.parse_microbe_metabolite()),
+        "metabolite-disease": list(metabolite_parser.parse_metabolite_disease()),
+        "metabolite-protein": list(metabolite_parser.parse_metabolite_protein()),
+        "metabolite-pathway": list(metabolite_parser.parse_metabolite_pathway()),
+        "protein-biological_process": list(protein_parser.parse_protein_biological_process()),
+        "protein-pathway": list(protein_parser.parse_protein_pathway()),
     }
     save_pickle(
         hmdb_combined,

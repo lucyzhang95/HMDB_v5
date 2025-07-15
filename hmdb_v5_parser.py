@@ -37,9 +37,14 @@ def save_pickle(obj, f_name):
 
 
 def load_pickle(f_name):
+    """
+
+    :param f_name:
+    :return:
+    """
     path = os.path.join(CACHE_DIR, f_name)
     return (
-        pickle.load(open(path, "rb")) if os.path.exists(path) else print("The file does not exist.")
+        pickle.load(open(path, "rb")) if os.path.exists(path) else None
     )
 
 
@@ -152,11 +157,11 @@ def ete3_taxon_name2taxid(taxon_names: list) -> dict:
 
 
 def entrez_taxon_name2taxid(
-    taxon_names: list[str],
-    email: str,
-    sleep: float = 0.34,
-    retries: int = 3,
-    backoff_factor: int = 2,
+        taxon_names: list[str],
+        email: str,
+        sleep: float = 0.34,
+        retries: int = 3,
+        backoff_factor: int = 2,
 ) -> dict:
     """Map taxonomy names to NCBI taxonomy ids using the Entrez API with retry logic.
 
@@ -424,7 +429,7 @@ def get_cuis_sync(api_key: str, disease_names: List[str]):
 
 
 def text2term_disease_name2id(
-    disease_names, ontology="MONDO", ontology_url="http://purl.obolibrary.org/obo/mondo.owl"
+        disease_names, ontology="MONDO", ontology_url="http://purl.obolibrary.org/obo/mondo.owl"
 ):
     """
 
@@ -635,8 +640,8 @@ def get_all_uniprot_ids_from_hmdbp(input_xml) -> list:
         elem.text.strip()
         for protein in root.findall("hmdb:protein", namespace)
         if (elem := protein.find("hmdb:uniprot_id", namespace)) is not None
-        and elem.text
-        and elem.text.strip()
+           and elem.text
+           and elem.text.strip()
     ]
     return uniprot_ids
 
@@ -715,8 +720,14 @@ def get_smpdb_pathway_description():
 
 
 async def get_go_definitions(
-    go_ids: List[str], batch_size: int = 200, delay: float = 0.25
-) -> Dict[str, str]:
+        go_ids: List[str], batch_size: int = 200, delay: float = 0.25) -> Dict[str, str]:
+    """
+
+    :param go_ids:
+    :param batch_size:
+    :param delay:
+    :return:
+    """
     BASE = "https://www.ebi.ac.uk/QuickGO/services/ontology/go/terms/"
 
     def chunks(lst, n):

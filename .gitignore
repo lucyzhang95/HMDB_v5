@@ -1,9 +1,0 @@
-.idea
-.venv
-.env
-downloads
-temp_dir
-cache
-
-pyproject.toml
-.flake8

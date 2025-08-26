@@ -1,40 +1,69 @@
+"""Cache utilities for storing and retrieving processed data."""
 import json
 import os
 import pickle
 
+CACHE_DIR = os.path.join(os.getcwd(), "cache")
+os.makedirs(CACHE_DIR, exist_ok=True)
 
-class CacheHelper:
-    """Handles low-level saving and loading of data to/from the filesystem."""
 
-    SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-    CACHE_DIR = os.path.join(SCRIPT_DIR, "cache")
+def save_pickle(obj, filename: str) -> None:
+    """Save object to pickle file in cache directory."""
+    filepath = os.path.join(CACHE_DIR, filename)
+    with open(filepath, "wb") as f:
+        pickle.dump(obj, f)
 
-    def __init__(self, cache_dir=CACHE_DIR):
-        self.cache_dir = os.path.join(os.getcwd(), cache_dir)
-        os.makedirs(self.cache_dir, exist_ok=True)
 
-    def save_pickle(self, obj, f_name):
-        """Saves an object to a pickle file."""
-        with open(os.path.join(self.cache_dir, f_name), "wb") as out_f:
-            pickle.dump(obj, out_f)
+def load_pickle(filename: str):
+    """Load object from pickle file in cache directory."""
+    filepath = os.path.join(CACHE_DIR, filename)
+    return pickle.load(open(filepath, "rb")) if os.path.exists(filepath) else None
 
-    def load_pickle(self, f_name):
-        """Loads an object from a pickle file."""
-        path = os.path.join(self.cache_dir, f_name)
-        if os.path.exists(path):
-            with open(path, "rb") as in_f:
-                return pickle.load(in_f)
-        return None
 
-    def save_json(self, obj, f_name):
-        """Saves an object to a JSON file."""
-        with open(os.path.join(self.cache_dir, f_name), "w") as out_f:
-            json.dump(obj, out_f, indent=4)
+def save_json(obj, filename: str) -> None:
+    """Save object to JSON file in cache directory."""
+    filepath = os.path.join(CACHE_DIR, filename)
+    with open(filepath, "w") as f:
+        json.dump(obj, f, indent=4)
 
-    def load_json(self, f_name):
-        """Loads an object from a JSON file."""
-        path = os.path.join(self.cache_dir, f_name)
-        if os.path.exists(path):
-            with open(path, "r") as in_f:
-                return json.load(in_f)
-        return None
+
+def cache_exists(filename: str) -> bool:
+    """Check if cache file exists."""
+    filepath = os.path.join(CACHE_DIR, filename)
+    return os.path.exists(filepath)
+
+
+def get_cache_path(filename: str) -> str:
+    """Get full path to cache file."""
+    return os.path.join(CACHE_DIR, filename)
+
+
+def clear_cache() -> None:
+    """Remove all cache files."""
+    import shutil
+
+    if os.path.exists(CACHE_DIR):
+        shutil.rmtree(CACHE_DIR)
+        os.makedirs(CACHE_DIR, exist_ok=True)
+
+
+def get_cache_size() -> dict:
+    """Get size information about cache files."""
+    cache_info = {}
+    if not os.path.exists(CACHE_DIR):
+        return cache_info
+
+    for filename in os.listdir(CACHE_DIR):
+        filepath = os.path.join(CACHE_DIR, filename)
+        if os.path.isfile(filepath):
+            size = os.path.getsize(filepath)
+            cache_info[filename] = {"size_bytes": size, "size_mb": round(size / (1024 * 1024), 2)}
+
+    return cache_info
+
+
+def list_cache_files() -> list:
+    """List all files in cache directory."""
+    if not os.path.exists(CACHE_DIR):
+        return []
+    return [f for f in os.listdir(CACHE_DIR) if os.path.isfile(os.path.join(CACHE_DIR, f))]

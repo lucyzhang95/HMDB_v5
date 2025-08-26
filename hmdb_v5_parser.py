@@ -1251,7 +1251,7 @@ class HMDB_Metabolite_Parse(XMLParseHelper):
             pmids = sorted(set(pmids))
             pmid_value = pmids[0] if len(pmids) == 1 else pmids
 
-            return {"id": f"PMID:{pmids[0]}", "pmid": pmid_value, "type": "biolink:Publication"}
+            return {"pmid": pmid_value, "type": "biolink:Publication"}
 
     def build_metabolite_node(
         self,
@@ -1646,7 +1646,7 @@ class HMDB_Protein_Parse(XMLParseHelper):
         if pmids:
             pmids = sorted(set(pmids))
             pmid_value = pmids[0] if len(pmids) == 1 else pmids
-            return {"id": f"PMID:{pmids[0]}", "pmid": pmid_value, "type": "biolink:Publication"}
+            return {"pmid": pmid_value, "type": "biolink:Publication"}
 
     def lookup_uniprot(self, uniprot_id: str) -> tuple[str | None, str | None]:
         descr = self.protein_func.get(uniprot_id, {}).get("description")
@@ -1860,7 +1860,7 @@ def load_hmdb_data(data_dir="downloads"):
 
 def cache_hmdb_db(data_dir="downloads"):
     """Cache HMDB data for faster access in the future."""
-    print(f"--- Caching HMDB data in {data_dir}... ---")
+    print(f"--- Caching HMDB data... ---")
     data_dir = os.path.abspath(data_dir)
     metabolite_xml = os.path.join(data_dir, "hmdb_metabolites.xml")
     if not os.path.isfile(metabolite_xml):
@@ -1889,7 +1889,10 @@ def cache_hmdb_db(data_dir="downloads"):
         hmdb_combined,
         "hmdb_v5_parsed_records.pkl",
     )
-    print("--- Caching complete. ---")
+    save_json(
+        hmdb_combined,
+        "hmdb_v5_parsed_records.json", )
+    print("🎉 Caching complete!")
 
 
 if __name__ == "__main__":

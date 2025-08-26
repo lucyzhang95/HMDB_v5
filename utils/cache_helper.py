@@ -10,8 +10,8 @@ os.makedirs(CACHE_DIR, exist_ok=True)
 def save_pickle(obj, filename: str) -> None:
     """Save object to pickle file in cache directory."""
     filepath = os.path.join(CACHE_DIR, filename)
-    with open(filepath, "wb") as f:
-        pickle.dump(obj, f)
+    with open(filepath, "wb") as in_f:
+        pickle.dump(obj, in_f)
 
 
 def load_pickle(filename: str):
@@ -23,8 +23,8 @@ def load_pickle(filename: str):
 def save_json(obj, filename: str) -> None:
     """Save object to JSON file in cache directory."""
     filepath = os.path.join(CACHE_DIR, filename)
-    with open(filepath, "w") as f:
-        json.dump(obj, f, indent=4)
+    with open(filepath, "w") as out_f:
+        json.dump(obj, out_f, indent=4)
 
 
 def cache_exists(filename: str) -> bool:

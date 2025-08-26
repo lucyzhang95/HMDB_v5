@@ -1264,12 +1264,12 @@ class HMDB_Metabolite_Parse(XMLParseHelper):
         state = self.get_text(metabolite, "state")
 
         synonyms_elem = metabolite.find("hmdb:synonyms", self.namespace)
-        synonyms = self.get_list(synonyms_elem, "synonym") if synonyms_elem is not None else []
+        synonyms = self.get_list(synonyms_elem, "synonyms") if synonyms_elem is not None else []
 
         node = {
             "id": primary_id,
             "name": name.lower() if name else None,
-            "synonym": synonyms,
+            "synonyms": synonyms,
             "description": self.get_text(metabolite, "description"),
             "chemical_formula": self.get_text(metabolite, "chemical_formula"),
             "molecular_weight": self.get_molecular_weights(metabolite),
@@ -1665,7 +1665,7 @@ class HMDB_Protein_Parse(XMLParseHelper):
         name = self.get_text(protein, "gene_name")
         full_name = self.get_text(protein, "name")
         synonyms_elem = protein.find("hmdb:synonyms", self.namespace)
-        synonyms = self.get_list(synonyms_elem, "synonym") if synonyms_elem is not None else []
+        synonyms = self.get_list(synonyms_elem, "synonyms") if synonyms_elem is not None else []
         primary_id, xrefs = self.get_primary_id(protein)
         prot_func = self.get_text(protein, "general_function")
         prot_spec_func = self.get_text(protein, "specific_function")
@@ -1697,7 +1697,7 @@ class HMDB_Protein_Parse(XMLParseHelper):
             "id": primary_id,
             "name": name if name else None,
             "full_name": full_name.lower() if full_name else None,
-            "synonym": synonyms,
+            "synonyms": synonyms,
             "description": prot_descr,
             "function": prot_func,
             "specific_function": prot_spec_func,

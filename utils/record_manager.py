@@ -9,14 +9,14 @@ from pathlib import Path
 from typing import Dict, Iterator, List
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'parsers'))
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", "parsers"))
 
+from metabolite_parser import HMDBMetaboliteParser
+from protein_parser import HMDBProteinParser
 from tqdm.auto import tqdm
 
 from .cache_helper import load_pickle, save_json, save_pickle
 from .cache_manager import CacheManager
-from metabolite_parser import HMDBMetaboliteParser
-from protein_parser import HMDBProteinParser
 from .reader import extract_file_from_zip
 
 
@@ -232,7 +232,11 @@ class RecordManager:
             return stats
 
         except FileNotFoundError:
-            return {"error": "❌ No cached records found", "total_records": 0, "association_types": {}}
+            return {
+                "error": "❌ No cached records found",
+                "total_records": 0,
+                "association_types": {},
+            }
 
 
 def cache_hmdb_database(
@@ -245,7 +249,7 @@ def cache_hmdb_database(
     :param umls_api_key: API key for UMLS
     :param data_dir: Directory containing HMDB XML files
     :param force_refresh: Whether to force refresh of all cached data
-    
+
     :return: Dictionary with pipeline results and statistics
     """
     start_time = time.time()

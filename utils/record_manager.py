@@ -133,7 +133,7 @@ class RecordManager:
         if cached:
             return cached
         else:
-            raise FileNotFoundError("‼️No cached records found. Run generate_all_records() first.")
+            raise FileNotFoundError("‼️No cached records found. Run --generate-records first.")
 
     def get_record_iterator(self) -> Iterator[Dict]:
         """Get an iterator over all records."""
@@ -241,14 +241,12 @@ def cache_hmdb_database(
     """
     Complete HMDB database caching and record generation pipeline.
 
-    Args:
-        email: Email for NCBI Entrez API
-        umls_api_key: API key for UMLS
-        data_dir: Directory containing HMDB XML files
-        force_refresh: Whether to force refresh of all cached data
-
-    Returns:
-        Dictionary with pipeline results and statistics
+    :param email: Email for NCBI Entrez API
+    :param umls_api_key: API key for UMLS
+    :param data_dir: Directory containing HMDB XML files
+    :param force_refresh: Whether to force refresh of all cached data
+    
+    :return: Dictionary with pipeline results and statistics
     """
     start_time = time.time()
 

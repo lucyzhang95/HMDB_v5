@@ -159,7 +159,7 @@ class HMDBProteinParser(XMLParseHelper):
         entrez_curie = entrez_map.get("gene_id")
         return description, entrez_curie
 
-    def lookup_entrez_data(self, entrez_curie: str) -> Tuple[str, str]:
+    def lookup_entrez_data(self, entrez_curie: str) -> Tuple[str, str] | Tuple[None, None]:
         """Lookup Entrez gene ID and description."""
         if not entrez_curie or ":" not in entrez_curie:
             return None, None

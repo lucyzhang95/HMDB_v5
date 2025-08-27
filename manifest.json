@@ -6,7 +6,8 @@
     "license": "CC BY 4.0",
     "source_last_modified": "02/16/2022",
     "source_download_date": "05/13/2025",
-    "source_last_parsed": "07/03/2025"
+    "source_format": "xml.zip",
+    "source_last_ingested": "08/26/2025"
   },
   "display_name": "HMDBv5",
   "biothing_type": "association",
@@ -27,10 +28,11 @@
       "https://hmdb.ca/system/downloads/current/hmdb_proteins.zip",
       "https://smpdb.ca/downloads/smpdb_pathways.csv.zip"
     ],
+    "uncompress": true,
     "release": "version:get_release"
   },
   "uploader": {
-    "parser": "hmdb_v5_parser:load_hmdb_data",
+    "parser": "hmdb_parser:load_hmdb_data",
     "on_duplicates": "error"
   }
 }

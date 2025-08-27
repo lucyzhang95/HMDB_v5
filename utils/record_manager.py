@@ -156,7 +156,7 @@ class RecordManager:
         else:
             filtered_records = records
 
-        output_path = Path(output_file)
+        output_path = Path("cache") / Path(output_file).name
         output_path.parent.mkdir(parents=True, exist_ok=True)
 
         if format.lower() == "jsonl":

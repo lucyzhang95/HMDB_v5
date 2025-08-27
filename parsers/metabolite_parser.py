@@ -29,6 +29,7 @@ class HMDBMetaboliteParser(XMLParseHelper):
             load_pickle("uniprot_protein_functions.pkl") or []
         )
         self.cached_pathway_descriptions = load_pickle("smpdb_pathway_descriptions.pkl") or {}
+        self.cached_uberon_mappings = load_pickle("uberon_mappings.pkl") or {}
 
     def _flatten_protein_functions(self, protein_function_list: List[Dict]) -> Dict:
         """Flatten list of protein function dictionaries into single dict."""
@@ -92,14 +93,31 @@ class HMDBMetaboliteParser(XMLParseHelper):
             if specimen_elem is not None:
                 for specimen in specimen_elem.findall("hmdb:biospecimen", self.namespace):
                     if specimen.text and specimen.text.strip():
-                        output["biosample"].append(specimen.text.strip().lower())
+                        specimen_name = specimen.text.strip().lower()
+                        if specimen_name in self.cached_uberon_mappings:
+                            output["biosample"].append(self.cached_uberon_mappings[specimen_name])
+                        else:
+                            output["biosample"].append(
+                                {
+                                    "original_name": specimen_name,
+                                    "type": "biolink:AnatomicalEntity",
+                                }
+                            )
 
             # tissue locations
             tissue_elem = bio_prop.find("hmdb:tissue_locations", self.namespace)
             if tissue_elem is not None:
                 for tissue in tissue_elem.findall("hmdb:tissue", self.namespace):
                     if tissue.text and tissue.text.strip():
-                        output["anatomical_entity"].append(tissue.text.strip().lower())
+                        tissue_name = tissue.text.strip().lower()
+                        if tissue_name in self.cached_uberon_mappings:
+                            output["anatomical_entity"].append(
+                                self.cached_uberon_mappings[tissue_name]
+                            )
+                        else:
+                            output["anatomical_entity"].append(
+                                {"original_name": tissue_name, "type": "biolink:AnatomicalEntity"}
+                            )
 
         return output
 

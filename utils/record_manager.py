@@ -7,12 +7,14 @@ from itertools import chain
 from pathlib import Path
 from typing import Dict, Iterator, List
 
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+
 from tqdm.auto import tqdm
 
 from .cache_helper import load_pickle, save_json, save_pickle
 from .cache_manager import CacheManager
-from .hmdb_metabolite_parser import HMDBMetaboliteParser
-from .hmdb_protein_parser import HMDBProteinParser
+from .metabolite_parser import HMDBMetaboliteParser
+from .protein_parser import HMDBProteinParser
 from .reader import extract_file_from_zip
 
 

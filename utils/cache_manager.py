@@ -3,6 +3,8 @@
 import asyncio
 from typing import Dict, List
 
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+
 from .cache_helper import cache_exists, load_pickle, save_pickle
 from .ontology_mapper import DiseaseMapper, ProteinMapper, TaxonMapper
 from .ontology_services import GeneServices, GOServices, PathwayServices, ProteinServices

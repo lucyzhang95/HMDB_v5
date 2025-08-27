@@ -134,3 +134,29 @@ def get_all_go_terms_from_hmdbp(input_xml: Union[str, pathlib.Path]) -> list[str
             if go_id_elem is not None and go_id_elem.text:
                 go_terms.add(go_id_elem.text.strip())
     return list(go_terms)
+
+
+def get_all_anatomical_terms_from_hmdb(input_xml: Union[str, pathlib.Path]) -> list[str]:
+    """Extract all tissue terms from HMDB metabolites XML."""
+    namespace = {"hmdb": "http://www.hmdb.ca"}
+    tree = ET.parse(input_xml)
+    root = tree.getroot()
+
+    anatomical_terms = set()
+
+    for metabolite in root.findall("hmdb:metabolite", namespace):
+        bio_prop = metabolite.find("hmdb:biological_properties", namespace)
+        if bio_prop is not None:
+            tissue_elem = bio_prop.find("hmdb:tissue_locations", namespace)
+            if tissue_elem is not None:
+                for tissue in tissue_elem.findall("hmdb:tissue", namespace):
+                    if tissue.text and tissue.text.strip():
+                        anatomical_terms.add(tissue.text.strip().lower())
+
+            specimen_elem = bio_prop.find("hmdb:biospecimen_locations", namespace)
+            if specimen_elem is not None:
+                for specimen in specimen_elem.findall("hmdb:biospecimen", namespace):
+                    if specimen.text and specimen.text.strip():
+                        anatomical_terms.add(specimen.text.strip().lower())
+
+    return sorted(list(anatomical_terms))

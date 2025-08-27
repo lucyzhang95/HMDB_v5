@@ -3,7 +3,7 @@ import asyncio
 import os
 import ssl
 import time
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 import aiohttp
 import biothings_client as bt
@@ -516,12 +516,34 @@ class PathwayServices:
 
 
 class UberonService:
-    """Handles anatomy EBI OLS service."""
+    """Handles anatomy EBI OLS service queries for UBERON ontology."""
 
-    async def async_query_anatomical_entity_to_uberon_id(
-        self, session, term, url, match_type="exact", ontology="uberon", rows=1
-    ):
-        """Async helper function that now accepts a URL."""
+    DEFAULT_BASE_URL = "https://www.ebi.ac.uk/ols4/api/search"
+    DEFAULT_ONTOLOGY = "uberon"
+
+    @classmethod
+    async def _query_single_term(
+        cls,
+        session: aiohttp.ClientSession,
+        term: str,
+        url: str,
+        match_type: str = "exact",
+        ontology: str = DEFAULT_ONTOLOGY,
+        rows: int = 1,
+    ) -> Tuple[str, Optional[Dict[str, Any]]]:
+        """
+        Query a single anatomical term against the UBERON ontology.
+
+        Args:
+        :param session: Active aiohttp session
+        :param term: Anatomical term to query
+        :param url: API endpoint URL
+        :param match_type: Type of matching ('exact', 'partial', or 'fuzzy
+        :param ontology: Ontology to search (default: 'uberon')
+        :param rows: Number of results to return
+
+        :return: Tuple of (term, result_dict) where result_dict is None if no match found
+        """
         params = {"q": term, "ontology": ontology, "rows": rows, "start": 0}
 
         if match_type == "exact":
@@ -530,17 +552,18 @@ class UberonService:
             params["exact"] = "false"
             params["queryFields"] = "label"
         elif match_type == "fuzzy":
-            params["q"] = term + "~"
+            params["q"] = f"{term}~"
             params["exact"] = "false"
         else:
-            raise ValueError("match_type must be 'exact', 'partial', or 'fuzzy'.")
+            raise ValueError("match_type must be 'exact', 'partial', or 'fuzzy'")
 
         try:
-            async with session.get(url, params=params) as resp:
-                resp.raise_for_status()
-                data = await resp.json()
+            async with session.get(url, params=params) as response:
+                response.raise_for_status()
+                data = await response.json()
 
-                for doc in data.get("response", {}).get("docs", []):
+                docs = data.get("response", {}).get("docs", [])
+                for doc in docs:
                     iri = doc.get("iri")
                     if iri and "UBERON_" in iri:
                         uberon_id = iri.split("/")[-1].replace("_", ":")
@@ -551,34 +574,74 @@ class UberonService:
                             "original_name": term,
                             "type": "biolink:AnatomicalEntity",
                         }
+
         except aiohttp.ClientError as e:
-            print(f"❗️Error fetching term '{term}': {e}")
+            print(f"❗️ Error fetching term '{term}': {e}")
+        except Exception as e:
+            print(f"❗️ Unexpected error for term '{term}': {e}")
+
         return term, None
 
-    async def async_anatomical_entities_to_uberon_ids(
-        self, terms, match_type="exact", base_url="https://www.ebi.ac.uk/ols4/api/search"
-    ):
+    @classmethod
+    async def query_terms_async(
+        cls,
+        terms: List[str],
+        match_type: str = "exact",
+        base_url: str = DEFAULT_BASE_URL,
+        ontology: str = DEFAULT_ONTOLOGY,
+    ) -> Dict[str, Dict[str, Any]]:
         """
-        Query OLS for a list of terms, using the provided base_url.
+        Asynchronously query multiple anatomical terms against UBERON ontology.
+
+        Args:
+            terms: List of anatomical terms to query
+            match_type: Type of matching ('exact', 'partial', or 'fuzzy')
+            base_url: Base URL for the OLS API
+            ontology: Ontology to search
+
+        Returns:
+            Dictionary mapping terms to their UBERON information
         """
+        if not terms:
+            return {}
+
         async with aiohttp.ClientSession() as session:
             tasks = [
-                self.async_query_anatomical_entity_to_uberon_id(
-                    session, term, url=base_url, match_type=match_type
+                cls._query_single_term(
+                    session=session,
+                    term=term,
+                    url=base_url,
+                    match_type=match_type,
+                    ontology=ontology,
                 )
                 for term in terms
             ]
 
-            all_results = await tqdm.gather(*tasks, desc="Querying UBERON IDs...")
+            results = await tqdm.asyncio.tqdm.gather(*tasks, desc="Querying UBERON IDs")
 
-            return {term: info for term, info in all_results if info is not None}
+            return {term: info for term, info in results if info is not None}
 
-    def async_run_anatomical_entities_to_uberon_ids(self, terms, match_type="exact"):
-        base_url = "https://www.ebi.ac.uk/ols4/api/search"
-        results = asyncio.run(
-            self.async_anatomical_entities_to_uberon_ids(
-                terms, match_type=match_type, base_url=base_url
+    @classmethod
+    def query_terms(
+        cls, terms: List[str], match_type: str = "exact", base_url: str = DEFAULT_BASE_URL
+    ) -> Dict[str, Dict[str, Any]]:
+        """
+        Synchronous wrapper for querying anatomical terms.
+
+        Args:
+            terms: List of anatomical terms to query
+            match_type: Type of matching ('exact', 'partial', or 'fuzzy')
+            base_url: Base URL for the OLS API
+
+        Returns:
+            Dictionary mapping terms to their UBERON information
+        """
+        try:
+            results = asyncio.run(
+                cls.query_terms_async(terms=terms, match_type=match_type, base_url=base_url)
             )
-        )
-        print("🎉 UBERON ID mapping completed!")
-        return results
+            print(f"🎉 UBERON ID mapping completed! Found {len(results)} matches.")
+            return results
+        except Exception as e:
+            print(f"❗️ Error during UBERON ID mapping: {e}")
+            return {}

@@ -1,6 +1,6 @@
 """Module for correcting specific anatomical names to their corresponding UBERON IDs."""
 
-OXO_CORRECTIONS = {
+UBERON_CORRECTIONS = {
     "all tissues": {
         "id": "UBERON:0000479",
         "name": "tissue",
@@ -57,7 +57,10 @@ MANUAL_ANATOMY_MAPPINGS = {
 
 
 def _get_uberon_correction():
-    return OXO_CORRECTIONS.copy()
+    return UBERON_CORRECTIONS.copy()
+
+def _get_uberon_manual_mappings():
+    return MANUAL_ANATOMY_MAPPINGS.copy()
 
 
 def _apply_uberon_corrections(uberon_mapped: dict) -> dict:

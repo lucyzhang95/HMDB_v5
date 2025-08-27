@@ -153,7 +153,7 @@ class HMDBMetaboliteParser(XMLParseHelper):
         state = self.get_text(metabolite, "state")
 
         synonyms_elem = metabolite.find("hmdb:synonyms", self.namespace)
-        synonyms = self.get_list(synonyms_elem, "synonyms") if synonyms_elem is not None else []
+        synonyms = self.get_list(synonyms_elem, "synonym") if synonyms_elem is not None else []
 
         node = {
             "id": primary_id,

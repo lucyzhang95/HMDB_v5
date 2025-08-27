@@ -175,7 +175,7 @@ class HMDBProteinParser(XMLParseHelper):
 
         # synonyms
         synonyms_elem = protein.find("hmdb:synonyms", self.namespace)
-        synonyms = self.get_list(synonyms_elem, "synonyms") if synonyms_elem is not None else []
+        synonyms = self.get_list(synonyms_elem, "synonym") if synonyms_elem is not None else []
 
         # primary ID and xrefs
         primary_id, xrefs = IDHierarchy.get_protein_primary_id(protein, self)

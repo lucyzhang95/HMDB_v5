@@ -109,7 +109,7 @@ class CacheManager:
         else:
             print("✅ UBERON anatomy terms already cached, skipping...")
 
-        print("\n🎉 Metabolite Data Caching Complete!=")
+        print("\n🎉 Metabolite Data Caching Complete!")
 
     def cache_protein_data(self, protein_xml: str, skip_existing: bool = True) -> None:
         """Cache all protein-related mappings and enrichments with selective skipping."""

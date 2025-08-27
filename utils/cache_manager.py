@@ -25,6 +25,7 @@ from .reader import (
     get_all_uniprot_ids_from_hmdb,
     get_all_uniprot_ids_from_hmdbp,
 )
+from manual_annotations.anatomical_name2uberonid import apply_manual_anatomy_mappings
 
 
 class CacheManager:
@@ -104,8 +105,9 @@ class CacheManager:
             else:
                 print(f"-> Found {len(anatomical_terms)} unique anatomical terms")
             uberon_terms = UberonService.query_terms(anatomical_terms)
-            save_pickle(uberon_terms, "uberon_tissue_name2id.pkl")
-            print(f"✅ Cached {len(uberon_terms)} UBERON anatomy terms")
+            corrected_uberon_terms = apply_manual_anatomy_mappings(uberon_terms)
+            save_pickle(corrected_uberon_terms, "uberon_tissue_name2id.pkl")
+            print(f"✅ Cached {len(corrected_uberon_terms)} UBERON anatomy terms")
         else:
             print("✅ UBERON anatomy terms already cached, skipping...")
 

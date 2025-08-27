@@ -2,12 +2,13 @@
 
 import json
 import os
+import sys
 import time
 from itertools import chain
 from pathlib import Path
 from typing import Dict, Iterator, List
 
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
 from tqdm.auto import tqdm
 

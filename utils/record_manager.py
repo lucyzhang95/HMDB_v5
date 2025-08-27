@@ -96,7 +96,7 @@ class RecordManager:
 
     def save_records(self, records: Dict[str, List[Dict]], output_format: str = "both") -> Dict:
         """Save records to cache files."""
-        print("Saving parsed records...")
+        print("\n▶️ Saving parsed records...")
 
         if output_format in ("pickle", "both"):
             save_pickle(records, "hmdb_v5_parsed_records.pkl")
@@ -167,9 +167,9 @@ class RecordManager:
         elif format.lower() == "tsv":
             self._export_tsv(filtered_records, output_path)
         else:
-            raise ValueError(f"Unsupported format: {format}")
+            raise ValueError(f"‼️ Unsupported format: {format}")
 
-        print(f"Records exported to {output_path}")
+        print(f"🎉 Records exported to {output_path}")
 
     def _export_jsonl(self, records: Dict, output_path: Path) -> None:
         """Export records as JSON Lines format."""
@@ -232,7 +232,7 @@ class RecordManager:
             return stats
 
         except FileNotFoundError:
-            return {"error": "No cached records found", "total_records": 0, "association_types": {}}
+            return {"error": "❌ No cached records found", "total_records": 0, "association_types": {}}
 
 
 def cache_hmdb_database(
@@ -256,7 +256,7 @@ def cache_hmdb_database(
     cache_manager = CacheManager(email, umls_api_key)
 
     if force_refresh or not cache_manager.is_cache_complete():
-        print("Caching reference data (taxonomies, diseases, proteins)...")
+        print("▶️ Caching reference data (taxonomies, diseases, proteins)...")
 
         data_path = Path(data_dir).resolve()
 
@@ -273,27 +273,27 @@ def cache_hmdb_database(
         cache_manager.cache_metabolite_data(str(metabolite_xml))
         cache_manager.cache_protein_data(str(protein_xml))
     else:
-        print("Reference data cache is complete, skipping...")
+        print("✅ Reference data cache is complete, skipping...")
 
-    print("\nGenerating association records...")
+    print("\n▶️ Generating association records...")
     record_manager = RecordManager(data_dir)
 
     if force_refresh or not os.path.exists(os.path.join("cache", "hmdb_v5_parsed_records.pkl")):
         records = record_manager.generate_all_records()
         stats = record_manager.save_records(records)
     else:
-        print("Parsed records already exist, loading from cache...")
+        print("✅ Parsed records already exist, loading from cache...")
         stats = record_manager.get_record_summary()
 
     duration = time.time() - start_time
 
     print("\n" + "=" * 50)
-    print("HMDB Database Caching Complete!")
-    print(f"Total time: {duration / 60:.2f} minutes")
-    print(f"Total association records: {stats.get('total_records', 0):,}")
+    print("🎉 HMDB Database Caching Complete!")
+    print(f"-> Total time: {duration / 60:.2f} minutes")
+    print(f"-> Total association records: {stats.get('total_records', 0):,}")
 
     if "association_types" in stats:
-        print("\nAssociation breakdown:")
+        print("\n📋 Association breakdown:")
         for assoc_type, type_stats in stats["association_types"].items():
             print(f"  {assoc_type}: {type_stats['count']:,} ({type_stats['percentage']:.1f}%)")
 

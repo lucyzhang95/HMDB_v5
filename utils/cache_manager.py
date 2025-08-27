@@ -10,8 +10,15 @@ sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
 from .cache_helper import cache_exists, load_pickle, save_pickle
 from .ontology_mapper import DiseaseMapper, ProteinMapper, TaxonMapper
-from .ontology_services import GeneServices, GOServices, PathwayServices, ProteinServices
+from .ontology_services import (
+    GeneServices,
+    GOServices,
+    PathwayServices,
+    ProteinServices,
+    UberonService,
+)
 from .reader import (
+    get_all_anatomical_terms_from_hmdb,
     get_all_diseases,
     get_all_go_terms_from_hmdbp,
     get_all_microbe_names,
@@ -86,6 +93,21 @@ class CacheManager:
             print(f"✅ Cached {len(pathway_descriptions)} pathway descriptions")
         else:
             print("✅ Pathway descriptions already cached, skipping...")
+
+        # step 5: cache Uberon anatomy terms (from tissue name to Uberon ID)
+        if not skip_existing or not cache_exists("uberon_tissue_name2id.pkl"):
+            print("⚙️ Querying UBERON anatomy terms...")
+            anatomical_terms = get_all_anatomical_terms_from_hmdb(metabolite_xml)
+            if not anatomical_terms:
+                print("⚠️ No anatomical terms found in metabolite data")
+                return
+            else:
+                print(f"-> Found {len(anatomical_terms)} unique anatomical terms")
+            uberon_terms = UberonService.query_terms(anatomical_terms)
+            save_pickle(uberon_terms, "uberon_tissue_name2id.pkl")
+            print(f"✅ Cached {len(uberon_terms)} UBERON anatomy terms")
+        else:
+            print("✅ UBERON anatomy terms already cached, skipping...")
 
         print("\n🎉 Metabolite Data Caching Complete!=")
 
@@ -169,6 +191,7 @@ class CacheManager:
             "hmdbp_uniprot2entrezgene.pkl",
             "hmdbp_entrezgene_summaries.pkl",
             "hmdbp_go_definitions.pkl",
+            "uberon_tissue_name2id.pkl",
         ]
 
         return {filename: cache_exists(filename) for filename in cache_files}
@@ -194,6 +217,7 @@ class CacheManager:
             "hmdbp_uniprot2entrez": load_pickle("hmdbp_uniprot2entrezgene.pkl"),
             "hmdbp_gene_summaries": load_pickle("hmdbp_entrezgene_summaries.pkl"),
             "go_definitions": load_pickle("hmdbp_go_definitions.pkl"),
+            "uberon_terms": load_pickle("uberon_tissue_name2id.pkl"),
         }
 
     def cache_exists_for_file(self, xml_file: str) -> bool:
@@ -204,6 +228,7 @@ class CacheManager:
                 "original_disease_name2id.pkl",
                 "uniprot_protein_functions.pkl",
                 "smpdb_pathway_descriptions.pkl",
+                "uberon_tissue_name2id.pkl",
             ]
         elif "protein" in xml_file.lower():
             required_files = ["hmdbp_uniprot_protein_functions.pkl", "hmdbp_go_definitions.pkl"]

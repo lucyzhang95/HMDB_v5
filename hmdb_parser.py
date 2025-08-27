@@ -45,8 +45,6 @@ def main():
         epilog="""
 
 Usage Examples:
-    # Workflow: 1. cache reference data, 2. generate records, and 3. export
-    
     # Cache all reference data and generate association records
     python hmdb_parser.py --cache-all
 
@@ -63,6 +61,13 @@ Usage Examples:
     python hmdb_parser.py --export records.jsonl --format jsonl
     python hmdb_parser.py --export records.json --format json
     python hmdb_parser.py --export records.tsv --format tsv
+    
+    # Example Workflow: 1. cache reference data, 2. generate records, and 3. export
+    python hmdb_parser.py --cache-reference-data --generate-records --export records.json --format json
+    
+    or
+    
+    # python hmdb_parser.py --cache-all --export records.json --format json
         """,
     )
 

@@ -3,8 +3,8 @@
 import asyncio
 from typing import Dict, List
 
-from ..manual_annotations.disease_name2id import format_manual_disease_mappings
-from ..manual_annotations.taxon_name2taxid import (
+from manual_annotations.disease_name2id import format_manual_disease_mappings
+from manual_annotations.taxon_name2taxid import (
     apply_text2term_corrections,
     format_manual_mappings,
 )

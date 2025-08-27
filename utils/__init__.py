@@ -14,8 +14,8 @@ from .cache_helper import (
 )
 from .cache_manager import CacheManager
 from .cache_pipeline import CachePipeline, run_cache_pipeline, show_cache_status
-from .hmdb_metabolite_parser import HMDBMetaboliteParser
-from .hmdb_protein_parser import HMDBProteinParser
+from .metabolite_parser import HMDBMetaboliteParser
+from .protein_parser import HMDBProteinParser
 from .ontology_mapper import DiseaseMapper, ProteinMapper, TaxonMapper
 from .ontology_services import (
     BiothingsServices,
@@ -48,12 +48,12 @@ from .reader import (
 )
 from .record_manager import RecordManager, cache_hmdb_database
 
-__version__ = "2.0.0"
-__author__ = "HMDB Parser Team"
+__version__ = "5.0"
+__author__ = "Lucy Zhang (BioThings Team)"
 __description__ = "Modular HMDB data extraction and processing pipeline"
 
 
-# Convenience imports for backward compatibility
+# convenience imports for backward compatibility
 def load_hmdb_data(data_dir="downloads"):
     """Load HMDB data with automatic caching (backward compatibility)."""
     from .record_manager import RecordManager

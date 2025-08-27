@@ -3,11 +3,12 @@
 import asyncio
 from typing import Dict, List
 
+import biothings_client as bt
+from tqdm.auto import tqdm
+
 from manual_annotations.disease_name2id import format_manual_disease_mappings
-from manual_annotations.taxon_name2taxid import (
-    apply_text2term_corrections,
-    format_manual_mappings,
-)
+from manual_annotations.taxon_name2taxid import apply_text2term_corrections, format_manual_mappings
+
 from .cache_helper import load_pickle, save_pickle
 from .ontology_services import (
     BiothingsServices,
@@ -195,6 +196,28 @@ class DiseaseMapper:
 
 class ProteinMapper:
     """Orchestrates protein and gene mapping with enrichment."""
+
+    @staticmethod
+    def uniprot_id2entrezgene(uniprot_ids: list[str]) -> dict:
+        """Map UniProt IDs to Entrez Gene IDs using biothings."""
+        uniprot_ids = list(set(uniprot_ids))
+        get_gene = bt.get_client("gene")
+
+        entrezgene_mapped = {}
+        with tqdm(desc="UniProt to EntrezGene mapping", unit="batch") as pbar:
+            gene_q = get_gene.querymany(uniprot_ids, scopes=["uniprot", "uniprot.Swiss-Prot"])
+
+            for info in gene_q:
+                if "notfound" in info:
+                    continue
+                if "entrezgene" in info:
+                    entrezgene_mapped[info["query"]] = {
+                        "gene_id": f"NCBIGene:{info['entrezgene']}",
+                        "mapping_tool": "bt",
+                    }
+            pbar.update(1)
+
+        return entrezgene_mapped
 
     @staticmethod
     def enrich_protein_mappings(protein2uniprot: Dict[str, str]) -> Dict:

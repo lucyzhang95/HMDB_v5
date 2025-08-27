@@ -198,28 +198,6 @@ class ProteinServices:
 
         return results
 
-    @staticmethod
-    def uniprot_id2entrezgene(uniprot_ids: list[str]) -> dict:
-        """Map UniProt IDs to Entrez Gene IDs using biothings."""
-        uniprot_ids = list(set(uniprot_ids))
-        get_gene = bt.get_client("gene")
-
-        entrezgene_mapped = {}
-        with tqdm(desc="UniProt to EntrezGene mapping", unit="batch") as pbar:
-            gene_q = get_gene.querymany(uniprot_ids, scopes=["uniprot", "uniprot.Swiss-Prot"])
-
-            for info in gene_q:
-                if "notfound" in info:
-                    continue
-                if "entrezgene" in info:
-                    entrezgene_mapped[info["query"]] = {
-                        "gene_id": f"NCBIGene:{info['entrezgene']}",
-                        "mapping_tool": "bt",
-                    }
-            pbar.update(1)
-
-        return entrezgene_mapped
-
 
 class GeneServices:
     """Services for gene-related data retrieval."""

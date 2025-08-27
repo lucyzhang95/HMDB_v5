@@ -1,5 +1,6 @@
-"""Cache management for HMDB data processing pipeline."""
-
+"""
+Cache management for HMDB data processing pipeline.
+"""
 import asyncio
 import os
 import sys
@@ -28,96 +29,120 @@ class CacheManager:
         self.taxon_mapper = TaxonMapper(email)
         self.disease_mapper = DiseaseMapper(umls_api_key)
 
-    def cache_metabolite_data(self, metabolite_xml: str) -> None:
-        """Cache all metabolite-related mappings and enrichments."""
-        print("▶️ Caching HMDB Metabolite-related Data...")
+    def cache_metabolite_data(self, metabolite_xml: str, skip_existing: bool = True) -> None:
+        """Cache all metabolite-related mappings and enrichments with selective skipping."""
+        print("▶️ Caching Metabolite Data...")
 
         # step 1: cache taxon mappings
-        print("⚙️ Processing microbe taxon names...")
-        microbe_names = list(set(get_all_microbe_names(metabolite_xml)))
-        save_pickle(microbe_names, "hmdb_v5_microbe_names.pkl")
+        if not skip_existing or not cache_exists("original_taxon_name2taxid.pkl"):
+            print("⚙️ Processing microbe taxon names...")
+            microbe_names = list(set(get_all_microbe_names(metabolite_xml)))
+            save_pickle(microbe_names, "hmdb_v5_microbe_names.pkl")
 
-        # map taxon names using ete3 -> entrez -> text2term -> manual
-        all_mapped_taxons = self.taxon_mapper.map_all_taxon_names(microbe_names)
+            # map taxon names using ete3 -> entrez -> text2term -> manual
+            all_mapped_taxons = self.taxon_mapper.map_all_taxon_names(microbe_names)
 
-        # enrich with detailed taxon info
-        enriched_taxon_info = self.taxon_mapper.enrich_taxon_info(all_mapped_taxons)
-        print(f"✅ Mapped {len(enriched_taxon_info)} taxon names")
+            # enrich with detailed taxon info
+            enriched_taxon_info = self.taxon_mapper.enrich_taxon_info(all_mapped_taxons)
+            print(f"✅ Mapped {len(enriched_taxon_info)} taxon names")
+        else:
+            print("✅ Taxon mappings already cached, skipping...")
 
         # step 2: cache disease mappings
-        print("\n⚙️ Processing disease names...")
-        diseases = get_all_diseases(metabolite_xml)
-        save_pickle(diseases, "hmdb_v5_diseases.pkl")
+        if not skip_existing or not cache_exists("original_disease_name2id.pkl"):
+            print("\n⚙️ Processing disease names...")
+            diseases = get_all_diseases(metabolite_xml)
+            save_pickle(diseases, "hmdb_v5_diseases.pkl")
 
-        # map disease names using text2term -> umls -> manual
-        all_mapped_diseases = self.disease_mapper.map_all_disease_names(diseases)
+            # map disease names using text2term -> umls -> manual
+            all_mapped_diseases = self.disease_mapper.map_all_disease_names(diseases)
 
-        # enrich with detailed disease info
-        enriched_disease_info = self.disease_mapper.enrich_disease_info(all_mapped_diseases)
-        print(f"✅ Mapped {len(enriched_disease_info)} disease names")
+            # enrich with detailed disease info
+            enriched_disease_info = self.disease_mapper.enrich_disease_info(all_mapped_diseases)
+            print(f"✅ Mapped {len(enriched_disease_info)} disease names")
+        else:
+            print("✅ Disease mappings already cached, skipping...")
 
         # step 3: cache protein mappings
-        print("\n⚙️ Processing protein mappings...")
-        protein2uniprot = get_all_uniprot_ids_from_hmdb(metabolite_xml)
-        save_pickle(protein2uniprot, "all_protein_name2uniprot.pkl")
+        if not skip_existing or not cache_exists("uniprot_protein_functions.pkl"):
+            print("\n▶️ Processing protein mappings...")
+            protein2uniprot = get_all_uniprot_ids_from_hmdb(metabolite_xml)
+            save_pickle(protein2uniprot, "all_protein_name2uniprot.pkl")
 
-        # enrich protein mappings
-        protein_enrichment = ProteinMapper.enrich_protein_mappings(protein2uniprot)
+            # enrich protein mappings
+            protein_enrichment = ProteinMapper.enrich_protein_mappings(protein2uniprot)
 
-        # enrich gene information
-        gene_summaries = ProteinMapper.enrich_gene_info(protein_enrichment["uniprot2entrez"])
-        print(f"✅ Processed {len(protein2uniprot)} protein mappings")
+            # enrich gene information
+            gene_summaries = ProteinMapper.enrich_gene_info(protein_enrichment["uniprot2entrez"])
+            print(f"✅ Processed {len(protein2uniprot)} protein mappings")
+        else:
+            print("✅ Protein mappings already cached, skipping...")
 
         # step 4: cache pathway descriptions
-        print("\n⚙️ Processing pathway descriptions...")
-        pathway_descriptions = PathwayServices.get_smpdb_pathway_description()
-        save_pickle(pathway_descriptions, "smpdb_pathway_descriptions.pkl")
-        print(f"▶️ Cached {len(pathway_descriptions)} pathway descriptions")
+        if not skip_existing or not cache_exists("smpdb_pathway_descriptions.pkl"):
+            print("\n▶️ Processing pathway descriptions...")
+            pathway_descriptions = PathwayServices.get_smpdb_pathway_description()
+            save_pickle(pathway_descriptions, "smpdb_pathway_descriptions.pkl")
+            print(f"✅ Cached {len(pathway_descriptions)} pathway descriptions")
+        else:
+            print("✅ Pathway descriptions already cached, skipping...")
 
-        print("\n🎉 HMDB Metabolite-related Data Caching Complete!")
+        print("\n🎉 Metabolite Data Caching Complete!=")
 
-    def cache_protein_data(self, protein_xml: str) -> None:
-        """Cache all protein-related mappings and enrichments."""
-        print("\n▶️ Caching HMDB Protein-related Data...")
+    def cache_protein_data(self, protein_xml: str, skip_existing: bool = True) -> None:
+        """Cache all protein-related mappings and enrichments with selective skipping."""
+        print("\n▶️ Caching Protein Data...")
 
         # step 1: cache HMDBP protein functions
-        print("⚙️ Processing HMDBP UniProt IDs...")
-        hmdbp_uniprot_ids = get_all_uniprot_ids_from_hmdbp(protein_xml)
+        if not skip_existing or not cache_exists("hmdbp_uniprot_protein_functions.pkl"):
+            print("⚙️ Processing HMDBP UniProt IDs...")
+            hmdbp_uniprot_ids = get_all_uniprot_ids_from_hmdbp(protein_xml)
 
-        print("⚙️ Querying HMDBP protein functions...")
-        hmdbp_protein_functions = asyncio.run(
-            ProteinServices.get_batch_protein_functions(hmdbp_uniprot_ids)
-        )
-        save_pickle(hmdbp_protein_functions, "hmdbp_uniprot_protein_functions.pkl")
+            print("⚙️ Querying HMDBP protein functions...")
+            hmdbp_protein_functions = asyncio.run(
+                ProteinServices.get_batch_protein_functions(hmdbp_uniprot_ids)
+            )
+            save_pickle(hmdbp_protein_functions, "hmdbp_uniprot_protein_functions.pkl")
+        else:
+            print("✅ HMDBP protein functions already cached, skipping...")
 
         # step 2: cache gene mappings and summaries
-        print("⚙️ Mapping HMDBP UniProt to EntrezGene...")
-        hmdbp_uniprot2entrez = ProteinMapper.uniprot_id2entrezgene(hmdbp_uniprot_ids)
-        save_pickle(hmdbp_uniprot2entrez, "hmdbp_uniprot2entrezgene.pkl")
+        if not skip_existing or not cache_exists("hmdbp_uniprot2entrezgene.pkl"):
+            print("⚙️ Mapping HMDBP UniProt to EntrezGene...")
+            hmdbp_uniprot_ids = get_all_uniprot_ids_from_hmdbp(protein_xml)
+            hmdbp_uniprot2entrez = ProteinMapper.uniprot_id2entrezgene(hmdbp_uniprot_ids)
+            save_pickle(hmdbp_uniprot2entrez, "hmdbp_uniprot2entrezgene.pkl")
+        else:
+            print("✅ HMDBP UniProt to EntrezGene mappings already cached, skipping...")
+            hmdbp_uniprot2entrez = load_pickle("hmdbp_uniprot2entrezgene.pkl")
 
-        # get gene summaries
-        entrez_genes = [
-            gene_info["gene_id"].split(":")[1]
-            for gene_info in hmdbp_uniprot2entrez.values()
-            if "gene_id" in gene_info
-        ]
+        if not skip_existing or not cache_exists("hmdbp_entrezgene_summaries.pkl"):
+            # get gene summaries
+            entrez_genes = [
+                gene_info["gene_id"].split(":")[1]
+                for gene_info in hmdbp_uniprot2entrez.values()
+                if "gene_id" in gene_info
+            ]
 
-        print("⚙️ Querying HMDBP gene summaries...")
-        hmdbp_gene_summaries = asyncio.run(GeneServices.get_batch_gene_summaries(entrez_genes))
-        save_pickle(hmdbp_gene_summaries, "hmdbp_entrezgene_summaries.pkl")
+            print("⚙️ Querying HMDBP gene summaries...")
+            hmdbp_gene_summaries = asyncio.run(GeneServices.get_batch_gene_summaries(entrez_genes))
+            save_pickle(hmdbp_gene_summaries, "hmdbp_entrezgene_summaries.pkl")
+        else:
+            print("✅ HMDBP gene summaries already cached, skipping...")
 
         # step 3: cache GO terms and definitions
-        print("⚙️ Processing GO terms...")
-        go_terms = get_all_go_terms_from_hmdbp(protein_xml)
+        if not skip_existing or not cache_exists("hmdbp_go_definitions.pkl"):
+            print("⚙️ Processing GO terms...")
+            go_terms = get_all_go_terms_from_hmdbp(protein_xml)
 
-        print("⚙️ Querying GO definitions...")
-        go_definitions = asyncio.run(GOServices.get_go_definitions(go_terms))
-        save_pickle(go_definitions, "hmdbp_go_definitions.pkl")
+            print("⚙️ Querying GO definitions...")
+            go_definitions = asyncio.run(GOServices.get_go_definitions(go_terms))
+            save_pickle(go_definitions, "hmdbp_go_definitions.pkl")
+            print(f"✅ Cached {len(go_definitions)} GO definitions")
+        else:
+            print("✅ GO definitions already cached, skipping...")
 
-        print(f"✅ Processed {len(hmdbp_uniprot_ids)} HMDBP proteins")
-        print(f"✅ Cached {len(go_definitions)} GO definitions")
-
-        print("\n🎉 HMDB Protein-related Data Caching Complete!")
+        print("\n🎉 Protein Data Caching Complete!")
 
     def get_cache_status(self) -> Dict[str, bool]:
         """Check which cache files exist."""

@@ -29,7 +29,7 @@ class HMDBMetaboliteParser(XMLParseHelper):
             load_pickle("uniprot_protein_functions.pkl") or []
         )
         self.cached_pathway_descriptions = load_pickle("smpdb_pathway_descriptions.pkl") or {}
-        self.cached_uberon_mappings = load_pickle("uberon_mappings.pkl") or {}
+        self.cached_uberon_mappings = load_pickle("uberon_tissue_name2id.pkl") or {}
 
     def _flatten_protein_functions(self, protein_function_list: List[Dict]) -> Dict:
         """Flatten list of protein function dictionaries into single dict."""

@@ -2,6 +2,9 @@
 HMDB Parser Utils - Modular components for HMDB data processing.
 """
 
+import os
+import sys
+
 from .cache_helper import (
     cache_exists,
     clear_cache,
@@ -14,8 +17,6 @@ from .cache_helper import (
 )
 from .cache_manager import CacheManager
 from .cache_pipeline import CachePipeline, run_cache_pipeline, show_cache_status
-from .metabolite_parser import HMDBMetaboliteParser
-from .protein_parser import HMDBProteinParser
 from .ontology_mapper import DiseaseMapper, ProteinMapper, TaxonMapper
 from .ontology_services import (
     BiothingsServices,
@@ -48,7 +49,12 @@ from .reader import (
 )
 from .record_manager import RecordManager, cache_hmdb_database
 
-__version__ = "5.0"
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", "parsers"))
+
+from metabolite_parser import HMDBMetaboliteParser
+from protein_parser import HMDBProteinParser
+
+__version__ = "1.0"
 __author__ = "Lucy Zhang (BioThings Team)"
 __description__ = "Modular HMDB data extraction and processing pipeline"
 

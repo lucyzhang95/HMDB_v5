@@ -5,8 +5,8 @@ from typing import Dict, Iterator, List, Tuple
 
 from lxml import etree as ET
 
-from .cache_helper import load_pickle
-from .parser_helper import IDHierarchy, XMLParseHelper
+from utils.cache_helper import load_pickle
+from utils.parser_helper import IDHierarchy, XMLParseHelper
 
 
 class HMDBProteinParser(XMLParseHelper):

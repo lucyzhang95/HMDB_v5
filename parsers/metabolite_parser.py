@@ -5,8 +5,8 @@ from typing import Dict, Iterator, List
 
 from lxml import etree as ET
 
-from .cache_helper import load_pickle
-from .parser_helper import (
+from utils.cache_helper import load_pickle
+from utils.parser_helper import (
     IDHierarchy,
     MolecularWeightExtractor,
     OrganismClassifier,

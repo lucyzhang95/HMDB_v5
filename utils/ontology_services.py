@@ -12,6 +12,7 @@ import requests
 import text2term
 from Bio import Entrez
 from ete3 import NCBITaxa
+from tqdm.asyncio import tqdm as atqdm
 from tqdm.auto import tqdm
 
 
@@ -617,7 +618,7 @@ class UberonService:
                 for term in terms
             ]
 
-            results = await tqdm.asyncio.tqdm.gather(*tasks, desc="Querying UBERON IDs")
+            results = await atqdm.gather(*tasks, desc="Querying UBERON IDs")
 
             return {term: info for term, info in results if info is not None}
 

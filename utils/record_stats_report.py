@@ -170,6 +170,128 @@ class HMDBRecordStatsReporter:
 
         return {"record_count": records_with_field, "unique_count": len(set(all_items))}
 
+    def export_duplicate_records(self) -> Dict[str, Any]:
+        """Export complete duplicate records to JSON file for investigation."""
+        print("\n📍 Identifying and exporting duplicate records...")
+
+        filepath = os.path.join("..", "cache", "hmdb_v5_parsed_records.pkl")
+
+        try:
+            with open(filepath, "rb") as in_f:
+                combined_data = pickle.load(in_f)
+                if not combined_data:
+                    print("❌ No data loaded from pickle file.")
+                    return {}
+        except Exception as e:
+            print(f"‼️ Error loading hmdb_v5_parsed_records.pkl: {e}")
+            return {}
+
+        relationship_types = [
+            "microbe-metabolite",
+            "metabolite-disease",
+            "metabolite-protein",
+            "metabolite-pathway",
+            "protein-pathway",
+            "protein-biological_process",
+        ]
+
+        all_records_with_type = []
+        for rel_type in relationship_types:
+            if rel_type in combined_data:
+                for record in combined_data[rel_type]:
+                    record_copy = record.copy()
+                    record_copy["_relationship_type"] = rel_type
+                    all_records_with_type.append(record_copy)
+
+        print(f"Total records collected: {len(all_records_with_type)}")
+
+        # find duplicates by _id
+        id_to_records = defaultdict(list)
+        for record in all_records_with_type:
+            record_id = record.get("_id")
+            if record_id:
+                id_to_records[record_id].append(record)
+
+        duplicate_records = {}
+        duplicate_summary = {}
+
+        for record_id, records in id_to_records.items():
+            if len(records) > 1:
+                duplicate_records[record_id] = {
+                    "count": len(records),
+                    "relationship_types": list(
+                        set(r.get("_relationship_type", "unknown") for r in records)
+                    ),
+                    "records": records,
+                }
+                duplicate_summary[record_id] = {
+                    "count": len(records),
+                    "relationship_types": duplicate_records[record_id]["relationship_types"],
+                }
+
+        print(f"✅ Found {len(duplicate_records)} duplicate IDs")
+
+        duplicate_stats = self._generate_duplicate_statistics(duplicate_records)
+
+        export_data = {
+            "metadata": {
+                "export_date": datetime.now().isoformat(),
+                "total_duplicate_ids": len(duplicate_records),
+                "total_duplicate_records": sum(
+                    data["count"] for data in duplicate_records.values()
+                ),
+                "source_file": filepath,
+                "relationship_types_analyzed": relationship_types,
+            },
+            "duplicate_summary": duplicate_summary,
+            "duplicate_records": duplicate_records,
+            "statistics": duplicate_stats,
+        }
+
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        export_path = os.path.join(self.report_dir, f"duplicate_records_{timestamp}.json")
+
+        with open(export_path, "w") as f:
+            json.dump(export_data, f, indent=2, sort_keys=True, default=str)
+
+        print(f"✅ Duplicate records exported to: {export_path}")
+        print(f"✅ Exported {len(duplicate_records)} duplicate record groups")
+
+        return export_data
+
+    def _generate_duplicate_statistics(self, duplicate_records: Dict[str, Any]) -> Dict[str, Any]:
+        """Generate statistics about the duplicate records."""
+        if not duplicate_records:
+            return {}
+
+        count_distribution = Counter()
+        relationship_type_pairs = Counter()
+        cross_relationship_duplicates = 0
+
+        for _, data in duplicate_records.items():
+            count = data["count"]
+            rel_types = data["relationship_types"]
+
+            count_distribution[count] += 1
+
+            if len(rel_types) > 1:
+                cross_relationship_duplicates += 1
+                rel_types_sorted = tuple(sorted(rel_types))
+                relationship_type_pairs[rel_types_sorted] += 1
+
+        most_common_counts = dict(count_distribution.most_common(10))
+        most_common_rel_pairs = dict(relationship_type_pairs.most_common(10))
+
+        return {
+            "count_distribution": most_common_counts,
+            "cross_relationship_duplicates": cross_relationship_duplicates,
+            "relationship_type_pairs": most_common_rel_pairs,
+            "max_duplicates_for_single_id": max(count_distribution.keys())
+            if count_distribution
+            else 0,
+            "total_duplicate_groups": len(duplicate_records),
+        }
+
     def generate_record_stats(self) -> Dict[str, Any]:
         """Generate comprehensive statistics for HMDB records."""
         print("\n⚙️ Generating HMDB record statistics...")
@@ -605,7 +727,25 @@ class HMDBRecordStatsReporter:
 
         return stats
 
+    def run_full_analysis_with_duplicates(self) -> Dict[str, Any]:
+        """Run complete statistical analysis and export duplicate records."""
+        print("Starting comprehensive HMDB record analysis with duplicate export...")
+
+        stats = self.generate_record_stats()
+        if stats:
+            self.save_stats_report(stats)
+
+        duplicate_data = self.export_duplicate_records()
+        if stats and duplicate_data:
+            print("Analysis and duplicate export complete!")
+        elif stats:
+            print("Analysis complete, but duplicate export failed.")
+        else:
+            print("Analysis failed - no data found.")
+
+        return {"stats": stats, "duplicates": duplicate_data}
+
 
 if __name__ == "__main__":
     reporter = HMDBRecordStatsReporter()
-    stats_report = reporter.run_full_analysis()
+    full_report = reporter.run_full_analysis_with_duplicates()

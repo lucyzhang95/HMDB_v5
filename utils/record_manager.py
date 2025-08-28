@@ -17,6 +17,7 @@ from tqdm.auto import tqdm
 
 from .cache_helper import load_pickle, save_json, save_pickle
 from .cache_manager import CacheManager
+from .deduplicator import deduplicate_and_merge
 from .reader import extract_file_from_zip
 
 
@@ -59,38 +60,60 @@ class RecordManager:
 
         # step 3: generate records with progress tracking
         records = {}
+        raw_counts = {}
 
         print("▶️ Parsing microbe-metabolite associations...")
-        records["microbe-metabolite"] = list(
+        microbe_metabolite_records = list(
             tqdm(metabolite_parser.parse_microbe_metabolite(), desc="Microbe-Metabolite")
         )
+        raw_counts["microbe-metabolite"] = len(microbe_metabolite_records)
+        records["microbe-metabolite"] = deduplicate_and_merge(microbe_metabolite_records)
 
         print("▶️ Parsing metabolite-disease associations...")
-        records["metabolite-disease"] = list(
+        metabolite_disease_records = list(
             tqdm(metabolite_parser.parse_metabolite_disease(), desc="Metabolite-Disease")
         )
+        raw_counts["metabolite-disease"] = len(metabolite_disease_records)
+        records["metabolite-disease"] = deduplicate_and_merge(metabolite_disease_records)
 
         print("▶️ Parsing metabolite-protein associations...")
-        records["metabolite-protein"] = list(
+        metabolite_protein_records = list(
             tqdm(metabolite_parser.parse_metabolite_protein(), desc="Metabolite-Protein")
         )
+        raw_counts["metabolite-protein"] = len(metabolite_protein_records)
+        records["metabolite-protein"] = deduplicate_and_merge(metabolite_protein_records)
 
         print("▶️ Parsing metabolite-pathway associations...")
-        records["metabolite-pathway"] = list(
+        metabolite_pathway_records = list(
             tqdm(metabolite_parser.parse_metabolite_pathway(), desc="Metabolite-Pathway")
         )
+        raw_counts["metabolite-pathway"] = len(metabolite_pathway_records)
+        records["metabolite-pathway"] = deduplicate_and_merge(metabolite_pathway_records)
 
         print("▶️ Parsing protein-pathway associations...")
-        records["protein-pathway"] = list(
+        protein_pathway_records = list(
             tqdm(protein_parser.parse_protein_pathway(), desc="Protein-Pathway")
         )
+        raw_counts["protein-pathway"] = len(protein_pathway_records)
+        records["protein-pathway"] = deduplicate_and_merge(protein_pathway_records)
 
         print("▶️ Parsing protein-biological process associations...")
-        records["protein-biological_process"] = list(
+        protein_biological_process_records = list(
             tqdm(
                 protein_parser.parse_protein_biological_process(), desc="Protein-BiologicalProcess"
             )
         )
+        raw_counts["protein-biological_process"] = len(protein_biological_process_records)
+        records["protein-biological_process"] = deduplicate_and_merge(
+            protein_biological_process_records
+        )
+
+        print("\n🎉 Deduplication complete!")
+        for key, dedup_list in records.items():
+            raw_count = raw_counts.get(key, 0)
+            if raw_count > 0:
+                removed = raw_count - len(dedup_list)
+                print(f"-> {key}: Removed {removed:,} duplicates ({len(dedup_list):,} remaining).")
 
         return records
 

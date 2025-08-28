@@ -6,7 +6,6 @@ import logging
 import os
 import sys
 import time
-from itertools import chain
 from pathlib import Path
 from typing import Any, Dict, Iterator, List, Optional, Tuple
 
@@ -171,7 +170,9 @@ class RecordManager:
         logger.info(f"Found {len(fieldnames)} unique headers")
         return fieldnames
 
-    def _get_task_iterators(self, tasks: List[Tuple[str, Any, str]]) -> List[Tuple[str, Iterator, str]]:
+    def _get_task_iterators(
+        self, tasks: List[Tuple[str, Any, str]]
+    ) -> List[Tuple[str, Iterator, str]]:
         """
         Get task iterators without pre-scanning (truly streaming approach).
 
@@ -201,9 +202,16 @@ class RecordManager:
         if not is_last:
             file_handle.write(",\n")
 
-    def _write_records_by_format(self, file_handle, records: List[Dict[str, Any]],
-                                 key: str, output_format: str, writer: Optional[csv.DictWriter] = None,
-                                 is_first_type: bool = True, processed_count: int = 0) -> None:
+    def _write_records_by_format(
+        self,
+        file_handle,
+        records: List[Dict[str, Any]],
+        key: str,
+        output_format: str,
+        writer: Optional[csv.DictWriter] = None,
+        is_first_type: bool = True,
+        processed_count: int = 0,
+    ) -> None:
         """
         Write records in the specified format with progress tracking.
 
@@ -221,7 +229,7 @@ class RecordManager:
             total=len(records),
             desc=f"Exporting {key}",
             unit="records",
-            leave=False
+            leave=False,
         )
 
         for i, record in record_iterator:
@@ -251,7 +259,9 @@ class RecordManager:
             output_format: Export format (json, jsonl, pkl, tsv)
         """
         overall_start_time = time.time()
-        logger.info(f"🚀 Starting generation and export to '{output_file}' (format: {output_format})")
+        logger.info(
+            f"🚀 Starting generation and export to '{output_file}' (format: {output_format})"
+        )
 
         if output_format in ("pkl", "tsv"):
             warnings.warn(
@@ -282,7 +292,7 @@ class RecordManager:
             "total_records": 0,
             "association_types": {},
             "generation_timestamp": time.time(),
-            "processing_times": {}
+            "processing_times": {},
         }
         raw_counts = {}
         all_records_for_pickle = {}
@@ -298,7 +308,7 @@ class RecordManager:
 
         # Process records
         try:
-            with open(output_path, "w", newline="", encoding='utf-8') as f:
+            with open(output_path, "w", newline="", encoding="utf-8") as f:
                 writer = None
                 if output_format == "tsv":
                     writer = csv.DictWriter(f, fieldnames=fieldnames, delimiter="\t")
@@ -314,12 +324,12 @@ class RecordManager:
                     desc="Processing association types",
                     unit="type",
                     position=0,
-                    leave=True
+                    leave=True,
                 )
 
                 processed_tasks = 0  # Counter for valid tasks (for JSON formatting)
 
-                for i, (key, record_iterator, desc) in enumerate(overall_pbar):
+                for _, (key, record_iterator, desc) in enumerate(overall_pbar):
                     association_start = time.time()
                     overall_pbar.set_description(f"Processing {desc}")
 
@@ -339,7 +349,7 @@ class RecordManager:
                             desc=f"Parsing {key}",
                             unit="records",
                             position=1,
-                            leave=False
+                            leave=False,
                         )
 
                         for record in record_pbar:
@@ -377,9 +387,13 @@ class RecordManager:
                             all_records_for_pickle[key] = deduped_records
                         else:
                             self._write_records_by_format(
-                                f, deduped_records, key, output_format, writer,
+                                f,
+                                deduped_records,
+                                key,
+                                output_format,
+                                writer,
                                 is_first_type=(processed_tasks == 0),
-                                processed_count=processed_tasks
+                                processed_count=processed_tasks,
                             )
                         export_time = time.time() - export_start
 
@@ -391,7 +405,7 @@ class RecordManager:
                             "parsing": parsing_time,
                             "deduplication": dedup_time,
                             "export": export_time,
-                            "total": association_total_time
+                            "total": association_total_time,
                         }
 
                         processed_tasks += 1
@@ -445,8 +459,13 @@ class RecordManager:
         stats["processing_times"]["total_pipeline"] = overall_time
         self._print_export_summary(raw_counts, stats, output_path, overall_time)
 
-    def _print_export_summary(self, raw_counts: Dict[str, int],
-                              stats: Dict[str, Any], output_path: Path, overall_time: float) -> None:
+    def _print_export_summary(
+        self,
+        raw_counts: Dict[str, int],
+        stats: Dict[str, Any],
+        output_path: Path,
+        overall_time: float,
+    ) -> None:
         """Print export summary statistics with detailed timing information."""
         logger.info("🎉 Deduplication and export complete!")
 
@@ -507,6 +526,7 @@ class RecordManager:
 
             size_names = ["B", "KB", "MB", "GB", "TB"]
             import math
+
             i = int(math.floor(math.log(size_bytes, 1024)))
             p = math.pow(1024, i)
             s = round(size_bytes / p, 2)
@@ -515,8 +535,9 @@ class RecordManager:
             return "Unknown size"
 
 
-def cache_hmdb_database(email: str, umls_api_key: str, data_dir: str = "downloads",
-                        force_refresh: bool = False) -> Dict[str, Any]:
+def cache_hmdb_database(
+    email: str, umls_api_key: str, data_dir: str = "downloads", force_refresh: bool = False
+) -> Dict[str, Any]:
     """
     HMDB reference data caching pipeline (does not generate association records).
 
@@ -573,11 +594,15 @@ def cache_hmdb_database(email: str, umls_api_key: str, data_dir: str = "download
         logger.info(f"⏱️  Total time: {duration:.2f} seconds ({duration / 60:.2f} minutes)")
 
         if force_refresh or not cache_manager.is_cache_complete():
-            logger.info(f"📊 Breakdown: Metabolite: {metabolite_time:.2f}s, Protein: {protein_time:.2f}s")
+            logger.info(
+                f"📊 Breakdown: Metabolite: {metabolite_time:.2f}s, Protein: {protein_time:.2f}s"
+            )
 
         logger.info("\n💡 Next steps:")
         logger.info("   Use generate_and_export_streamed() to create association records")
-        logger.info("   Example: record_manager.generate_and_export_streamed('output.jsonl', 'jsonl')")
+        logger.info(
+            "   Example: record_manager.generate_and_export_streamed('output.jsonl', 'jsonl')"
+        )
 
         return {
             "success": True,
@@ -590,8 +615,8 @@ def cache_hmdb_database(email: str, umls_api_key: str, data_dir: str = "download
             "timing": {
                 "metabolite_caching": metabolite_time,
                 "protein_caching": protein_time,
-                "total": duration
-            }
+                "total": duration,
+            },
         }
 
     except Exception as e:

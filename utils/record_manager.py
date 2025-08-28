@@ -17,7 +17,7 @@ from tqdm.auto import tqdm
 
 from .cache_helper import load_pickle, save_json, save_pickle
 from .cache_manager import CacheManager
-from .deduplicator import deduplicate_and_merge
+from .record_deduplicator import deduplicate_and_merge
 from .reader import extract_file_from_zip
 
 

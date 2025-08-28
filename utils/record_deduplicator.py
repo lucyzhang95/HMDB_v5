@@ -267,28 +267,28 @@ def test_hybrid_deduplication():
     """Test the hybrid deduplication with various scenarios."""
 
     test_records = [
-        # Exact duplicate
+        # exact duplicate
         {
             "_id": "test1",
             "subject": {"id": "A", "name": "protein_a", "xrefs": {"uniprot": "P1"}},
             "object": {"id": "B", "name": "pathway_b", "xrefs": {"kegg": "K1"}},
             "association": {"type": "participates_in"},
         },
-        # Exact duplicate of above
+        # exact duplicate
         {
             "_id": "test1",
             "subject": {"id": "A", "name": "protein_a", "xrefs": {"uniprot": "P1"}},
             "object": {"id": "B", "name": "pathway_b", "xrefs": {"kegg": "K1"}},
             "association": {"type": "participates_in"},
         },
-        # Same relationship, additional xrefs
+        # same relationship, additional xrefs
         {
             "_id": "test1",
             "subject": {"id": "A", "name": "protein_a", "xrefs": {"uniprot": "P1", "pdb": "1ABC"}},
             "object": {"id": "B", "name": "pathway_b", "xrefs": {"kegg": "K1", "smpdb": "S1"}},
             "association": {"type": "participates_in"},
         },
-        # Completely different record
+        # completely different record
         {
             "_id": "test2",
             "subject": {"id": "C", "name": "protein_c"},
@@ -297,13 +297,13 @@ def test_hybrid_deduplication():
         },
     ]
 
-    # Test batch deduplication
+    # test batch deduplication
     result = deduplicate_with_stats(test_records)
 
     assert len(result["deduplicated_records"]) == 2, "Should have 2 unique records"
     assert result["stats"]["duplicates_removed"] == 2, "Should remove 2 duplicates"
 
-    # Check that xrefs were properly merged
+    # check that xrefs were properly merged
     merged_record = next(r for r in result["deduplicated_records"] if r["_id"] == "test1")
     assert "pdb" in merged_record["subject"]["xrefs"], "Should have merged PDB xref"
     assert "smpdb" in merged_record["object"]["xrefs"], "Should have merged SMPDB xref"

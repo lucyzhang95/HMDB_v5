@@ -229,6 +229,7 @@ def deduplicate_with_stats(records: Union[List[Dict], Iterator[Dict]]) -> Dict:
         },
     }
 
+
 def deduplicate_and_merge(records: List[Dict]) -> List[Dict]:
     """Backwards compatible alias for your existing code."""
     return deduplicate_records_list(records)

@@ -1,12 +1,11 @@
 import json
 import os
+import pickle
 import random
 from collections import Counter, defaultdict
 from datetime import datetime
 from statistics import mean, median
 from typing import Any, Dict, List
-
-import pickle
 
 
 class HMDBRecordStatsReporter:
@@ -58,7 +57,7 @@ class HMDBRecordStatsReporter:
 
         xref_counts = {}
         for key, value in xrefs.items():
-            if value:  # only count non-empty xrefs
+            if value:  # only non-empty xrefs
                 if isinstance(value, list):
                     xref_counts[key] = len(value)
                 else:
@@ -75,9 +74,28 @@ class HMDBRecordStatsReporter:
         for key, value in xrefs.items():
             if value:  # only non-empty xrefs
                 if isinstance(value, list):
-                    unique_xrefs[key] = set(value)
+                    processed_values = []
+                    for item in value:
+                        if isinstance(item, dict):
+                            # Extract id or name from dict
+                            if "id" in item:
+                                processed_values.append(item["id"])
+                            elif "name" in item:
+                                processed_values.append(item["name"])
+                            else:
+                                processed_values.append(str(item))
+                        else:
+                            processed_values.append(str(item))
+                    unique_xrefs[key] = set(processed_values)
+                elif isinstance(value, dict):
+                    if "id" in value:
+                        unique_xrefs[key] = {value["id"]}
+                    elif "name" in value:
+                        unique_xrefs[key] = {value["name"]}
+                    else:
+                        unique_xrefs[key] = {str(value)}
                 else:
-                    unique_xrefs[key] = {value}
+                    unique_xrefs[key] = {str(value)}
         return unique_xrefs
 
     def _analyze_molecular_weight(self, nodes: List[Dict[str, Any]]) -> Dict[str, Any]:
@@ -139,7 +157,16 @@ class HMDBRecordStatsReporter:
 
             if current and isinstance(current, list) and len(current) > 0:
                 records_with_field += 1
-                all_items.extend(current)
+                for item in current:
+                    if isinstance(item, dict):
+                        if "id" in item:
+                            all_items.append(item["id"])
+                        elif "original_name" in item:
+                            all_items.append(item["original_name"])
+                        else:
+                            all_items.append(str(item))
+                    else:
+                        all_items.append(item)
 
         return {"record_count": records_with_field, "unique_count": len(set(all_items))}
 
@@ -152,15 +179,15 @@ class HMDBRecordStatsReporter:
             with open(filepath, "rb") as in_f:
                 combined_data = pickle.load(in_f)
                 if combined_data:
-                    print("Loaded data from hmdb_v5_parsed_records.pkl")
+                    print("✅ Loaded data from hmdb_v5_parsed_records.pkl")
                 else:
-                    print("File exists but no data loaded.")
+                    print("❌ File exists but no data loaded.")
                     return {}
         except Exception as e:
-            print(f"Error loading hmdb_v5_parsed_records.pkl: {e}")
+            print(f"‼️ Error loading hmdb_v5_parsed_records.pkl: {e}")
             return {}
 
-        # Define the 6 relationship types for HMDB
+        # HMDB 6 relationship types
         relationship_types = [
             "microbe-metabolite",
             "metabolite-disease",
@@ -182,7 +209,7 @@ class HMDBRecordStatsReporter:
             },
         }
 
-        # 1. Total record counts
+        # total record counts
         total_records = 0
         relationship_counts = {}
         for rel_type in relationship_types:
@@ -194,7 +221,7 @@ class HMDBRecordStatsReporter:
         stats["metadata"]["total_records_analyzed"] = total_records
         stats["metadata"]["total_records_analyzed_by_relationship"] = relationship_counts
 
-        # Process each relationship type
+        # each relationship type
         relationship_stats = {}
 
         for rel_type in relationship_types:
@@ -205,7 +232,6 @@ class HMDBRecordStatsReporter:
 
         stats["relationship_analysis"] = relationship_stats
 
-        # Overall statistics across all relationships
         stats.update(self._calculate_overall_stats(combined_data, relationship_types))
 
         print(f"Generated comprehensive statistics for {total_records} total records.")
@@ -220,7 +246,7 @@ class HMDBRecordStatsReporter:
             if rel_type in combined_data:
                 all_records.extend(combined_data[rel_type])
 
-        # 2. Overall evidence types
+        # all evidence types
         evidence_counter = Counter()
         for record in all_records:
             evidence_type = record.get("association", {}).get("evidence_type")
@@ -230,7 +256,7 @@ class HMDBRecordStatsReporter:
                 else:
                     evidence_counter[evidence_type] += 1
 
-        # 3. Overall ID duplication check
+        # all ID duplication check
         all_record_ids = [record.get("_id") for record in all_records]
         id_counter = Counter(all_record_ids)
         duplicates = {id_val: count for id_val, count in id_counter.items() if count > 1}
@@ -245,7 +271,7 @@ class HMDBRecordStatsReporter:
             sample_size = min(3, len(id_list))
             sampled_ids_by_count[count] = random.sample(id_list, sample_size)
 
-        # 4-5. Overall CURIE analysis
+        # all CURIE analysis
         overall_subject_curies = []
         overall_object_curies = []
         for record in all_records:
@@ -256,7 +282,7 @@ class HMDBRecordStatsReporter:
             if object_id:
                 overall_object_curies.append(self._extract_curie_prefix(object_id))
 
-        # 6. Overall description analysis
+        # all description analysis
         subject_desc_count = sum(
             1 for record in all_records if record.get("subject", {}).get("description")
         )
@@ -264,7 +290,7 @@ class HMDBRecordStatsReporter:
             1 for record in all_records if record.get("object", {}).get("description")
         )
 
-        # 7. Overall xrefs analysis
+        # all xrefs analysis
         overall_subject_xrefs = defaultdict(int)
         overall_object_xrefs = defaultdict(int)
         overall_subject_unique_xrefs = defaultdict(set)
@@ -286,7 +312,7 @@ class HMDBRecordStatsReporter:
             for xref_type, unique_values in object_unique_xrefs.items():
                 overall_object_unique_xrefs[xref_type].update(unique_values)
 
-        # 8. Overall publication analysis
+        # all publication analysis
         overall_pub_stats = self._count_publication_pmids(all_records)
 
         return {
@@ -341,13 +367,12 @@ class HMDBRecordStatsReporter:
             "publication_stats": {},
         }
 
-        # Basic stats collection
         evidence_counter = Counter()
         subject_curie_counter = Counter()
         object_curie_counter = Counter()
 
         for record in records:
-            # Evidence types
+            # evidence types
             evidence_type = record.get("association", {}).get("evidence_type")
             if evidence_type:
                 if isinstance(evidence_type, list):
@@ -364,13 +389,13 @@ class HMDBRecordStatsReporter:
             if object_id:
                 object_curie_counter[self._extract_curie_prefix(object_id)] += 1
 
-            # Descriptions
+            # descriptions
             if record.get("subject", {}).get("description"):
                 rel_stats["subject_description_count"] += 1
             if record.get("object", {}).get("description"):
                 rel_stats["object_description_count"] += 1
 
-            # Xrefs
+            # xrefs
             subject_xrefs = self._count_xrefs(record.get("subject", {}))
             object_xrefs = self._count_xrefs(record.get("object", {}))
             subject_unique_xrefs = self._collect_unique_xrefs(record.get("subject", {}))
@@ -386,7 +411,6 @@ class HMDBRecordStatsReporter:
             for xref_type, unique_values in object_unique_xrefs.items():
                 rel_stats["object_unique_xref_stats"][xref_type].update(unique_values)
 
-        # Convert to serializable format
         rel_stats["evidence_types"] = dict(evidence_counter)
         rel_stats["subject_curie_stats"] = dict(subject_curie_counter)
         rel_stats["object_curie_stats"] = dict(object_curie_counter)
@@ -399,10 +423,10 @@ class HMDBRecordStatsReporter:
             k: len(v) for k, v in rel_stats["object_unique_xref_stats"].items()
         }
 
-        # Publication stats
+        # publication stats
         rel_stats["publication_stats"] = self._count_publication_pmids(records)
 
-        # Relationship-specific analysis
+        # relationship-specific analysis
         if rel_type == "microbe-metabolite":
             rel_stats.update(self._analyze_microbe_metabolite_specific(records))
         elif rel_type == "metabolite-disease":
@@ -429,7 +453,7 @@ class HMDBRecordStatsReporter:
             object_node = record.get("object", {})
             object_nodes.append(object_node)
 
-            # Subject organism type and rank
+            # organism type and rank
             organism_type = subject.get("organism_type")
             if organism_type:
                 organism_types.append(organism_type)
@@ -438,7 +462,7 @@ class HMDBRecordStatsReporter:
             if rank:
                 ranks.append(rank)
 
-            # Object properties
+            # object properties
             logp = object_node.get("logp")
             if logp is not None:
                 logp_values.append(logp)
@@ -447,27 +471,27 @@ class HMDBRecordStatsReporter:
                 melting_point_count += 1
 
         return {
-            "microbe_metabolite_organism_types": dict(Counter(organism_types)),
-            "microbe_metabolite_ranks": dict(Counter(ranks)),
-            "microbe_metabolite_object_molecular_weight_stats": self._analyze_molecular_weight(
+            "organism_types": dict(Counter(organism_types)),
+            "ranks": dict(Counter(ranks)),
+            "object_molecular_weight_stats": self._analyze_molecular_weight(
                 object_nodes
             ),
-            "microbe_metabolite_object_logp_stats": self._safe_get_numeric_stats(logp_values),
-            "microbe_metabolite_melting_point_count": melting_point_count,
-            "microbe_metabolite_cellular_component_stats": self._count_unique_items_in_list_field(
+            "object_logp_stats": self._safe_get_numeric_stats(logp_values),
+            "melting_point_count": melting_point_count,
+            "cellular_component_stats": self._count_unique_items_in_list_field(
                 records, ["object", "cellular_component"]
             ),
-            "microbe_metabolite_biosample_stats": self._count_unique_items_in_list_field(
+            "biosample_stats": self._count_unique_items_in_list_field(
                 records, ["object", "biosample"]
             ),
-            "microbe_metabolite_anatomical_entity_stats": self._count_unique_items_in_list_field(
+            "anatomical_entity_stats": self._count_unique_items_in_list_field(
                 records, ["object", "anatomical_entity"]
             ),
         }
 
     def _analyze_metabolite_disease_specific(self, records: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Analyze metabolite-disease specific statistics."""
-        return {}  # No specific analysis needed beyond publication stats
+        return {} 
 
     def _analyze_metabolite_protein_specific(self, records: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Analyze metabolite-protein specific statistics."""
@@ -502,17 +526,16 @@ class HMDBRecordStatsReporter:
         for record in records:
             subject = record.get("subject", {})
 
-            # Function
+            # protein function
             function = subject.get("function")
             if function:
                 functions.append(function)
 
-            # Molecular weight
+            # molecular weight
             mw = subject.get("molecular_weight")
             if mw is not None:
                 molecular_weights.append(mw)
 
-            # Count various fields
             if subject.get("transmembrane_region"):
                 transmembrane_count += 1
             if subject.get("signal_region"):
@@ -531,29 +554,29 @@ class HMDBRecordStatsReporter:
         total_records = len(records)
 
         return {
-            "protein_pathway_function_stats": {
+            "function_stats": {
                 "record_count": len(functions),
                 "unique_count": len(set(functions)),
                 "percentage": round((len(functions) / total_records) * 100, 2)
                 if total_records > 0
                 else 0,
             },
-            "protein_pathway_molecular_weight_stats": self._safe_get_numeric_stats(
+            "molecular_weight_stats": self._safe_get_numeric_stats(
                 molecular_weights
             ),
-            "protein_pathway_transmembrane_region_count": transmembrane_count,
-            "protein_pathway_signal_region_count": signal_region_count,
-            "protein_pathway_protein_seq_count": protein_seq_count,
-            "protein_pathway_chromosomal_location_count": chromosomal_location_count,
-            "protein_pathway_locus_count": locus_count,
-            "protein_pathway_gene_seq_count": gene_seq_count,
-            "protein_pathway_gene_description_stats": {
+            "transmembrane_region_count": transmembrane_count,
+            "signal_region_count": signal_region_count,
+            "protein_seq_count": protein_seq_count,
+            "chromosomal_location_count": chromosomal_location_count,
+            "locus_count": locus_count,
+            "gene_seq_count": gene_seq_count,
+            "gene_description_stats": {
                 "record_count": gene_description_count,
                 "percentage": round((gene_description_count / total_records) * 100, 2)
                 if total_records > 0
                 else 0,
             },
-            "protein_pathway_cellular_component_stats": self._count_unique_items_in_list_field(
+            "cellular_component_stats": self._count_unique_items_in_list_field(
                 records, ["subject", "cellular_component"]
             ),
         }

@@ -473,9 +473,7 @@ class HMDBRecordStatsReporter:
         return {
             "organism_types": dict(Counter(organism_types)),
             "ranks": dict(Counter(ranks)),
-            "object_molecular_weight_stats": self._analyze_molecular_weight(
-                object_nodes
-            ),
+            "object_molecular_weight_stats": self._analyze_molecular_weight(object_nodes),
             "object_logp_stats": self._safe_get_numeric_stats(logp_values),
             "melting_point_count": melting_point_count,
             "cellular_component_stats": self._count_unique_items_in_list_field(
@@ -491,7 +489,7 @@ class HMDBRecordStatsReporter:
 
     def _analyze_metabolite_disease_specific(self, records: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Analyze metabolite-disease specific statistics."""
-        return {} 
+        return {}
 
     def _analyze_metabolite_protein_specific(self, records: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Analyze metabolite-protein specific statistics."""
@@ -561,9 +559,7 @@ class HMDBRecordStatsReporter:
                 if total_records > 0
                 else 0,
             },
-            "molecular_weight_stats": self._safe_get_numeric_stats(
-                molecular_weights
-            ),
+            "molecular_weight_stats": self._safe_get_numeric_stats(molecular_weights),
             "transmembrane_region_count": transmembrane_count,
             "signal_region_count": signal_region_count,
             "protein_seq_count": protein_seq_count,

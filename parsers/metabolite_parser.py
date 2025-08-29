@@ -181,45 +181,192 @@ class HMDBMetaboliteParser(XMLParseHelper):
 
     def parse_microbe_metabolite(self) -> Iterator[Dict]:
         """Parse microbe-metabolite associations."""
-        tree = ET.parse(self.input_xml)
-        root = tree.getroot()
 
-        for metabolite in root.findall("hmdb:metabolite", self.namespace):
-            microbes = self.get_microbes(metabolite)
-            if not microbes:
-                continue
+        for event, elem in ET.iterparse(self.input_xml, events=("start", "end")):
+            if event == "end" and elem.tag == f'{{{self.namespace["hmdb"]}}}metabolite':
+                metabolite = elem
 
-            description = self.get_text(metabolite, "description")
-            references = self.reference_extractor.extract_references(description, microbes)
+                microbes = self.get_microbes(metabolite)
+                if not microbes:
+                    elem.clear()
+                    for ancestor in elem.xpath("ancestor-or-self::*"):
+                        ancestor.clear()
+                    continue
 
-            association_node = {
-                "predicate": "biolink:OrganismTaxonToChemicalEntityAssociation",
-                "type": "has_metabolic_interaction_with",
-                "primary_knowledge_source": "infores:hmdb_v5",
-                "publication": references if references else None,
-                "evidence_type": "ECO:0000305" if references else "ECO:0000000",
-            }
-            association_node = self.remove_empty_none_values(association_node)
+                description = self.get_text(metabolite, "description")
+                references = self.reference_extractor.extract_references(description, microbes)
 
-            # metabolite node
-            primary_id, xrefs = IDHierarchy.get_metabolite_primary_id(metabolite, self)
-            object_node = self.build_metabolite_node(
-                metabolite,
-                primary_id,
-                xrefs,
-                anatomical_entities=self.get_anatomical_entities(metabolite),
-            )
+                association_node = {
+                    "predicate": "biolink:OrganismTaxonToChemicalEntityAssociation",
+                    "type": "has_metabolic_interaction_with",
+                    "primary_knowledge_source": "infores:hmdb_v5",
+                    "publication": references if references else None,
+                    "evidence_type": "ECO:0000305" if references else "ECO:0000000",
+                }
+                association_node = self.remove_empty_none_values(association_node)
 
-            # generate associations for each microbe
-            for microbe in microbes:
-                if microbe in self.cached_taxon_info:
-                    subject_node = self.cached_taxon_info[microbe].copy()
-                    subject_node["original_name"] = microbe.lower().strip()
-                    subject_node["type"] = "biolink:OrganismTaxon"
-                    subject_node["organism_type"] = OrganismClassifier.get_organism_type(
-                        subject_node
-                    )
-                    subject_node = self.remove_empty_none_values(subject_node)
+                # metabolite node
+                primary_id, xrefs = IDHierarchy.get_metabolite_primary_id(metabolite, self)
+                object_node = self.build_metabolite_node(
+                    metabolite,
+                    primary_id,
+                    xrefs,
+                    anatomical_entities=self.get_anatomical_entities(metabolite),
+                )
+
+                # generate associations for each microbe
+                for microbe in microbes:
+                    if microbe in self.cached_taxon_info:
+                        subject_node = self.cached_taxon_info[microbe].copy()
+                        subject_node["original_name"] = microbe.lower().strip()
+                        subject_node["type"] = "biolink:OrganismTaxon"
+                        subject_node["organism_type"] = OrganismClassifier.get_organism_type(
+                            subject_node
+                        )
+                        subject_node = self.remove_empty_none_values(subject_node)
+
+                        yield {
+                            "_id": str(uuid.uuid4()),
+                            "association": association_node,
+                            "object": object_node,
+                            "subject": subject_node,
+                        }
+
+                # clear memory after processing all metabolites
+                elem.clear()
+                for ancestor in elem.xpath("ancestor-or-self::*"):
+                    ancestor.clear()
+
+    def parse_metabolite_disease(self) -> Iterator[Dict]:
+        """Parse metabolite-disease associations."""
+        for event, elem in ET.iterparse(self.input_xml, events=("start", "end")):
+            if event == "end" and elem.tag == f'{{{self.namespace["hmdb"]}}}metabolite':
+                metabolite = elem
+
+                # get associated diseases
+                diseases = self.get_diseases(metabolite)
+                if not diseases:
+                    elem.clear()
+                    for ancestor in elem.xpath("ancestor-or-self::*"):
+                        ancestor.clear()
+                    continue
+
+                # metabolite node
+                primary_id, xrefs = IDHierarchy.get_metabolite_primary_id(metabolite, self)
+                subject_node = self.build_metabolite_node(
+                    metabolite,
+                    primary_id,
+                    xrefs,
+                    anatomical_entities=self.get_anatomical_entities(metabolite),
+                )
+
+                references = None
+                diseases_elem = metabolite.find("hmdb:diseases", self.namespace)
+                if diseases_elem is not None:
+                    for disease_elem in diseases_elem.findall("hmdb:disease", self.namespace):
+                        temp_references = self.get_medical_references(disease_elem)
+                        if temp_references:
+                            references = temp_references
+                            break
+
+                # association node (with or without references)
+                association_node = {
+                    "id": "RO:0000087",  # has role
+                    "predicate": "biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation",
+                    "type": "has_role_in",
+                    "primary_knowledge_source": "infores:hmdb_v5",
+                    "evidence_type": "ECO:0000305" if references else "ECO:0000000",
+                    "publication": references if references else None,
+                }
+                association_node = self.remove_empty_none_values(association_node)
+
+                # generate associations for each disease
+                for disease in diseases:
+                    disease_key = disease.strip().lower()
+                    if disease_key in self.cached_disease_info:
+                        object_node = self.cached_disease_info[disease_key].copy()
+                        object_node = self.remove_empty_none_values(object_node)
+
+                        yield {
+                            "_id": str(uuid.uuid4()),
+                            "association": association_node,
+                            "object": object_node,
+                            "subject": subject_node,
+                        }
+
+                elem.clear()
+                for ancestor in elem.xpath("ancestor-or-self::*"):
+                    ancestor.clear()
+
+    def parse_metabolite_protein(self) -> Iterator[Dict]:
+        """Parse metabolite-protein associations."""
+
+        for event, elem in ET.iterparse(self.input_xml, events=("start", "end")):
+            if event == "end" and elem.tag == f'{{{self.namespace["hmdb"]}}}metabolite':
+                metabolite = elem
+                # metabolite node
+                primary_id, xrefs = IDHierarchy.get_metabolite_primary_id(metabolite, self)
+                subject_node = self.build_metabolite_node(
+                    metabolite,
+                    primary_id,
+                    xrefs,
+                    anatomical_entities=self.get_anatomical_entities(metabolite),
+                )
+
+                # process protein associations
+                prot_elem = metabolite.find("hmdb:protein_associations", self.namespace)
+                if prot_elem is None:
+                    elem.clear()
+                    for ancestor in elem.xpath("ancestor-or-self::*"):
+                        ancestor.clear()
+                    continue
+
+                for protein in prot_elem.findall("hmdb:protein", self.namespace):
+                    # protein node
+                    object_node = {
+                        "id": None,
+                        "name": self.get_text(protein, "gene_name"),
+                        "full_name": self.get_text(protein, "name"),
+                        "description": None,
+                        "type": "biolink:Protein",
+                        "protein_type": None,
+                        "xrefs": {},
+                    }
+
+                    # add protein type
+                    prot_type = self.get_text(protein, "protein_type")
+                    if prot_type:
+                        object_node["protein_type"] = prot_type.lower()
+
+                    # add HMDBP accession
+                    prot_accession = self.get_text(protein, "protein_accession")
+                    if prot_accession:
+                        object_node["xrefs"]["hmdbp"] = f"HMDBP:{prot_accession}"
+
+                    # UniProt ID and description
+                    uniprot_id = self.get_text(protein, "uniprot_id")
+                    if uniprot_id:
+                        object_node["id"] = f"UniProtKB:{uniprot_id}"
+                        object_node["xrefs"]["uniprotkb"] = f"UniProtKB:{uniprot_id}"
+
+                        # add protein function if available
+                        if uniprot_id in self.cached_protein_functions:
+                            object_node["description"] = self.cached_protein_functions[uniprot_id][
+                                "description"
+                            ]
+                    elif prot_accession:
+                        object_node["id"] = f"HMDBP:{prot_accession}"
+
+                    object_node = self.remove_empty_none_values(object_node)
+
+                    # association node
+                    association_node = {
+                        "id": "RO:0002434",
+                        "predicate": "biolink:ChemicalGeneInteractionAssociation",
+                        "type": "interacts_with",
+                        "primary_knowledge_source": "infores:hmdb_v5",
+                        "evidence_type": "ECO:0000000",  # unknown evidence
+                    }
 
                     yield {
                         "_id": str(uuid.uuid4()),
@@ -228,200 +375,88 @@ class HMDBMetaboliteParser(XMLParseHelper):
                         "subject": subject_node,
                     }
 
-    def parse_metabolite_disease(self) -> Iterator[Dict]:
-        """Parse metabolite-disease associations."""
-        tree = ET.parse(self.input_xml)
-        root = tree.getroot()
-
-        for metabolite in root.findall("hmdb:metabolite", self.namespace):
-            diseases = self.get_diseases(metabolite)
-            if not diseases:
-                continue
-
-            # metabolite node
-            primary_id, xrefs = IDHierarchy.get_metabolite_primary_id(metabolite, self)
-            subject_node = self.build_metabolite_node(
-                metabolite,
-                primary_id,
-                xrefs,
-                anatomical_entities=self.get_anatomical_entities(metabolite),
-            )
-
-            # process disease references
-            diseases_elem = metabolite.find("hmdb:diseases", self.namespace)
-            if diseases_elem is not None:
-                for disease_elem in diseases_elem.findall("hmdb:disease", self.namespace):
-                    references = self.get_medical_references(disease_elem)
-                    if not references:
-                        continue
-
-                    # association node
-                    association_node = {
-                        "id": "RO:0000087",  # has role
-                        "predicate": "biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation",
-                        "type": "has_role_in",
-                        "primary_knowledge_source": "infores:hmdb_v5",
-                        "evidence_type": "ECO:0000305",  # manual assertion
-                        "publication": references,
-                    }
-                    association_node = self.remove_empty_none_values(association_node)
-
-                    # generate associations for each disease
-                    for disease in diseases:
-                        disease_key = disease.strip().lower()
-                        if disease_key in self.cached_disease_info:
-                            object_node = self.cached_disease_info[disease_key].copy()
-                            object_node = self.remove_empty_none_values(object_node)
-
-                            yield {
-                                "_id": str(uuid.uuid4()),
-                                "association": association_node,
-                                "object": object_node,
-                                "subject": subject_node,
-                            }
-
-    def parse_metabolite_protein(self) -> Iterator[Dict]:
-        """Parse metabolite-protein associations."""
-        tree = ET.parse(self.input_xml)
-        root = tree.getroot()
-
-        for metabolite in root.findall("hmdb:metabolite", self.namespace):
-            # metabolite node
-            primary_id, xrefs = IDHierarchy.get_metabolite_primary_id(metabolite, self)
-            subject_node = self.build_metabolite_node(
-                metabolite,
-                primary_id,
-                xrefs,
-                anatomical_entities=self.get_anatomical_entities(metabolite),
-            )
-
-            # process protein associations
-            prot_elem = metabolite.find("hmdb:protein_associations", self.namespace)
-            if prot_elem is None:
-                continue
-
-            for protein in prot_elem.findall("hmdb:protein", self.namespace):
-                # protein node
-                object_node = {
-                    "id": None,
-                    "name": self.get_text(protein, "gene_name"),
-                    "full_name": self.get_text(protein, "name"),
-                    "description": None,
-                    "type": "biolink:Protein",
-                    "protein_type": None,
-                    "xrefs": {},
-                }
-
-                # add protein type
-                prot_type = self.get_text(protein, "protein_type")
-                if prot_type:
-                    object_node["protein_type"] = prot_type.lower()
-
-                # add HMDBP accession
-                prot_accession = self.get_text(protein, "protein_accession")
-                if prot_accession:
-                    object_node["xrefs"]["hmdbp"] = f"HMDBP:{prot_accession}"
-
-                # UniProt ID and description
-                uniprot_id = self.get_text(protein, "uniprot_id")
-                if uniprot_id:
-                    object_node["id"] = f"UniProtKB:{uniprot_id}"
-                    object_node["xrefs"]["uniprotkb"] = f"UniProtKB:{uniprot_id}"
-
-                    # add protein function if available
-                    if uniprot_id in self.cached_protein_functions:
-                        object_node["description"] = self.cached_protein_functions[uniprot_id][
-                            "description"
-                        ]
-                elif prot_accession:
-                    object_node["id"] = f"HMDBP:{prot_accession}"
-
-                object_node = self.remove_empty_none_values(object_node)
-
-                # association node
-                association_node = {
-                    "id": "RO:0002434",
-                    "predicate": "biolink:ChemicalGeneInteractionAssociation",
-                    "type": "interacts_with",
-                    "primary_knowledge_source": "infores:hmdb_v5",
-                    "evidence_type": "ECO:0000000",  # unknown evidence
-                }
-
-                yield {
-                    "_id": str(uuid.uuid4()),
-                    "association": association_node,
-                    "object": object_node,
-                    "subject": subject_node,
-                }
+                elem.clear()
+                for ancestor in elem.xpath("ancestor-or-self::*"):
+                    ancestor.clear()
 
     def parse_metabolite_pathway(self) -> Iterator[Dict]:
         """Parse metabolite-pathway associations."""
-        tree = ET.parse(self.input_xml)
-        root = tree.getroot()
+        for event, elem in ET.iterparse(self.input_xml, events=("start", "end")):
+            if event == "end" and elem.tag == f'{{{self.namespace["hmdb"]}}}metabolite':
+                metabolite = elem
 
-        for metabolite in root.findall("hmdb:metabolite", self.namespace):
-            # metabolite node
-            primary_id, xrefs = IDHierarchy.get_metabolite_primary_id(metabolite, self)
-            subject_node = self.build_metabolite_node(
-                metabolite,
-                primary_id,
-                xrefs,
-                anatomical_entities=self.get_anatomical_entities(metabolite),
-            )
-
-            # pathway associations
-            bio_prop = metabolite.find("hmdb:biological_properties", self.namespace)
-            if bio_prop is None:
-                continue
-
-            pathways_elem = bio_prop.find("hmdb:pathways", self.namespace)
-            if pathways_elem is None:
-                continue
-
-            for pathway in pathways_elem.findall("hmdb:pathway", self.namespace):
-                pw_name = self.get_text(pathway, "name")
-                if not pw_name:
-                    continue
-
-                kegg_map = self.get_text(pathway, "kegg_map_id")
-
-                # get SMPDB info from cache
-                cache_entry = self.cached_pathway_descriptions.get(pw_name.lower(), {})
-                smpdb_id = cache_entry.get("smpdb")
-                description = cache_entry.get("description")
-
-                # pathway node
-                object_node = {
-                    "id": smpdb_id or (f"KEGG:{kegg_map}" if kegg_map else None),
-                    "name": pw_name.lower(),
-                    "description": description,
-                    "type": "biolink:Pathway",
-                    "xrefs": {
-                        "smpdb": smpdb_id,
-                        "kegg": f"KEGG:{kegg_map}" if kegg_map else None,
-                    },
-                }
-                object_node = self.remove_empty_none_values(object_node)
-
-                # association node
-                association_node = {
-                    "id": "RO:0000056",
-                    "predicate": "biolink:ChemicalToPathwayAssociation",
-                    "type": "participates_in",
-                    "primary_knowledge_source": "infores:hmdb_v5",
-                    "evidence_type": "ECO:0000000",  # unknown evidence
-                }
-
-                # generate association ID
-                _id = (
-                    f"{subject_node['id'].split(':')[1]}_participates_in_{object_node['id'].split(':')[1]}"
-                    if object_node.get("id") and subject_node.get("id")
-                    else str(uuid.uuid4())
+                # metabolite node
+                primary_id, xrefs = IDHierarchy.get_metabolite_primary_id(metabolite, self)
+                subject_node = self.build_metabolite_node(
+                    metabolite,
+                    primary_id,
+                    xrefs,
+                    anatomical_entities=self.get_anatomical_entities(metabolite),
                 )
 
-                yield {
-                    "_id": _id,
-                    "association": association_node,
-                    "object": object_node,
-                    "subject": subject_node,
-                }
+                # pathway associations
+                bio_prop = metabolite.find("hmdb:biological_properties", self.namespace)
+                if bio_prop is None:
+                    elem.clear()
+                    for ancestor in elem.xpath("ancestor-or-self::*"):
+                        ancestor.clear()
+                    continue
+
+                pathways_elem = bio_prop.find("hmdb:pathways", self.namespace)
+                if pathways_elem is None:
+                    elem.clear()
+                    for ancestor in elem.xpath("ancestor-or-self::*"):
+                        ancestor.clear()
+                    continue
+
+                for pathway in pathways_elem.findall("hmdb:pathway", self.namespace):
+                    pw_name = self.get_text(pathway, "name")
+                    if not pw_name:
+                        continue
+
+                    kegg_map = self.get_text(pathway, "kegg_map_id")
+
+                    # get SMPDB info from cache
+                    cache_entry = self.cached_pathway_descriptions.get(pw_name.lower(), {})
+                    smpdb_id = cache_entry.get("smpdb")
+                    description = cache_entry.get("description")
+
+                    # pathway node
+                    object_node = {
+                        "id": smpdb_id or (f"KEGG:{kegg_map}" if kegg_map else None),
+                        "name": pw_name.lower(),
+                        "description": description,
+                        "type": "biolink:Pathway",
+                        "xrefs": {
+                            "smpdb": smpdb_id,
+                            "kegg": f"KEGG:{kegg_map}" if kegg_map else None,
+                        },
+                    }
+                    object_node = self.remove_empty_none_values(object_node)
+
+                    # association node
+                    association_node = {
+                        "id": "RO:0000056",
+                        "predicate": "biolink:ChemicalToPathwayAssociation",
+                        "type": "participates_in",
+                        "primary_knowledge_source": "infores:hmdb_v5",
+                        "evidence_type": "ECO:0000000",  # unknown evidence
+                    }
+
+                    # generate association ID
+                    _id = (
+                        f"{subject_node['id'].split(':')[1]}_participates_in_{object_node['id'].split(':')[1]}"
+                        if object_node.get("id") and subject_node.get("id")
+                        else str(uuid.uuid4())
+                    )
+
+                    yield {
+                        "_id": _id,
+                        "association": association_node,
+                        "object": object_node,
+                        "subject": subject_node,
+                    }
+
+                elem.clear()
+                for ancestor in elem.xpath("ancestor-or-self::*"):
+                    ancestor.clear()

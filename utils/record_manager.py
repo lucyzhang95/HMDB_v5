@@ -74,7 +74,7 @@ class RecordManager:
         return Path(extracted_path)
 
     def _flatten_dict(
-        self, d: Dict[str, Any], parent_key: str = "", sep: str = "."
+            self, d: Dict[str, Any], parent_key: str = "", sep: str = "."
     ) -> Dict[str, Any]:
         """
         Flatten nested dictionary for JSONL export.
@@ -96,7 +96,7 @@ class RecordManager:
         return dict(items)
 
     def _get_parser_tasks(
-        self, metabolite_parser: HMDBMetaboliteParser, protein_parser: HMDBProteinParser
+            self, metabolite_parser: HMDBMetaboliteParser, protein_parser: HMDBProteinParser
     ) -> List[Tuple[str, Any, str]]:
         """
         Get list of parser tasks with their configurations.
@@ -222,13 +222,13 @@ class RecordManager:
         self._print_export_summary(raw_counts, stats, output_path, overall_time)
 
     def _process_and_export_records(
-        self,
-        output_path: Path,
-        output_format: str,
-        tasks: list,
-        stats: dict,
-        raw_counts: dict,
-        batch_size: int,
+            self,
+            output_path: Path,
+            output_format: str,
+            tasks: list,
+            stats: dict,
+            raw_counts: dict,
+            batch_size: int,
     ) -> List[str]:
         """Process and export records with proper resource management."""
 
@@ -236,7 +236,7 @@ class RecordManager:
         processed_association_types = []
 
         with tqdm(
-            task_configs, desc="Processing association types", unit="type", position=0, leave=True
+                task_configs, desc="Processing association types", unit="type", position=0, leave=True
         ) as overall_pbar:
 
             for _, (key, parser_func, desc) in enumerate(overall_pbar):
@@ -272,14 +272,14 @@ class RecordManager:
         return processed_association_types
 
     def _process_single_association_type(
-        self,
-        output_path: Path,
-        key: str,
-        record_iterator,
-        desc: str,
-        output_format: str,
-        batch_size: int,
-        overall_pbar,
+            self,
+            output_path: Path,
+            key: str,
+            record_iterator,
+            desc: str,
+            output_format: str,
+            batch_size: int,
+            overall_pbar,
     ) -> Tuple[int, int]:
         """Process a single association type with streaming and batched processing."""
         association_start = time.time()
@@ -308,7 +308,7 @@ class RecordManager:
         return total_raw_count, total_deduped_count
 
     def _process_records_streamed(
-        self, output_path: Path, record_iterator, key: str, output_format: str, batch_size: int
+            self, output_path: Path, record_iterator, key: str, output_format: str, batch_size: int
     ) -> Tuple[int, int]:
         """
         Process records in true streaming fashion with batched deduplication.
@@ -370,13 +370,13 @@ class RecordManager:
         return total_raw_count, total_deduped_count
 
     def _process_batch(
-        self,
-        f,
-        batch: list,
-        key: str,
-        output_format: str,
-        global_seen_keys: set,
-        first_record_written: bool,
+            self,
+            f,
+            batch: list,
+            key: str,
+            output_format: str,
+            global_seen_keys: set,
+            first_record_written: bool,
     ) -> int:
         """
         Process a single batch: deduplicate and write records.
@@ -472,11 +472,11 @@ class RecordManager:
             )
 
     def _print_export_summary(
-        self,
-        raw_counts: Dict[str, int],
-        stats: Dict[str, Any],
-        output_path: Path,
-        overall_time: float,
+            self,
+            raw_counts: Dict[str, int],
+            stats: Dict[str, Any],
+            output_path: Path,
+            overall_time: float,
     ) -> None:
         """Print export summary statistics with detailed timing information."""
         logger.info("🎉 Deduplication and export complete!")
@@ -521,7 +521,7 @@ class RecordManager:
 
 
 def cache_hmdb_database(
-    email: str, umls_api_key: str, data_dir: str = "downloads", force_refresh: bool = False
+        email: str, umls_api_key: str, data_dir: str = "downloads", force_refresh: bool = False
 ) -> Dict[str, Any]:
     """
     HMDB reference data caching pipeline (does not generate association records).

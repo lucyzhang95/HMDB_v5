@@ -4,6 +4,7 @@ import csv
 import json
 import logging
 import os
+import pickle
 import sys
 import time
 from pathlib import Path
@@ -18,7 +19,6 @@ from metabolite_parser import HMDBMetaboliteParser
 from protein_parser import HMDBProteinParser
 from tqdm.auto import tqdm
 
-from .cache_helper import save_pickle
 from .cache_manager import CacheManager
 from .reader import extract_file_from_zip
 from .record_deduplicator import deduplicate_and_merge
@@ -306,7 +306,6 @@ class RecordManager:
             logger.info(f"📋 Header scanning completed in {header_time:.2f} seconds")
             stats["processing_times"]["header_scan"] = header_time
 
-        # Process records
         try:
             with open(output_path, "w", newline="", encoding="utf-8") as f:
                 writer = None
@@ -437,16 +436,17 @@ class RecordManager:
             logger.error(f"Failed to write output file: {e}")
             raise
 
-        # Handle pickle format separately
+        # save pickle format separately
         if output_format == "pkl":
             pickle_start = time.time()
             logger.info("💾 Saving all collected records to pickle file...")
-            save_pickle(all_records_for_pickle, output_path)
+            with open(output_path, "wb") as pkl_f:
+                pickle.dump(all_records_for_pickle, pkl_f)
             pickle_time = time.time() - pickle_start
             stats["processing_times"]["pickle_save"] = pickle_time
             logger.info(f"💾 Pickle save completed in {pickle_time:.2f} seconds")
 
-        # Update statistics with percentages
+        # update statistics
         total = stats["total_records"]
         for key in stats["association_types"]:
             count = stats["association_types"][key]["count"]

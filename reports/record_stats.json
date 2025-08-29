@@ -1,7 +1,7 @@
 {
   "data_source": "HMDB",
   "metadata": {
-    "analysis_date": "2025-08-28T14:44:15.582428",
+    "analysis_date": "2025-08-29T00:18:48.705602",
     "report_version": "1.0",
     "total_records_analyzed": 2112467,
     "total_records_analyzed_by_relationship": {
@@ -27,14 +27,14 @@
     "duplicate_count": 759,
     "duplicates": {
       "2": [
-        "P50416_participates_in_SMP0000051",
-        "68841_participates_in_SMP0000484",
-        "P22413_participates_in_SMP0000070"
+        "P22413_participates_in_SMP0000027",
+        "P05091_participates_in_SMP0000063",
+        "O75600_participates_in_SMP0000484"
       ],
       "3": [
-        "P18669_participates_in_map00010",
-        "Q96PE3_participates_in_SMP0000462",
-        "Q13572_participates_in_SMP0000462"
+        "Q9NPH2_participates_in_SMP0000462",
+        "P23677_participates_in_SMP0000462",
+        "P18669_participates_in_map00010"
       ]
     },
     "duplicates_distribution": {

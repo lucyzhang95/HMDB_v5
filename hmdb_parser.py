@@ -44,7 +44,7 @@ def load_hmdb_data(data_dir: str = "downloads") -> Iterator[Dict]:
 
 
 def validate_environment_variables(
-    email: Optional[str], umls_api_key: Optional[str]
+        email: Optional[str], umls_api_key: Optional[str]
 ) -> tuple[str, str]:
     """
     Validate required environment variables.
@@ -131,8 +131,8 @@ Usage Examples:
     export_group.add_argument("--export", help="Generate and export records to the specified file")
     export_group.add_argument(
         "--format",
-        choices=["json", "jsonl", "pkl", "tsv"],
-        default="jsonl",
+        choices=["json", "jsonl", "pkl"],
+        default="json",
         help="Export format (default: jsonl, recommended for large datasets)",
     )
     export_group.add_argument(

@@ -707,7 +707,9 @@ class HMDBRecordStatsReporter:
 
     def save_stats_report(self, stats: Dict[str, Any]) -> str:
         """Save the statistics report to JSON file."""
-        report_path = os.path.join(self.report_dir, "record_stats.json")
+        report_path = os.path.join(
+            self.report_dir, f"record_stats_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+        )
         with open(report_path, "w") as f:
             json.dump(stats, f, indent=2, sort_keys=True)
 

@@ -243,14 +243,6 @@ class HMDBMetaboliteParser(XMLParseHelper):
             if event == "end" and elem.tag == f'{{{self.namespace["hmdb"]}}}metabolite':
                 metabolite = elem
 
-                # get associated diseases
-                diseases = self.get_diseases(metabolite)
-                if not diseases:
-                    elem.clear()
-                    for ancestor in elem.xpath("ancestor-or-self::*"):
-                        ancestor.clear()
-                    continue
-
                 # metabolite node
                 primary_id, xrefs = IDHierarchy.get_metabolite_primary_id(metabolite, self)
                 subject_node = self.build_metabolite_node(
@@ -260,39 +252,47 @@ class HMDBMetaboliteParser(XMLParseHelper):
                     anatomical_entities=self.get_anatomical_entities(metabolite),
                 )
 
-                references = None
+                diseases = self.get_diseases(metabolite)
+                if not diseases:
+                    elem.clear()
+                    for ancestor in elem.xpath("ancestor-or-self::*"):
+                        ancestor.clear()
+                    continue
+
                 diseases_elem = metabolite.find("hmdb:diseases", self.namespace)
-                if diseases_elem is not None:
-                    for disease_elem in diseases_elem.findall("hmdb:disease", self.namespace):
-                        temp_references = self.get_medical_references(disease_elem)
-                        if temp_references:
-                            references = temp_references
-                            break
+                if diseases_elem is None:
+                    elem.clear()
+                    for ancestor in elem.xpath("ancestor-or-self::*"):
+                        ancestor.clear()
+                    continue
 
-                # association node (with or without references)
-                association_node = {
-                    "id": "RO:0000087",  # has role
-                    "predicate": "biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation",
-                    "type": "has_role_in",
-                    "primary_knowledge_source": "infores:hmdb_v5",
-                    "evidence_type": "ECO:0000305" if references else "ECO:0000000",
-                    "publication": references if references else None,
-                }
-                association_node = self.remove_empty_none_values(association_node)
+                for disease_elem in diseases_elem.findall("hmdb:disease", self.namespace):
+                    references = self.get_medical_references(disease_elem)
 
-                # generate associations for each disease
-                for disease in diseases:
-                    disease_key = disease.strip().lower()
-                    if disease_key in self.cached_disease_info:
-                        object_node = self.cached_disease_info[disease_key].copy()
-                        object_node = self.remove_empty_none_values(object_node)
+                    # association node
+                    association_node = {
+                        "id": "RO:0000087",  # has role
+                        "predicate": "biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation",
+                        "type": "has_role_in",
+                        "primary_knowledge_source": "infores:hmdb_v5",
+                        "evidence_type": "ECO:0000305" if references else "ECO:0000000",
+                        "publication": references if references else None,
+                    }
+                    association_node = self.remove_empty_none_values(association_node)
 
-                        yield {
-                            "_id": str(uuid.uuid4()),
-                            "association": association_node,
-                            "object": object_node,
-                            "subject": subject_node,
-                        }
+                    # disease node
+                    for disease in diseases:
+                        disease_key = disease.strip().lower()
+                        if disease_key in self.cached_disease_info:
+                            object_node = self.cached_disease_info[disease_key].copy()
+                            object_node = self.remove_empty_none_values(object_node)
+
+                            yield {
+                                "_id": str(uuid.uuid4()),
+                                "association": association_node,
+                                "object": object_node,
+                                "subject": subject_node,
+                            }
 
                 elem.clear()
                 for ancestor in elem.xpath("ancestor-or-self::*"):

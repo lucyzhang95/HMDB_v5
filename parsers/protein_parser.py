@@ -247,134 +247,155 @@ class HMDBProteinParser(XMLParseHelper):
 
     def parse_protein_pathway(self) -> Iterator[Dict]:
         """Parse protein-pathway associations."""
-        tree = ET.parse(self.input_xml)
-        root = tree.getroot()
+        for event, elem in ET.iterparse(self.input_xml, events=("start", "end")):
+            if event == "end" and elem.tag == f'{{{self.namespace["hmdb"]}}}protein':
+                protein = elem
 
-        for protein in root.findall("hmdb:protein", self.namespace):
-            subject_node = self.build_protein_node(protein)
-            if not subject_node:
-                continue
-
-            # publication references
-            publication = self.get_references(protein)
-
-            # pathways
-            pathways_elem = protein.find("hmdb:pathways", self.namespace)
-            if pathways_elem is None:
-                continue
-
-            for pathway in pathways_elem.findall("hmdb:pathway", self.namespace):
-                pw_name = self.get_text(pathway, "name")
-                if not pw_name:
+                # protein node
+                subject_node = self.build_protein_node(protein)
+                if not subject_node:
+                    elem.clear()
+                    for ancestor in elem.xpath("ancestor-or-self::*"):
+                        ancestor.clear()
                     continue
 
-                kegg_map = self.get_text(pathway, "kegg_map_id")
+                # publication references
+                publication = self.get_references(protein)
 
-                # SMPDB information
-                cache_entry = self.cached_pathway_descriptions.get(pw_name.lower(), {})
-                smpdb_id = cache_entry.get("smpdb")
-                description = cache_entry.get("description")
+                # pathways
+                pathways_elem = protein.find("hmdb:pathways", self.namespace)
+                if pathways_elem is None:
+                    elem.clear()
+                    for ancestor in elem.xpath("ancestor-or-self::*"):
+                        ancestor.clear()
+                    continue
 
-                # pathway node
-                object_node = {
-                    "id": smpdb_id or (f"KEGG:{kegg_map}" if kegg_map else None),
-                    "name": pw_name.lower(),
-                    "description": description,
-                    "type": "biolink:Pathway",
-                    "xrefs": {
-                        "smpdb": smpdb_id,
-                        "kegg": f"KEGG:{kegg_map}" if kegg_map else None,
-                    },
-                }
-                object_node = self.remove_empty_none_values(object_node)
+                for pathway in pathways_elem.findall("hmdb:pathway", self.namespace):
+                    pw_name = self.get_text(pathway, "name")
+                    if not pw_name:
+                        continue
 
-                # association node
-                association_node = {
-                    "id": "RO:0000056",
-                    "predicate": "biolink:GeneToPathwayAssociation",
-                    "type": "participates_in",
-                    "primary_knowledge_source": "infores:hmdb_v5",
-                    "evidence_type": "ECO:0000305",  # manual assertion
-                    "publication": publication if publication else None,
-                }
-                association_node = self.remove_empty_none_values(association_node)
+                    kegg_map = self.get_text(pathway, "kegg_map_id")
 
-                # association ID
-                _id = (
-                    f"{subject_node['id'].split(':')[1]}_participates_in_{object_node['id'].split(':')[1]}"
-                    if object_node.get("id") and subject_node.get("id")
-                    else str(uuid.uuid4())
-                )
+                    # SMPDB information
+                    cache_entry = self.cached_pathway_descriptions.get(pw_name.lower(), {})
+                    smpdb_id = cache_entry.get("smpdb")
+                    description = cache_entry.get("description")
 
-                yield {
-                    "_id": _id,
-                    "association": association_node,
-                    "object": object_node,
-                    "subject": subject_node,
-                }
+                    # pathway node
+                    object_node = {
+                        "id": smpdb_id or (f"KEGG:{kegg_map}" if kegg_map else None),
+                        "name": pw_name.lower(),
+                        "description": description,
+                        "type": "biolink:Pathway",
+                        "xrefs": {
+                            "smpdb": smpdb_id,
+                            "kegg": f"KEGG:{kegg_map}" if kegg_map else None,
+                        },
+                    }
+                    object_node = self.remove_empty_none_values(object_node)
+
+                    # association node
+                    association_node = {
+                        "id": "RO:0000056",
+                        "predicate": "biolink:GeneToPathwayAssociation",
+                        "type": "participates_in",
+                        "primary_knowledge_source": "infores:hmdb_v5",
+                        "evidence_type": "ECO:0000305",  # manual assertion
+                        "publication": publication if publication else None,
+                    }
+                    association_node = self.remove_empty_none_values(association_node)
+
+                    # association ID
+                    _id = (
+                        f"{subject_node['id'].split(':')[1]}_participates_in_{object_node['id'].split(':')[1]}"
+                        if object_node.get("id") and subject_node.get("id")
+                        else str(uuid.uuid4())
+                    )
+
+                    yield {
+                        "_id": _id,
+                        "association": association_node,
+                        "object": object_node,
+                        "subject": subject_node,
+                    }
+
+                elem.clear()
+                for ancestor in elem.xpath("ancestor-or-self::*"):
+                    ancestor.clear()
 
     def parse_protein_biological_process(self) -> Iterator[Dict]:
         """Parse protein-biological process associations."""
-        tree = ET.parse(self.input_xml)
-        root = tree.getroot()
+        for event, elem in ET.iterparse(self.input_xml, events=("start", "end")):
+            if event == "end" and elem.tag == f'{{{self.namespace["hmdb"]}}}protein':
+                protein = elem
 
-        for protein in root.findall("hmdb:protein", self.namespace):
-            subject_node = self.build_protein_node(protein)
-            if not subject_node:
-                continue
-
-            # publication references
-            publication = self.get_references(protein)
-
-            # GO biological processes
-            go_elem = protein.find("hmdb:go_classifications", self.namespace)
-            if go_elem is None:
-                continue
-
-            for go_class in go_elem.findall("hmdb:go_class", self.namespace):
-                category = self.get_text(go_class, "category")
-                if category != "Biological process":
+                subject_node = self.build_protein_node(protein)
+                if not subject_node:
+                    elem.clear()
+                    for ancestor in elem.xpath("ancestor-or-self::*"):
+                        ancestor.clear()
                     continue
 
-                go_name = self.get_text(go_class, "description")
-                go_id = self.get_text(go_class, "go_id")
+                # publication references
+                publication = self.get_references(protein)
 
-                # GO description from cache
-                go_description = None
-                if go_id and go_id in self.cached_go_descriptions:
-                    go_description = self.cached_go_descriptions[go_id].get("description")
+                # GO biological processes
+                go_elem = protein.find("hmdb:go_classifications", self.namespace)
+                if go_elem is None:
+                    elem.clear()
+                    for ancestor in elem.xpath("ancestor-or-self::*"):
+                        ancestor.clear()
+                    continue
 
-                # biological process node
-                object_node = {
-                    "id": go_id,
-                    "name": go_name.lower() if go_name else None,
-                    "description": go_description,
-                    "type": "biolink:BiologicalProcess",
-                    "xrefs": {"go": go_id} if go_id else {},
-                }
-                object_node = self.remove_empty_none_values(object_node)
+                for go_class in go_elem.findall("hmdb:go_class", self.namespace):
+                    category = self.get_text(go_class, "category")
+                    if category != "Biological process":
+                        continue
 
-                # association node
-                association_node = {
-                    "id": "RO:0002331",
-                    "predicate": "biolink:MacromolecularMachineToBiologicalProcessAssociation",
-                    "type": "involved_in",
-                    "primary_knowledge_source": "infores:hmdb_v5",
-                    "evidence_type": "ECO:0000305",  # manual assertion
-                    "publication": publication if publication else None,
-                }
-                association_node = self.remove_empty_none_values(association_node)
+                    go_name = self.get_text(go_class, "description")
+                    go_id = self.get_text(go_class, "go_id")
 
-                # association ID
-                _id = (
-                    f"{subject_node['id'].split(':', 1)[1]}_involved_in_{object_node['id'].split(':', 1)[1]}"
-                    if object_node.get("id") and subject_node.get("id")
-                    else str(uuid.uuid4())
-                )
+                    # GO description from cache
+                    go_description = None
+                    if go_id and go_id in self.cached_go_descriptions:
+                        go_description = self.cached_go_descriptions[go_id].get("description")
 
-                yield {
-                    "_id": _id,
-                    "association": association_node,
-                    "object": object_node,
-                    "subject": subject_node,
-                }
+                    # biological process node
+                    object_node = {
+                        "id": go_id,
+                        "name": go_name.lower() if go_name else None,
+                        "description": go_description,
+                        "type": "biolink:BiologicalProcess",
+                        "xrefs": {"go": go_id} if go_id else {},
+                    }
+                    object_node = self.remove_empty_none_values(object_node)
+
+                    # association node
+                    association_node = {
+                        "id": "RO:0002331",
+                        "predicate": "biolink:MacromolecularMachineToBiologicalProcessAssociation",
+                        "type": "involved_in",
+                        "primary_knowledge_source": "infores:hmdb_v5",
+                        "evidence_type": "ECO:0000305",  # manual assertion
+                        "publication": publication if publication else None,
+                    }
+                    association_node = self.remove_empty_none_values(association_node)
+
+                    # association ID
+                    _id = (
+                        f"{subject_node['id'].split(':', 1)[1]}_involved_in_{object_node['id'].split(':', 1)[1]}"
+                        if object_node.get("id") and subject_node.get("id")
+                        else str(uuid.uuid4())
+                    )
+
+                    yield {
+                        "_id": _id,
+                        "association": association_node,
+                        "object": object_node,
+                        "subject": subject_node,
+                    }
+
+                elem.clear()
+                for ancestor in elem.xpath("ancestor-or-self::*"):
+                    ancestor.clear()

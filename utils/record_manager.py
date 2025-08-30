@@ -208,6 +208,8 @@ class RecordManager:
 
             if output_format == "json":
                 self._combine_json_files(output_path, processed_association_types)
+            elif output_format == "pkl":
+                self._combine_pkl_files(output_path, processed_association_types)
 
         except Exception as e:
             logger.error(f"❌ Failed to process records: {e}")
@@ -239,13 +241,15 @@ class RecordManager:
                 task_configs, desc="Processing association types", unit="type", position=0, leave=True
         ) as overall_pbar:
 
-            for _, (key, parser_func, desc) in enumerate(overall_pbar):
+            for task_index, (key, parser_func, desc) in enumerate(overall_pbar):
                 try:
                     logger.info(f"🔄 Creating iterator for {desc}...")
                     record_iterator = parser_func()
 
                     if output_format == "json":
                         temp_output_path = output_path.parent / f"{key}.json"
+                    elif output_format == "pkl":
+                        temp_output_path = output_path.parent / f"{key}.pkl"
                     else:
                         temp_output_path = output_path
 
@@ -257,6 +261,7 @@ class RecordManager:
                         output_format,
                         batch_size,
                         overall_pbar,
+                        is_first_association_type=(task_index == 0),
                     )
 
                     if total_deduped_count > 0:
@@ -280,6 +285,7 @@ class RecordManager:
             output_format: str,
             batch_size: int,
             overall_pbar,
+            is_first_association_type: bool = True,
     ) -> Tuple[int, int]:
         """Process a single association type with streaming and batched processing."""
         association_start = time.time()
@@ -288,7 +294,7 @@ class RecordManager:
 
         # process records with batched deduplication
         total_raw_count, total_deduped_count = self._process_records_streamed(
-            output_path, record_iterator, key, output_format, batch_size
+            output_path, record_iterator, key, output_format, batch_size, is_first_association_type
         )
 
         processing_time = time.time() - association_start
@@ -308,7 +314,13 @@ class RecordManager:
         return total_raw_count, total_deduped_count
 
     def _process_records_streamed(
-            self, output_path: Path, record_iterator, key: str, output_format: str, batch_size: int
+            self,
+            output_path: Path,
+            record_iterator,
+            key: str,
+            output_format: str,
+            batch_size: int,
+            is_first_association_type: bool = True,
     ) -> Tuple[int, int]:
         """
         Process records in true streaming fashion with batched deduplication.
@@ -330,11 +342,15 @@ class RecordManager:
         if output_format == "pkl":
             file_context = open(output_path, "wb")
         else:
-            file_context = open(output_path, "w", newline="", encoding="utf-8")
+            if output_format == "jsonl" and not is_first_association_type:
+                file_mode = "a"
+            else:
+                file_mode = "w"
+            file_context = open(output_path, file_mode, newline="", encoding="utf-8")
 
         try:
             with file_context as f:
-                if output_format == "json":
+                if output_format == "json" and is_first_association_type:
                     f.write("[\n")
 
                 first_record_written = False
@@ -461,6 +477,41 @@ class RecordManager:
 
         temp_final_path.replace(output_path)
         logger.info(f"✅ Combined {written_types} association types into {output_path}")
+
+    def _combine_pkl_files(self, output_path: Path, association_types: List[str]) -> None:
+        """
+        Combine individual PKL files into a single file with relationship type keys.
+
+        :param output_path: Path to the final output PKL file
+        :param association_types: List of association type keys that were processed
+        """
+        logger.info("Combining PKL files into single file...")
+
+        combined_data = {}
+
+        for assoc_type in association_types:
+            temp_file = output_path.parent / f"{assoc_type}.pkl"
+
+            if temp_file.exists():
+                records = []
+                with open(temp_file, "rb") as f:
+                    try:
+                        while True:
+                            record = pickle.load(f)
+                            records.append(record)
+                    except EOFError:
+                        pass
+
+                if records:
+                    combined_data[assoc_type] = records
+                    logger.info(f"Added {len(records)} records for {assoc_type}")
+
+                temp_file.unlink()
+
+        with open(output_path, "wb") as f:
+            pickle.dump(combined_data, f)
+
+        logger.info(f"Combined {len(association_types)} association types into {output_path}")
 
     def _finalize_statistics(self, stats: dict, raw_counts: dict) -> None:
         """Calculate final statistics including percentages."""

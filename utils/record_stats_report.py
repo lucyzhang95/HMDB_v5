@@ -16,48 +16,80 @@ class HMDBRecordStatsReporter:
         os.makedirs(self.report_dir, exist_ok=True)
         print("HMDBRecordStatsReporter initialized.")
 
-    def _load_data(self, file_name: str) -> Dict[str, List[Dict]]:
+    def _load_data(self, filepath: str) -> Dict[str, List[Dict]]:
         """
         Load data from various formats and normalize to grouped structure.
+
+        For PKL format, if filepath points to a directory or base name,
+        look for individual relationship type files.
 
         Returns:
             Dictionary with relationship types as keys and lists of records as values
         """
-        in_f_path = os.path.join("..", "cache", file_name)
+        file_path = os.path.join("..", "cache", filepath)
 
-        if not os.path.exists(in_f_path):
-            print(f"File not found: {in_f_path}")
+        if filepath.endswith(".pkl"):
+            base_name = filepath[:-4]
+            return self._load_multiple_pkl_files(base_name)
+        elif not os.path.exists(file_path):
+            print(f"File not found: {file_path}")
             return {}
 
-        file_ext = in_f_path.split(".")[-1].lower()
+        file_ext = filepath.split(".")[-1].lower()
 
         try:
-            if file_ext == "pkl":
-                return self._load_pkl_data(in_f_path)
-            elif file_ext == "json":
-                return self._load_json_data(in_f_path)
+            if file_ext == "json":
+                return self._load_json_data(file_path)
             elif file_ext == "jsonl":
-                return self._load_jsonl_data(in_f_path)
+                return self._load_jsonl_data(file_path)
             else:
                 print(f"Unsupported file format: {file_ext}")
                 return {}
         except Exception as e:
-            print(f"Error loading {in_f_path}: {e}")
+            print(f"Error loading {file_path}: {e}")
             return {}
 
-    def _load_pkl_data(self, in_f_path: str) -> Dict[str, List[Dict]]:
-        """Load PKL data - now expects a flat list of records."""
-        with open(in_f_path, "rb") as f:
-            data = []
-            try:
-                while True:
-                    record = pickle.load(f)
-                    data.append(record)
-            except EOFError:
-                pass
+    def _load_multiple_pkl_files(self, base_name: str) -> Dict[str, List[Dict]]:
+        """Load multiple PKL files for different relationship types."""
+        relationship_types = [
+            "microbe-metabolite",
+            "metabolite-disease",
+            "metabolite-protein",
+            "metabolite-pathway",
+            "protein-pathway",
+            "protein-biological_process",
+        ]
 
-        print(f"Loaded {len(data)} records from PKL file")
-        return self._group_records_by_association_type(data)
+        combined_data = {}
+        cache_dir = os.path.join("..", "cache")
+
+        for rel_type in relationship_types:
+            pkl_file = os.path.join(cache_dir, f"{rel_type}.pkl")
+
+            if os.path.exists(pkl_file):
+                try:
+                    with open(pkl_file, "rb") as f:
+                        records = []
+                        try:
+                            while True:
+                                record = pickle.load(f)
+                                records.append(record)
+                        except EOFError:
+                            pass
+
+                    if records:
+                        combined_data[rel_type] = records
+                        print(f"Loaded {len(records)} records from {rel_type}.pkl")
+
+                except Exception as e:
+                    print(f"Error loading {pkl_file}: {e}")
+                    continue
+            else:
+                print(f"PKL file not found: {pkl_file}")
+
+        total_records = sum(len(records) for records in combined_data.values())
+        print(f"Total records loaded from PKL files: {total_records}")
+        return combined_data
 
     def _load_json_data(self, in_f_path: str) -> Dict[str, List[Dict]]:
         """Load JSON data - expects grouped structure."""

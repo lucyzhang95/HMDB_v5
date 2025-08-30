@@ -208,8 +208,6 @@ class RecordManager:
 
             if output_format == "json":
                 self._combine_json_files(output_path, processed_association_types)
-            elif output_format == "pkl":
-                self._combine_pkl_files(output_path, processed_association_types)
 
         except Exception as e:
             logger.error(f"❌ Failed to process records: {e}")
@@ -477,41 +475,6 @@ class RecordManager:
 
         temp_final_path.replace(output_path)
         logger.info(f"✅ Combined {written_types} association types into {output_path}")
-
-    def _combine_pkl_files(self, output_path: Path, association_types: List[str]) -> None:
-        """
-        Combine individual PKL files into a single file with relationship type keys.
-
-        :param output_path: Path to the final output PKL file
-        :param association_types: List of association type keys that were processed
-        """
-        logger.info("Combining PKL files into single file...")
-
-        combined_data = {}
-
-        for assoc_type in association_types:
-            temp_file = output_path.parent / f"{assoc_type}.pkl"
-
-            if temp_file.exists():
-                records = []
-                with open(temp_file, "rb") as f:
-                    try:
-                        while True:
-                            record = pickle.load(f)
-                            records.append(record)
-                    except EOFError:
-                        pass
-
-                if records:
-                    combined_data[assoc_type] = records
-                    logger.info(f"Added {len(records)} records for {assoc_type}")
-
-                temp_file.unlink()
-
-        with open(output_path, "wb") as f:
-            pickle.dump(combined_data, f)
-
-        logger.info(f"Combined {len(association_types)} association types into {output_path}")
 
     def _finalize_statistics(self, stats: dict, raw_counts: dict) -> None:
         """Calculate final statistics including percentages."""

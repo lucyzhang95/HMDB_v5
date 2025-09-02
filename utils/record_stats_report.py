@@ -773,7 +773,7 @@ class HMDBRecordStatsReporter:
         file_ext = filepath.split(".")[-1] if "." in filepath else "unknown"
         report_path = os.path.join(
             self.report_dir,
-            f"record_stats_{file_ext}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
+            f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_record_stats_{file_ext}_input.json",
         )
         with open(report_path, "w") as f:
             json.dump(stats, f, indent=2, sort_keys=True)

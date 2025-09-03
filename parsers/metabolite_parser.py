@@ -225,8 +225,14 @@ class HMDBMetaboliteParser(XMLParseHelper):
                         )
                         subject_node = self.remove_empty_none_values(subject_node)
 
+                        _id = (
+                            f"{subject_node['id'].split(':')[1]}_has_metabolic_interaction_with_{object_node['id'].split(':')[1]}"
+                            if object_node.get("id") and subject_node.get("id")
+                            else str(uuid.uuid4())
+                        )
+
                         yield {
-                            "_id": str(uuid.uuid4()),
+                            "_id": _id,
                             "association": association_node,
                             "object": object_node,
                             "subject": subject_node,
@@ -287,8 +293,14 @@ class HMDBMetaboliteParser(XMLParseHelper):
                             object_node = self.cached_disease_info[disease_key].copy()
                             object_node = self.remove_empty_none_values(object_node)
 
+                            _id = (
+                                f"{subject_node['id'].split(':')[1]}_has_role_in_{object_node['id'].split(':')[1]}"
+                                if object_node.get("id") and subject_node.get("id")
+                                else str(uuid.uuid4())
+                            )
+
                             yield {
-                                "_id": str(uuid.uuid4()),
+                                "_id": _id,
                                 "association": association_node,
                                 "object": object_node,
                                 "subject": subject_node,
@@ -368,8 +380,14 @@ class HMDBMetaboliteParser(XMLParseHelper):
                         "evidence_type": "ECO:0000000",  # unknown evidence
                     }
 
+                    _id = (
+                        f"{subject_node['id'].split(':')[1]}_interacts_with_{object_node['id'].split(':')[1]}"
+                        if object_node.get("id") and subject_node.get("id")
+                        else str(uuid.uuid4())
+                    )
+
                     yield {
-                        "_id": str(uuid.uuid4()),
+                        "_id": _id,
                         "association": association_node,
                         "object": object_node,
                         "subject": subject_node,

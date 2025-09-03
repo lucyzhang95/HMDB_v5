@@ -118,7 +118,7 @@ class HMDBRecordStatsReporter:
 
         for record in records:
             assoc_type = (
-                    record.get("association_type") or record.get("_relationship_type") or "unknown"
+                record.get("association_type") or record.get("_relationship_type") or "unknown"
             )
             grouped[assoc_type].append(record)
 
@@ -215,8 +215,8 @@ class HMDBRecordStatsReporter:
                 if "average_molecular_weight" in mw and mw["average_molecular_weight"] is not None:
                     mw_data["average"].append(mw["average_molecular_weight"])
                 if (
-                        "monoisotopic_molecular_weight" in mw
-                        and mw["monoisotopic_molecular_weight"] is not None
+                    "monoisotopic_molecular_weight" in mw
+                    and mw["monoisotopic_molecular_weight"] is not None
                 ):
                     mw_data["monoisotopic"].append(mw["monoisotopic_molecular_weight"])
 
@@ -249,7 +249,7 @@ class HMDBRecordStatsReporter:
         }
 
     def _count_unique_items_in_list_field(
-            self, records: List[Dict[str, Any]], field_path: List[str]
+        self, records: List[Dict[str, Any]], field_path: List[str]
     ) -> Dict[str, int]:
         """Count records with field and unique items in list fields."""
         records_with_field = 0
@@ -323,6 +323,25 @@ class HMDBRecordStatsReporter:
 
         duplicate_stats = self._generate_duplicate_statistics(duplicate_records)
 
+        # random sample 3 duplicated records per count
+        records_by_count = defaultdict(list)
+        for record_id, data in duplicate_records.items():
+            count = data["count"]
+            records_by_count[count].append((record_id, data))
+
+        sampled_by_count = {}
+        for count, record_list in records_by_count.items():
+            sample_size = min(3, len(record_list))
+            sampled_records = random.sample(record_list, sample_size)
+            sampled_by_count[count] = [
+                {
+                    "record_id": record_id,
+                    "relationship_types": data["relationship_types"],
+                    "sample_records": random.sample(data["records"], min(3, len(data["records"]))),
+                }
+                for record_id, data in sampled_records
+            ]
+
         export_data = {
             "metadata": {
                 "export_date": datetime.now().isoformat(),
@@ -339,10 +358,34 @@ class HMDBRecordStatsReporter:
         }
 
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        export_path = os.path.join(self.report_dir, f"duplicate_records_{timestamp}.json")
+        export_path = os.path.join(self.report_dir, f"{timestamp}_duplicate_records.json")
 
         with open(export_path, "w") as f:
             json.dump(export_data, f, indent=2, sort_keys=True, default=str)
+
+        # random sample 3 duplicated records per count
+        records_by_count = defaultdict(list)
+        for record_id, data in duplicate_records.items():
+            count = data["count"]
+            records_by_count[count].append((record_id, data))
+
+        sampled_by_count = {}
+        for count, record_list in records_by_count.items():
+            sample_size = min(3, len(record_list))
+            sampled_records = random.sample(record_list, sample_size)
+            sampled_by_count[count] = [
+                {
+                    "record_id": record_id,
+                    "relationship_types": data["relationship_types"],
+                    "sample_records": random.sample(data["records"], min(3, len(data["records"]))),
+                }
+                for record_id, data in sampled_records
+            ]
+
+        with open(
+            os.path.join(self.report_dir, f"{timestamp}_random_sampled_duplicate_records.json"), "w"
+        ) as f:
+            json.dump(sampled_by_count, f, indent=2, sort_keys=True, default=str)
 
         print(f"Duplicate records exported to: {export_path}")
         print(f"Exported {len(duplicate_records)} duplicate record groups")
@@ -763,7 +806,7 @@ class HMDBRecordStatsReporter:
         }
 
     def _analyze_protein_biological_process_specific(
-            self, records: List[Dict[str, Any]]
+        self, records: List[Dict[str, Any]]
     ) -> Dict[str, Any]:
         """Analyze protein-biological process specific statistics."""
         return {}
@@ -795,7 +838,7 @@ class HMDBRecordStatsReporter:
         return stats
 
     def run_full_analysis_with_duplicates(
-            self, filepath: str = "hmdb_output.pkl"
+        self, filepath: str = "hmdb_output.pkl"
     ) -> Dict[str, Any]:
         """Run complete statistical analysis and export duplicate records."""
         print(

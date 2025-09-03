@@ -1,0 +1,896 @@
+{
+  "data_source": "HMDB",
+  "metadata": {
+    "analysis_date": "2025-09-02T20:36:49.581862",
+    "report_version": "1.0",
+    "source_file": "hmdb_v5_parsed_records.pkl",
+    "total_records_analyzed": 2110403,
+    "total_records_analyzed_by_relationship": {
+      "metabolite-disease": 91593,
+      "metabolite-pathway": 815631,
+      "metabolite-protein": 863759,
+      "microbe-metabolite": 952,
+      "protein-biological_process": 25978,
+      "protein-pathway": 312490
+    }
+  },
+  "overall_description_stats": {
+    "object_description_percentage": 91.53,
+    "object_descriptions": 1931715,
+    "subject_description_percentage": 99.8,
+    "subject_descriptions": 2106224
+  },
+  "overall_evidence_types": {
+    "ECO:0000000": 1682499,
+    "ECO:0000305": 427904
+  },
+  "overall_id_analysis": {
+    "duplicate_count": 7021,
+    "duplicates": {
+      "2": [
+        "24883428_interacts_with_Q9BY64",
+        "47579_has_role_in_0005575",
+        "25240378_interacts_with_Q3SYC2"
+      ],
+      "3": [
+        "439234_has_role_in_0013110",
+        "53478609_has_role_in_601665",
+        "402_has_role_in_0001134"
+      ],
+      "4": [
+        "61503_has_role_in_245450",
+        "10635_has_role_in_613743",
+        "440101_has_role_in_0009960"
+      ],
+      "5": [
+        "12303902_has_role_in_0013209",
+        "222528_has_role_in_0005101",
+        "356_has_role_in_0005258"
+      ],
+      "6": [
+        "515_has_role_in_606054",
+        "240_has_role_in_0013209",
+        "1051_has_role_in_1010169"
+      ],
+      "7": [
+        "CDAISMWEOUEBRE-GPIVLXJGSA-N_has_role_in_0005575",
+        "8314_has_role_in_0008930",
+        "65359_has_role_in_0005090"
+      ],
+      "8": [
+        "12232_has_role_in_0005258",
+        "31289_has_role_in_0008930",
+        "11756_has_role_in_0008722"
+      ],
+      "9": [
+        "6569_has_role_in_0005258",
+        "7405_has_role_in_0005090",
+        "6590_has_role_in_0009960"
+      ],
+      "10": [
+        "23327_has_role_in_0005101",
+        "999_has_role_in_C1882338",
+        "222656_has_role_in_104300"
+      ],
+      "11": [
+        "127_has_role_in_0012451",
+        "996_has_role_in_0008930",
+        "700_has_role_in_0012451"
+      ],
+      "12": [
+        "487_has_role_in_251100",
+        "439260_has_role_in_C0282507",
+        "5862_has_role_in_0005244"
+      ],
+      "13": [
+        "FBWPWWWZWKPJFL-UHFFFAOYSA-N_has_role_in_0043224",
+        "7991_has_role_in_0010940",
+        "7991_has_role_in_0013209"
+      ],
+      "14": [
+        "1066_has_role_in_0006042",
+        "69362_has_role_in_253260",
+        "69362_has_role_in_0012451"
+      ],
+      "15": [
+        "264_has_role_in_0010940",
+        "464_has_role_in_601665",
+        "264_has_role_in_180300"
+      ],
+      "16": [
+        "6021_has_role_in_0005101",
+        "923_has_role_in_201910",
+        "6021_has_role_in_0012451"
+      ],
+      "17": [
+        "1738118_has_role_in_0009960",
+        "5960_has_role_in_0012451",
+        "702_has_role_in_C0149645"
+      ],
+      "18": [
+        "10469_has_role_in_0018544",
+        "1826_has_role_in_0100340",
+        "271_has_role_in_0958181"
+      ],
+      "20": [
+        "440864_has_role_in_0005081",
+        "6238_has_role_in_201910",
+        "3776_has_role_in_0005081"
+      ],
+      "21": [
+        "1123_has_role_in_0005575",
+        "1123_has_role_in_0023691",
+        "1123_has_role_in_0005090"
+      ],
+      "22": [
+        "849_has_role_in_0008972",
+        "1738_has_role_in_0018457",
+        "1738_has_role_in_0021095"
+      ],
+      "23": [
+        "222_has_role_in_0009108",
+        "248_has_role_in_C0019004",
+        "91552_has_role_in_236250"
+      ],
+      "24": [
+        "6306_has_role_in_601313",
+        "813_has_role_in_0013005",
+        "6306_has_role_in_0005090"
+      ],
+      "25": [
+        "5961_has_role_in_0012451",
+        "5754_has_role_in_0007440",
+        "176_has_role_in_0009960"
+      ],
+      "26": [
+        "790_has_role_in_0012451",
+        "767_has_role_in_0014576",
+        "767_has_role_in_602522"
+      ],
+      "27": [
+        "311_has_role_in_0023691",
+        "311_has_role_in_0005052",
+        "311_has_role_in_0005575"
+      ],
+      "28": [
+        "6137_has_role_in_0008930",
+        "5951_has_role_in_0007488",
+        "5951_has_role_in_0012451"
+      ],
+      "29": [
+        "92135_has_role_in_0009705",
+        "6262_has_role_in_0005260",
+        "6262_has_role_in_0010797"
+      ],
+      "30": [
+        "5997_has_role_in_605911",
+        "1060_has_role_in_0004796",
+        "5997_has_role_in_0027767"
+      ],
+      "31": [
+        "1175_has_role_in_0007068",
+        "1175_has_role_in_0005575",
+        "1175_has_role_in_0012999"
+      ],
+      "33": [
+        "5962_has_role_in_0005052",
+        "5962_has_role_in_0009542",
+        "5962_has_role_in_C0266894"
+      ],
+      "34": [
+        "702_has_role_in_0005081",
+        "6267_has_role_in_0005081"
+      ],
+      "36": [
+        "180_has_role_in_0005081",
+        "96_has_role_in_0005081"
+      ],
+      "37": [
+        "6322_has_role_in_601665",
+        "6322_has_role_in_0009053",
+        "588_has_role_in_0009061"
+      ],
+      "38": [
+        "5950_has_role_in_0009960",
+        "5950_has_role_in_0012120",
+        "5950_has_role_in_211980"
+      ],
+      "42": [
+        "586_has_role_in_0005081"
+      ],
+      "45": [
+        "750_has_role_in_0008861",
+        "750_has_role_in_C0472349",
+        "750_has_role_in_261600"
+      ],
+      "46": [
+        "248_has_role_in_0005081"
+      ],
+      "49": [
+        "64689_has_role_in_0012451",
+        "64689_has_role_in_0009734",
+        "64689_has_role_in_600955"
+      ],
+      "50": [
+        "6288_has_role_in_0005081",
+        "10917_has_role_in_0005081",
+        "5961_has_role_in_0005081"
+      ],
+      "54": [
+        "6106_has_role_in_0005081",
+        "311_has_role_in_0005081"
+      ],
+      "56": [
+        "6137_has_role_in_0005081",
+        "5951_has_role_in_0005081"
+      ],
+      "58": [
+        "6057_has_role_in_0010161",
+        "92135_has_role_in_0005081",
+        "6057_has_role_in_0005081"
+      ],
+      "60": [
+        "5997_has_role_in_0010939",
+        "1060_has_role_in_0005081",
+        "145742_has_role_in_0005081"
+      ],
+      "66": [
+        "6287_has_role_in_0005081"
+      ],
+      "74": [
+        "6322_has_role_in_0005081",
+        "588_has_role_in_0005081",
+        "6322_has_role_in_0008814"
+      ],
+      "75": [
+        "107689_has_role_in_245450",
+        "107689_has_role_in_0024575",
+        "107689_has_role_in_0014464"
+      ],
+      "76": [
+        "5950_has_role_in_0005081"
+      ],
+      "90": [
+        "750_has_role_in_0005081"
+      ],
+      "98": [
+        "64689_has_role_in_0005081"
+      ],
+      "150": [
+        "107689_has_role_in_0005081"
+      ]
+    },
+    "duplicates_distribution": {
+      "2": 2213,
+      "3": 774,
+      "4": 510,
+      "5": 403,
+      "6": 277,
+      "7": 236,
+      "8": 235,
+      "9": 144,
+      "10": 228,
+      "11": 125,
+      "12": 127,
+      "13": 114,
+      "14": 69,
+      "15": 60,
+      "16": 34,
+      "17": 105,
+      "18": 128,
+      "20": 4,
+      "21": 43,
+      "22": 46,
+      "23": 68,
+      "24": 75,
+      "25": 179,
+      "26": 84,
+      "27": 54,
+      "28": 57,
+      "29": 85,
+      "30": 125,
+      "31": 31,
+      "33": 71,
+      "34": 2,
+      "36": 2,
+      "37": 74,
+      "38": 38,
+      "42": 1,
+      "45": 45,
+      "46": 1,
+      "49": 52,
+      "50": 4,
+      "54": 2,
+      "56": 2,
+      "58": 4,
+      "60": 4,
+      "66": 1,
+      "74": 3,
+      "75": 78,
+      "76": 1,
+      "90": 1,
+      "98": 1,
+      "150": 1
+    },
+    "total_ids": 2110403,
+    "unique_ids": 2045953
+  },
+  "overall_object_curie_stats": {
+    "ECTO": 50,
+    "GO": 27078,
+    "HP": 469,
+    "INCHIKEY": 11,
+    "KEGG": 9369,
+    "MONDO": 69621,
+    "OMIM": 16328,
+    "PUBCHEM.COMPOUND": 941,
+    "SMPDB": 1114804,
+    "UMLS": 4025,
+    "UniProtKB": 863759
+  },
+  "overall_publication_stats": {
+    "records_with_publication": 402348,
+    "total_pmid_count": 2317072,
+    "unique_pmid_count": 19394
+  },
+  "overall_subject_curie_stats": {
+    "INCHIKEY": 66907,
+    "NCBITaxon": 952,
+    "PUBCHEM.COMPOUND": 1704076,
+    "UniProtKB": 338468
+  },
+  "overall_unique_object_curie_count": 11,
+  "overall_unique_subject_curie_count": 4,
+  "overall_xref_stats": {
+    "object_unique_xrefs": {
+      "bigg": 38,
+      "cas": 148,
+      "chebi": 148,
+      "chemspider": 146,
+      "drugbank": 67,
+      "foodb": 149,
+      "go": 5591,
+      "hmdb": 154,
+      "hmdbp": 7465,
+      "hp": 1,
+      "inchikey": 154,
+      "kegg": 495,
+      "metlin": 91,
+      "mondo": 115,
+      "omim": 284,
+      "pdb": 6,
+      "pubchem_cid": 152,
+      "smiles": 154,
+      "smpdb": 48586,
+      "umls": 5,
+      "uniprotkb": 7465,
+      "vmh": 92
+    },
+    "object_xrefs": {
+      "bigg": 268,
+      "cas": 925,
+      "chebi": 934,
+      "chemspider": 903,
+      "drugbank": 462,
+      "foodb": 935,
+      "go": 25978,
+      "hmdb": 952,
+      "hmdbp": 863759,
+      "hp": 258,
+      "inchikey": 952,
+      "kegg": 13808,
+      "metlin": 602,
+      "mondo": 10177,
+      "omim": 50898,
+      "pdb": 37,
+      "pubchem_cid": 941,
+      "smiles": 952,
+      "smpdb": 1114804,
+      "umls": 257,
+      "uniprotkb": 863759,
+      "vmh": 655
+    },
+    "subject_unique_xrefs": {
+      "bigg": 609,
+      "cas": 4157,
+      "chebi": 5304,
+      "chemspider": 6591,
+      "drugbank": 1718,
+      "entrezgene": 3581,
+      "foodb": 37629,
+      "genbank_gene": 2037,
+      "genbank_prot": 1721,
+      "geneatlas": 2017,
+      "genecard": 2059,
+      "hgnc": 2417,
+      "hmdb": 61409,
+      "hmdbp": 4881,
+      "inchikey": 61409,
+      "kegg": 2911,
+      "metlin": 1248,
+      "ncit": 141,
+      "pdb": 8490,
+      "pfam": 1759,
+      "pubchem_cid": 48299,
+      "smiles": 60975,
+      "uniprotkb": 4881,
+      "vmh": 1226
+    },
+    "subject_xrefs": {
+      "bigg": 334257,
+      "cas": 556828,
+      "chebi": 736450,
+      "chemspider": 722540,
+      "drugbank": 486084,
+      "entrezgene": 332212,
+      "foodb": 836221,
+      "genbank_gene": 291889,
+      "genbank_prot": 262750,
+      "geneatlas": 291873,
+      "genecard": 292258,
+      "hgnc": 316761,
+      "hmdb": 1770983,
+      "hmdbp": 338468,
+      "inchikey": 1770983,
+      "kegg": 642644,
+      "metlin": 310651,
+      "ncit": 656,
+      "pdb": 315191,
+      "pfam": 423276,
+      "pubchem_cid": 1704076,
+      "smiles": 1770981,
+      "uniprotkb": 338468,
+      "vmh": 454559
+    }
+  },
+  "relationship_analysis": {
+    "metabolite-disease": {
+      "evidence_types": {
+        "ECO:0000000": 2909,
+        "ECO:0000305": 88684
+      },
+      "object_curie_stats": {
+        "ECTO": 50,
+        "GO": 1100,
+        "HP": 469,
+        "MONDO": 69621,
+        "OMIM": 16328,
+        "UMLS": 4025
+      },
+      "object_description_count": 54558,
+      "object_unique_xref_stats": {
+        "hp": 1,
+        "mondo": 115,
+        "omim": 284,
+        "umls": 5
+      },
+      "object_xref_stats": {
+        "hp": 258,
+        "mondo": 10177,
+        "omim": 50898,
+        "umls": 257
+      },
+      "publication_stats": {
+        "records_with_publication": 88684,
+        "total_pmid_count": 527590,
+        "unique_pmid_count": 1189
+      },
+      "record_count": 91593,
+      "subject_curie_stats": {
+        "INCHIKEY": 10280,
+        "PUBCHEM.COMPOUND": 81313
+      },
+      "subject_description_count": 91593,
+      "subject_unique_xref_stats": {
+        "bigg": 312,
+        "cas": 1581,
+        "chebi": 1983,
+        "chemspider": 1943,
+        "drugbank": 455,
+        "foodb": 21933,
+        "hmdb": 22595,
+        "inchikey": 22595,
+        "kegg": 988,
+        "metlin": 704,
+        "pdb": 79,
+        "pubchem_cid": 13032,
+        "smiles": 22163,
+        "vmh": 628
+      },
+      "subject_xref_stats": {
+        "bigg": 44796,
+        "cas": 68150,
+        "chebi": 69288,
+        "chemspider": 64929,
+        "drugbank": 45964,
+        "foodb": 87987,
+        "hmdb": 91593,
+        "inchikey": 91593,
+        "kegg": 64154,
+        "metlin": 49468,
+        "pdb": 1823,
+        "pubchem_cid": 81313,
+        "smiles": 91593,
+        "vmh": 57164
+      }
+    },
+    "metabolite-pathway": {
+      "evidence_types": {
+        "ECO:0000000": 815631
+      },
+      "object_curie_stats": {
+        "KEGG": 442,
+        "SMPDB": 813240
+      },
+      "object_description_count": 813240,
+      "object_unique_xref_stats": {
+        "kegg": 54,
+        "smpdb": 48571
+      },
+      "object_xref_stats": {
+        "kegg": 2046,
+        "smpdb": 813240
+      },
+      "publication_stats": {
+        "records_with_publication": 0,
+        "total_pmid_count": 0,
+        "unique_pmid_count": 0
+      },
+      "record_count": 815631,
+      "subject_curie_stats": {
+        "INCHIKEY": 17965,
+        "PUBCHEM.COMPOUND": 797666
+      },
+      "subject_description_count": 815631,
+      "subject_unique_xref_stats": {
+        "bigg": 491,
+        "cas": 1388,
+        "chebi": 2227,
+        "chemspider": 2564,
+        "drugbank": 735,
+        "foodb": 34177,
+        "hmdb": 54282,
+        "inchikey": 54282,
+        "kegg": 1248,
+        "metlin": 593,
+        "pdb": 106,
+        "pubchem_cid": 41705,
+        "smiles": 53850,
+        "vmh": 735
+      },
+      "subject_xref_stats": {
+        "bigg": 274410,
+        "cas": 447777,
+        "chebi": 527375,
+        "chemspider": 484478,
+        "drugbank": 420530,
+        "foodb": 536151,
+        "hmdb": 815631,
+        "inchikey": 815631,
+        "kegg": 504320,
+        "metlin": 239041,
+        "pdb": 751,
+        "pubchem_cid": 797666,
+        "smiles": 815631,
+        "vmh": 375543
+      }
+    },
+    "metabolite-protein": {
+      "evidence_types": {
+        "ECO:0000000": 863759
+      },
+      "metabolite_protein_object_protein_type_stats": {
+        "distribution": {
+          "enzyme": 453356,
+          "transporter": 85449,
+          "unknown": 324954
+        },
+        "record_count": 863759,
+        "unique_count": 3
+      },
+      "object_curie_stats": {
+        "UniProtKB": 863759
+      },
+      "object_description_count": 735897,
+      "object_unique_xref_stats": {
+        "hmdbp": 7465,
+        "uniprotkb": 7465
+      },
+      "object_xref_stats": {
+        "hmdbp": 863759,
+        "uniprotkb": 863759
+      },
+      "publication_stats": {
+        "records_with_publication": 0,
+        "total_pmid_count": 0,
+        "unique_pmid_count": 0
+      },
+      "record_count": 863759,
+      "subject_curie_stats": {
+        "INCHIKEY": 38662,
+        "PUBCHEM.COMPOUND": 825097
+      },
+      "subject_description_count": 861180,
+      "subject_unique_xref_stats": {
+        "bigg": 578,
+        "cas": 3214,
+        "chebi": 4384,
+        "chemspider": 5518,
+        "drugbank": 1551,
+        "foodb": 5393,
+        "hmdb": 22862,
+        "inchikey": 22862,
+        "kegg": 2462,
+        "metlin": 1023,
+        "pdb": 252,
+        "pubchem_cid": 21772,
+        "smiles": 22860,
+        "vmh": 1086
+      },
+      "subject_xref_stats": {
+        "bigg": 15051,
+        "cas": 40901,
+        "chebi": 139787,
+        "chemspider": 173133,
+        "drugbank": 19590,
+        "foodb": 212083,
+        "hmdb": 863759,
+        "inchikey": 863759,
+        "kegg": 74170,
+        "metlin": 22142,
+        "pdb": 2482,
+        "pubchem_cid": 825097,
+        "smiles": 863757,
+        "vmh": 21852
+      }
+    },
+    "microbe-metabolite": {
+      "anatomical_entity_stats": {
+        "record_count": 671,
+        "unique_count": 29
+      },
+      "biosample_stats": {
+        "record_count": 883,
+        "unique_count": 11
+      },
+      "cellular_component_stats": {
+        "record_count": 701,
+        "unique_count": 9
+      },
+      "evidence_types": {
+        "ECO:0000000": 200,
+        "ECO:0000305": 752
+      },
+      "melting_point_count": 737,
+      "object_curie_stats": {
+        "INCHIKEY": 11,
+        "PUBCHEM.COMPOUND": 941
+      },
+      "object_description_count": 952,
+      "object_logp_stats": {
+        "count": 531,
+        "max": 3.64,
+        "mean": 0.34,
+        "median": 0.33,
+        "min": -3.22
+      },
+      "object_molecular_weight_stats": {
+        "average": {
+          "count": 947,
+          "max": 5227.0637,
+          "mean": 215.288,
+          "median": 142.109,
+          "min": 2.0159
+        },
+        "monoisotopic": {
+          "count": 947,
+          "max": 5224.168615516,
+          "mean": 215.153,
+          "median": 142.027,
+          "min": 2.015650064
+        }
+      },
+      "object_unique_xref_stats": {
+        "bigg": 38,
+        "cas": 148,
+        "chebi": 148,
+        "chemspider": 146,
+        "drugbank": 67,
+        "foodb": 149,
+        "hmdb": 154,
+        "inchikey": 154,
+        "kegg": 132,
+        "metlin": 91,
+        "pdb": 6,
+        "pubchem_cid": 152,
+        "smiles": 154,
+        "vmh": 92
+      },
+      "object_xref_stats": {
+        "bigg": 268,
+        "cas": 925,
+        "chebi": 934,
+        "chemspider": 903,
+        "drugbank": 462,
+        "foodb": 935,
+        "hmdb": 952,
+        "inchikey": 952,
+        "kegg": 842,
+        "metlin": 602,
+        "pdb": 37,
+        "pubchem_cid": 941,
+        "smiles": 952,
+        "vmh": 655
+      },
+      "organism_types": {
+        "Archaeon": 22,
+        "Eukaryote": 6,
+        "Other": 2,
+        "biolink:Bacterium": 922
+      },
+      "publication_stats": {
+        "records_with_publication": 665,
+        "total_pmid_count": 1149,
+        "unique_pmid_count": 103
+      },
+      "ranks": {
+        "class": 1,
+        "family": 9,
+        "genus": 508,
+        "kingdom": 1,
+        "no rank": 2,
+        "order": 1,
+        "phylum": 6,
+        "species": 420,
+        "subspecies": 4
+      },
+      "record_count": 952,
+      "subject_curie_stats": {
+        "NCBITaxon": 952
+      },
+      "subject_description_count": 651,
+      "subject_unique_xref_stats": {
+        "ncit": 141
+      },
+      "subject_xref_stats": {
+        "ncit": 656
+      }
+    },
+    "protein-biological_process": {
+      "evidence_types": {
+        "ECO:0000305": 25978
+      },
+      "object_curie_stats": {
+        "GO": 25978
+      },
+      "object_description_count": 25504,
+      "object_unique_xref_stats": {
+        "go": 5591
+      },
+      "object_xref_stats": {
+        "go": 25978
+      },
+      "publication_stats": {
+        "records_with_publication": 24115,
+        "total_pmid_count": 315804,
+        "unique_pmid_count": 15129
+      },
+      "record_count": 25978,
+      "subject_curie_stats": {
+        "UniProtKB": 25978
+      },
+      "subject_description_count": 25588,
+      "subject_unique_xref_stats": {
+        "entrezgene": 3246,
+        "genbank_gene": 1729,
+        "genbank_prot": 1457,
+        "geneatlas": 1717,
+        "genecard": 1753,
+        "hgnc": 2105,
+        "hmdbp": 4495,
+        "pdb": 8056,
+        "pfam": 1645,
+        "uniprotkb": 4495
+      },
+      "subject_xref_stats": {
+        "entrezgene": 23181,
+        "genbank_gene": 10277,
+        "genbank_prot": 8607,
+        "geneatlas": 10186,
+        "genecard": 10357,
+        "hgnc": 11822,
+        "hmdbp": 25978,
+        "pdb": 103671,
+        "pfam": 46464,
+        "uniprotkb": 25978
+      }
+    },
+    "protein-pathway": {
+      "cellular_component_stats": {
+        "record_count": 277841,
+        "unique_count": 202
+      },
+      "chromosomal_location_count": 304477,
+      "evidence_types": {
+        "ECO:0000305": 312490
+      },
+      "function_stats": {
+        "percentage": 90.21,
+        "record_count": 281906,
+        "unique_count": 393
+      },
+      "gene_description_stats": {
+        "percentage": 98.32,
+        "record_count": 307231
+      },
+      "gene_seq_count": 281781,
+      "locus_count": 304585,
+      "molecular_weight_stats": {
+        "count": 312165,
+        "max": 593384.62,
+        "mean": 53991.595,
+        "median": 46553.135,
+        "min": 1271.54
+      },
+      "object_curie_stats": {
+        "KEGG": 8927,
+        "SMPDB": 301564
+      },
+      "object_description_count": 301564,
+      "object_unique_xref_stats": {
+        "kegg": 363,
+        "smpdb": 48541
+      },
+      "object_xref_stats": {
+        "kegg": 10920,
+        "smpdb": 301564
+      },
+      "protein_seq_count": 304838,
+      "publication_stats": {
+        "records_with_publication": 288884,
+        "total_pmid_count": 1472529,
+        "unique_pmid_count": 14974
+      },
+      "record_count": 312490,
+      "signal_region_count": 776,
+      "subject_curie_stats": {
+        "UniProtKB": 312490
+      },
+      "subject_description_count": 311581,
+      "subject_unique_xref_stats": {
+        "entrezgene": 2746,
+        "genbank_gene": 1758,
+        "genbank_prot": 1472,
+        "geneatlas": 1744,
+        "genecard": 1778,
+        "hgnc": 1945,
+        "hmdbp": 3603,
+        "pdb": 6582,
+        "pfam": 1374,
+        "uniprotkb": 3603
+      },
+      "subject_xref_stats": {
+        "entrezgene": 309031,
+        "genbank_gene": 281612,
+        "genbank_prot": 254143,
+        "geneatlas": 281687,
+        "genecard": 281901,
+        "hgnc": 304939,
+        "hmdbp": 312490,
+        "pdb": 206464,
+        "pfam": 376812,
+        "uniprotkb": 312490
+      },
+      "transmembrane_region_count": 3670
+    }
+  },
+  "relationship_types": [
+    "microbe-metabolite",
+    "metabolite-disease",
+    "metabolite-protein",
+    "metabolite-pathway",
+    "protein-pathway",
+    "protein-biological_process"
+  ],
+  "total_relationships": 6
+}

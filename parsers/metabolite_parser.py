@@ -226,7 +226,9 @@ class HMDBMetaboliteParser(XMLParseHelper):
                         subject_node = self.remove_empty_none_values(subject_node)
 
                         _id = (
-                            f"{subject_node['id'].split(':')[1]}_has_metabolic_interaction_with_{object_node['id'].split(':')[1]}"
+                            f"{subject_node['id'].split(':')[1]}"
+                            f"_{association_node['predicate']}"
+                            f"_{object_node['id'].split(':')[1]}"
                             if object_node.get("id") and subject_node.get("id")
                             else str(uuid.uuid4())
                         )

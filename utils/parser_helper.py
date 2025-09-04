@@ -95,7 +95,7 @@ class ReferenceExtractor:
         return {}
 
     def _format_references(self, refs: list) -> Dict:
-        """Format list of references into structured dictionary."""
+        """Format the list of references into a structured dictionary."""
         ref_dict = {}
 
         for ref in refs:
@@ -114,8 +114,6 @@ class ReferenceExtractor:
             if isinstance(ref_dict[k], list) and len(ref_dict[k]) == 1:
                 ref_dict[k] = ref_dict[k][0]
 
-        # add primary ID and type
-        ref_dict["id"] = self._generate_primary_id(ref_dict)
         ref_dict["type"] = "biolink:Publication"
 
         return ref_dict
@@ -130,7 +128,7 @@ class ReferenceExtractor:
             return "doi"
         elif "wikipedia" in prefix_lower:
             return "wikidata"
-        elif "http" in prefix_lower or "www" in prefix_lower:
+        elif "http" in prefix_lower or "www" in prefix_lower or ".com" in prefix_lower:
             return "url"
         else:
             return "article"
@@ -140,9 +138,9 @@ class ReferenceExtractor:
         value = value.strip()
 
         if ref_type == "pmid" and value.isdigit():
-            return int(value)
+            return f"PMID:{int(value)}"
         elif ref_type == "doi" and ":" in value:
-            return value.split(":", 1)[1].strip()
+            return value.strip()
 
         return value
 

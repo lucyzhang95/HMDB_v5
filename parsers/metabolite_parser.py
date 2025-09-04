@@ -121,7 +121,7 @@ class HMDBMetaboliteParser(XMLParseHelper):
 
         return output
 
-    def get_medical_references(self, disease_elem) -> Dict:
+    def get_publications(self, disease_elem) -> Dict:
         """Extract medical references from disease element."""
         pmids = []
         references_elem = disease_elem.find("hmdb:references", self.namespace)
@@ -130,23 +130,22 @@ class HMDBMetaboliteParser(XMLParseHelper):
                 pmid_elem = ref.find("hmdb:pubmed_id", self.namespace)
                 if pmid_elem is not None and pmid_elem.text:
                     try:
-                        pmids.append(int(pmid_elem.text.strip()))
+                        pmids.append(f"PMID:{int(pmid_elem.text.strip())}")
                     except ValueError:
                         continue
 
         if pmids:
             pmids = sorted(set(pmids))
-            pmid_value = pmids[0] if len(pmids) == 1 else pmids
-            return {"pmid": pmid_value, "type": "biolink:Publication"}
+            return {"pmid": pmids, "type": "biolink:Publication"}
 
         return {}
 
     def build_metabolite_node(
-        self,
-        metabolite,
-        primary_id: str,
-        xrefs: Dict,
-        anatomical_entities: Dict = None,
+            self,
+            metabolite,
+            primary_id: str,
+            xrefs: Dict,
+            anatomical_entities: Dict = None,
     ) -> Dict:
         """Build standardized metabolite node."""
         name = self.get_text(metabolite, "name")
@@ -273,7 +272,7 @@ class HMDBMetaboliteParser(XMLParseHelper):
                     continue
 
                 for disease_elem in diseases_elem.findall("hmdb:disease", self.namespace):
-                    references = self.get_medical_references(disease_elem)
+                    references = self.get_publications(disease_elem)
 
                     # association node
                     association_node = {

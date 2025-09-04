@@ -132,7 +132,7 @@ class HMDBProteinParser(XMLParseHelper):
             }
         )
 
-    def get_references(self, protein) -> Dict:
+    def get_publications(self, protein) -> Dict:
         """Extract publication references from protein."""
         pmids = []
         ref_elem = protein.find("hmdb:general_references", self.namespace)
@@ -141,14 +141,13 @@ class HMDBProteinParser(XMLParseHelper):
                 pmid_elem = ref.find("hmdb:pubmed_id", self.namespace)
                 if pmid_elem is not None and pmid_elem.text:
                     try:
-                        pmids.append(int(pmid_elem.text.strip()))
+                        pmids.append(f"PMID:{int(pmid_elem.text.strip())}")
                     except ValueError:
                         continue
 
         if pmids:
             pmids = sorted(set(pmids))
-            pmid_value = pmids[0] if len(pmids) == 1 else pmids
-            return {"pmid": pmid_value, "type": "biolink:Publication"}
+            return {"pmid": pmids, "type": "biolink:Publication"}
 
         return {}
 
@@ -260,7 +259,7 @@ class HMDBProteinParser(XMLParseHelper):
                     continue
 
                 # publication references
-                publication = self.get_references(protein)
+                publication = self.get_publications(protein)
 
                 # pathways
                 pathways_elem = protein.find("hmdb:pathways", self.namespace)
@@ -338,7 +337,7 @@ class HMDBProteinParser(XMLParseHelper):
                     continue
 
                 # publication references
-                publication = self.get_references(protein)
+                publication = self.get_publications(protein)
 
                 # GO biological processes
                 go_elem = protein.find("hmdb:go_classifications", self.namespace)

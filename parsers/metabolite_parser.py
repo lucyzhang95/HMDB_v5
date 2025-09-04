@@ -196,11 +196,12 @@ class HMDBMetaboliteParser(XMLParseHelper):
                 references = self.reference_extractor.extract_references(description, microbes)
 
                 association_node = {
-                    "predicate": "biolink:OrganismTaxonToChemicalEntityAssociation",
-                    "type": "has_metabolic_interaction_with",
+                    "category": "biolink:OrganismTaxonToChemicalEntityAssociation",
+                    "predicate": "has_metabolic_interaction_with",
                     "primary_knowledge_source": "infores:hmdb_v5",
+                    "has_evidence": "ECO:0000305" if references else "ECO:0000000",
+                    "agent_type": "biolink:manual_agent",
                     "publication": references if references else None,
-                    "evidence_type": "ECO:0000305" if references else "ECO:0000000",
                 }
                 association_node = self.remove_empty_none_values(association_node)
 

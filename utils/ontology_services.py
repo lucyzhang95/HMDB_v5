@@ -475,7 +475,7 @@ class BiothingsServices:
                     "id": info["_id"],
                     "name": mondo_data.get("label", "").lower(),
                     "description": mondo_data.get("definition"),
-                    "type": "biolink:Disease",
+                    "category": "biolink:Disease",
                     "xrefs": {prefix: _id if info["_id"] != _id else info["_id"]},
                     "_score": current_score,
                 }
@@ -573,7 +573,7 @@ class UberonService:
                             "id": uberon_id,
                             "name": doc.get("label"),
                             "original_name": term,
-                            "type": "biolink:AnatomicalEntity",
+                            "category": "biolink:AnatomicalEntity",
                         }
 
         except aiohttp.ClientError as e:

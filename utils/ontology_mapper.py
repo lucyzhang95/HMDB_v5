@@ -185,7 +185,7 @@ class DiseaseMapper:
                 enriched_disease_info[original_name] = {
                     "id": _id,
                     "name": original_name,
-                    "type": "biolink:Disease",
+                    "category": "biolink:Disease",
                     "original_name": original_name,
                     "mapping_tool": mapping_data["mapping_tool"],
                 }

@@ -118,7 +118,7 @@ class HMDBRecordStatsReporter:
 
         for record in records:
             assoc_type = (
-                record.get("association_type") or record.get("_relationship_type") or "unknown"
+                    record.get("association_type") or record.get("_relationship_type") or "unknown"
             )
             grouped[assoc_type].append(record)
 
@@ -215,8 +215,8 @@ class HMDBRecordStatsReporter:
                 if "average_molecular_weight" in mw and mw["average_molecular_weight"] is not None:
                     mw_data["average"].append(mw["average_molecular_weight"])
                 if (
-                    "monoisotopic_molecular_weight" in mw
-                    and mw["monoisotopic_molecular_weight"] is not None
+                        "monoisotopic_molecular_weight" in mw
+                        and mw["monoisotopic_molecular_weight"] is not None
                 ):
                     mw_data["monoisotopic"].append(mw["monoisotopic_molecular_weight"])
 
@@ -249,7 +249,7 @@ class HMDBRecordStatsReporter:
         }
 
     def _count_unique_items_in_list_field(
-        self, records: List[Dict[str, Any]], field_path: List[str]
+            self, records: List[Dict[str, Any]], field_path: List[str]
     ) -> Dict[str, int]:
         """Count records with field and unique items in list fields."""
         records_with_field = 0
@@ -383,7 +383,7 @@ class HMDBRecordStatsReporter:
             ]
 
         with open(
-            os.path.join(self.report_dir, f"{timestamp}_random_sampled_duplicate_records.json"), "w"
+                os.path.join(self.report_dir, f"{timestamp}_random_sampled_duplicate_records.json"), "w"
         ) as f:
             json.dump(sampled_by_count, f, indent=2, sort_keys=True, default=str)
 
@@ -806,7 +806,7 @@ class HMDBRecordStatsReporter:
         }
 
     def _analyze_protein_biological_process_specific(
-        self, records: List[Dict[str, Any]]
+            self, records: List[Dict[str, Any]]
     ) -> Dict[str, Any]:
         """Analyze protein-biological process specific statistics."""
         return {}
@@ -838,7 +838,7 @@ class HMDBRecordStatsReporter:
         return stats
 
     def run_full_analysis_with_duplicates(
-        self, filepath: str = "hmdb_output.pkl"
+            self, filepath: str = "hmdb_output.pkl"
     ) -> Dict[str, Any]:
         """Run complete statistical analysis and export duplicate records."""
         print(

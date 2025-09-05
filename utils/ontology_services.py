@@ -43,11 +43,11 @@ class TaxonServices:
 
     @staticmethod
     def entrez_taxon_name2taxid(
-        taxon_names: list[str],
-        email: str,
-        sleep: float = 0.34,
-        retries: int = 3,
-        backoff_factor: int = 2,
+            taxon_names: list[str],
+            email: str,
+            sleep: float = 0.34,
+            retries: int = 3,
+            backoff_factor: int = 2,
     ) -> dict:
         """Map taxonomy names to NCBI taxonomy IDs using Entrez API."""
         Entrez.email = email
@@ -116,9 +116,9 @@ class DiseaseServices:
 
     @staticmethod
     def text2term_disease_name2id(
-        disease_names: list[str],
-        ontology: str = "MONDO",
-        ontology_url: str = "http://purl.obolibrary.org/obo/mondo.owl",
+            disease_names: list[str],
+            ontology: str = "MONDO",
+            ontology_url: str = "http://purl.obolibrary.org/obo/mondo.owl",
     ) -> dict:
         """Map disease names using text2term."""
         if not text2term.cache_exists(ontology):
@@ -158,7 +158,7 @@ class ProteinServices:
 
     @staticmethod
     async def get_protein_function(
-        session: aiohttp.ClientSession, uniprot_id: str
+            session: aiohttp.ClientSession, uniprot_id: str
     ) -> Optional[dict]:
         """Get protein function description from UniProt."""
         url = f"https://rest.uniprot.org/uniprotkb/{uniprot_id}.json"
@@ -178,7 +178,7 @@ class ProteinServices:
 
     @staticmethod
     async def get_batch_protein_functions(
-        uniprot_ids: List[str], batch_size: int = 5, delay: float = 1.0
+            uniprot_ids: List[str], batch_size: int = 5, delay: float = 1.0
     ) -> List[dict]:
         """Get protein functions in batches with progress tracking."""
         results = []
@@ -187,10 +187,10 @@ class ProteinServices:
 
         async with aiohttp.ClientSession(connector=connector) as session:
             with tqdm(
-                desc="Fetching protein functions", total=len(uniprot_ids), unit="proteins"
+                    desc="Fetching protein functions", total=len(uniprot_ids), unit="proteins"
             ) as pbar:
                 for i in range(0, len(uniprot_ids), batch_size):
-                    batch = uniprot_ids[i : i + batch_size]
+                    batch = uniprot_ids[i: i + batch_size]
                     tasks = [ProteinServices.get_protein_function(session, uid) for uid in batch]
                     batch_results = await asyncio.gather(*tasks)
                     results.extend([r for r in batch_results if r is not None])
@@ -232,7 +232,7 @@ class GeneServices:
 
     @staticmethod
     async def get_batch_gene_summaries(
-        gene_ids: List[str], batch_size: int = 10, delay: float = 1.0
+            gene_ids: List[str], batch_size: int = 10, delay: float = 1.0
     ) -> List[dict]:
         """Get gene summaries in batches with progress tracking."""
         results = []
@@ -241,7 +241,7 @@ class GeneServices:
         async with aiohttp.ClientSession(connector=connector) as session:
             with tqdm(desc="Fetching gene summaries", total=len(gene_ids), unit="genes") as pbar:
                 for i in range(0, len(gene_ids), batch_size):
-                    batch = gene_ids[i : i + batch_size]
+                    batch = gene_ids[i: i + batch_size]
                     tasks = [GeneServices.get_gene_summary(session, gid) for gid in batch]
                     batch_results = await asyncio.gather(*tasks)
                     results.extend([r for r in batch_results if r is not None])
@@ -256,14 +256,14 @@ class GOServices:
 
     @staticmethod
     async def get_go_definitions(
-        go_ids: List[str], batch_size: int = 200, delay: float = 0.25
+            go_ids: List[str], batch_size: int = 200, delay: float = 0.25
     ) -> Dict[str, dict]:
         """Get GO term definitions with progress tracking."""
         BASE = "https://www.ebi.ac.uk/QuickGO/services/ontology/go/terms/"
 
         def chunks(lst, n):
             for i in range(0, len(lst), n):
-                yield lst[i : i + n]
+                yield lst[i: i + n]
 
         async def query(session: aiohttp.ClientSession, ids: List[str]) -> Dict[str, dict]:
             url = BASE + ",".join(ids)
@@ -524,13 +524,13 @@ class UberonService:
 
     @classmethod
     async def _query_single_term(
-        cls,
-        session: aiohttp.ClientSession,
-        term: str,
-        url: str,
-        match_type: str = "exact",
-        ontology: str = DEFAULT_ONTOLOGY,
-        rows: int = 1,
+            cls,
+            session: aiohttp.ClientSession,
+            term: str,
+            url: str,
+            match_type: str = "exact",
+            ontology: str = DEFAULT_ONTOLOGY,
+            rows: int = 1,
     ) -> Tuple[str, Optional[Dict[str, Any]]]:
         """
         Query a single anatomical term against the UBERON ontology.
@@ -585,11 +585,11 @@ class UberonService:
 
     @classmethod
     async def query_terms_async(
-        cls,
-        terms: List[str],
-        match_type: str = "exact",
-        base_url: str = DEFAULT_BASE_URL,
-        ontology: str = DEFAULT_ONTOLOGY,
+            cls,
+            terms: List[str],
+            match_type: str = "exact",
+            base_url: str = DEFAULT_BASE_URL,
+            ontology: str = DEFAULT_ONTOLOGY,
     ) -> Dict[str, Dict[str, Any]]:
         """
         Asynchronously query multiple anatomical terms against UBERON ontology.
@@ -624,7 +624,7 @@ class UberonService:
 
     @classmethod
     def query_terms(
-        cls, terms: List[str], match_type: str = "exact", base_url: str = DEFAULT_BASE_URL
+            cls, terms: List[str], match_type: str = "exact", base_url: str = DEFAULT_BASE_URL
     ) -> Dict[str, Dict[str, Any]]:
         """
         Synchronous wrapper for querying anatomical terms.

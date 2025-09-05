@@ -112,8 +112,8 @@ def get_all_uniprot_ids_from_hmdbp(input_xml: Union[str, pathlib.Path]) -> list[
         elem.text.strip()
         for protein in root.findall("hmdb:protein", namespace)
         if (elem := protein.find("hmdb:uniprot_id", namespace)) is not None
-        and elem.text
-        and elem.text.strip()
+           and elem.text
+           and elem.text.strip()
     ]
     return uniprot_ids
 

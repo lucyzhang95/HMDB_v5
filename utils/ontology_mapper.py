@@ -57,8 +57,8 @@ class TaxonMapper:
             name
             for name in taxon_names
             if name not in ete3_mapped
-            and name not in entrez_mapped
-            and name not in text2term_mapped
+               and name not in entrez_mapped
+               and name not in text2term_mapped
         ]
         print(f"Step 4: Manual mapping for {len(no_hits3)} unmapped names...")
         manual_mapped = format_manual_mappings(no_hits3)

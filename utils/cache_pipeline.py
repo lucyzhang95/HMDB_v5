@@ -38,7 +38,7 @@ class CachePipeline:
         return str(metabolite_xml), str(protein_xml)
 
     def run_full_cache_pipeline(
-        self, force_refresh: bool = False, skip_existing: bool = True
+            self, force_refresh: bool = False, skip_existing: bool = True
     ) -> dict:
         """Run the complete caching pipeline."""
         start_time = time.time()
@@ -182,7 +182,7 @@ class CachePipeline:
 
 
 def run_cache_pipeline(
-    email: str, umls_api_key: str, data_dir: str = "downloads", force_refresh: bool = False
+        email: str, umls_api_key: str, data_dir: str = "downloads", force_refresh: bool = False
 ) -> dict:
     """Convenience function to run the complete cache pipeline."""
     pipeline = CachePipeline(email, umls_api_key, data_dir)

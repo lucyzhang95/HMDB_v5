@@ -100,7 +100,7 @@ class HMDBMetaboliteParser(XMLParseHelper):
                             output["biosample"].append(
                                 {
                                     "original_name": specimen_name,
-                                    "type": "biolink:AnatomicalEntity",
+                                    "category": "biolink:AnatomicalEntity",
                                 }
                             )
 
@@ -116,7 +116,7 @@ class HMDBMetaboliteParser(XMLParseHelper):
                             )
                         else:
                             output["anatomical_entity"].append(
-                                {"original_name": tissue_name, "type": "biolink:AnatomicalEntity"}
+                                {"original_name": tissue_name, "category": "biolink:AnatomicalEntity"}
                             )
 
         return output
@@ -136,7 +136,7 @@ class HMDBMetaboliteParser(XMLParseHelper):
 
         if pmids:
             pmids = sorted(set(pmids))
-            return {"pmid": pmids, "type": "biolink:Publication"}
+            return {"pmid": pmids, "category": "biolink:Publication"}
 
         return {}
 
@@ -169,7 +169,7 @@ class HMDBMetaboliteParser(XMLParseHelper):
             "melting_point": PropertyExtractor.get_experimental_property(
                 metabolite, self, "melting_point"
             ),
-            "type": "biolink:SmallMolecule",
+            "category": "biolink:SmallMolecule",
             "xrefs": xrefs,
         }
 
@@ -219,7 +219,7 @@ class HMDBMetaboliteParser(XMLParseHelper):
                     if microbe in self.cached_taxon_info:
                         subject_node = self.cached_taxon_info[microbe].copy()
                         subject_node["original_name"] = microbe.lower().strip()
-                        subject_node["type"] = "biolink:OrganismTaxon"
+                        subject_node["category"] = "biolink:OrganismTaxon"
                         subject_node["organism_type"] = OrganismClassifier.get_organism_type(
                             subject_node
                         )
@@ -344,7 +344,7 @@ class HMDBMetaboliteParser(XMLParseHelper):
                         "name": self.get_text(protein, "gene_name"),
                         "full_name": self.get_text(protein, "name"),
                         "description": None,
-                        "type": "biolink:Protein",
+                        "category": "biolink:Protein",
                         "protein_type": None,
                         "xrefs": {},
                     }
@@ -450,7 +450,7 @@ class HMDBMetaboliteParser(XMLParseHelper):
                         "id": smpdb_id or (f"KEGG:{kegg_map}" if kegg_map else None),
                         "name": pw_name.lower(),
                         "description": description,
-                        "type": "biolink:Pathway",
+                        "category": "biolink:Pathway",
                         "xrefs": {
                             "smpdb": smpdb_id,
                             "kegg": f"KEGG:{kegg_map}" if kegg_map else None,

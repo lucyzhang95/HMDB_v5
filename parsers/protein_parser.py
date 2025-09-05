@@ -147,7 +147,7 @@ class HMDBProteinParser(XMLParseHelper):
 
         if pmids:
             pmids = sorted(set(pmids))
-            return {"pmid": pmids, "type": "biolink:Publication"}
+            return {"pmid": pmids, "category": "biolink:Publication"}
 
         return {}
 
@@ -236,7 +236,7 @@ class HMDBProteinParser(XMLParseHelper):
             "locus": gene_props.get("locus"),
             "gene_seq": gene_props.get("gene_sequence"),
             "gene_description": gene_description,
-            "type": "biolink:Protein",
+            "category": "biolink:Protein",
             "protein_type": prot_type.lower() if prot_type else None,
             "cellular_component": cellular_components,
             "xrefs": xrefs,
@@ -286,7 +286,7 @@ class HMDBProteinParser(XMLParseHelper):
                         "id": smpdb_id or (f"KEGG:{kegg_map}" if kegg_map else None),
                         "name": pw_name.lower(),
                         "description": description,
-                        "type": "biolink:Pathway",
+                        "category": "biolink:Pathway",
                         "xrefs": {
                             "smpdb": smpdb_id,
                             "kegg": f"KEGG:{kegg_map}" if kegg_map else None,
@@ -367,7 +367,7 @@ class HMDBProteinParser(XMLParseHelper):
                         "id": go_id,
                         "name": go_name.lower() if go_name else None,
                         "description": go_description,
-                        "type": "biolink:BiologicalProcess",
+                        "category": "biolink:BiologicalProcess",
                         "xrefs": {"go": go_id} if go_id else {},
                     }
                     object_node = self.remove_empty_none_values(object_node)

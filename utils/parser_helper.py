@@ -114,7 +114,7 @@ class ReferenceExtractor:
             if isinstance(ref_dict[k], list) and len(ref_dict[k]) == 1:
                 ref_dict[k] = ref_dict[k][0]
 
-        ref_dict["type"] = "biolink:Publication"
+        ref_dict["category"] = "biolink:Publication"
 
         return ref_dict
 
@@ -306,7 +306,7 @@ class PropertyExtractor:
 
     @staticmethod
     def get_experimental_property(
-        metabolite, xml_helper: XMLParseHelper, prop_name: str
+            metabolite, xml_helper: XMLParseHelper, prop_name: str
     ) -> Union[str, None]:
         """Extract specific experimental property by name."""
         props = metabolite.find("hmdb:experimental_properties", xml_helper.namespace)

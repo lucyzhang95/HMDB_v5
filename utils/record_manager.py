@@ -95,6 +95,19 @@ class RecordManager:
                 items.append((new_key, str(v) if v is not None else ""))
         return dict(items)
 
+    def _standardize_record(self, record: Dict[str, Any]) -> Dict[str, Any]:
+        """Standardizes a record by cleaning up empty values and formatting xrefs into a list."""
+        clean_record = record.copy()
+
+        for entity_key in ["subject", "object"]:
+            if entity_key in clean_record and isinstance(clean_record[entity_key], dict):
+                entity = clean_record[entity_key].copy()
+                if "xrefs" in entity and isinstance(entity["xrefs"], dict):
+                    entity["xrefs"] = [v for k, v in entity["xrefs"].items() if v]
+                clean_record[entity_key] = entity
+
+        return clean_record
+
     def _get_parser_tasks(
             self, metabolite_parser: HMDBMetaboliteParser, protein_parser: HMDBProteinParser
     ) -> List[Tuple[str, Any, str]]:
@@ -103,7 +116,7 @@ class RecordManager:
 
         :param metabolite_parser: Metabolite parser instance
         :param protein_parser: Protein parser instance
-        
+
         :return: List of (key, parser_function, description) tuples
         """
         return [
@@ -127,7 +140,11 @@ class RecordManager:
                 metabolite_parser.parse_metabolite_pathway,
                 "Metabolite-Pathway",
             ),
-            ("protein-pathway", protein_parser.parse_protein_pathway, "Protein-Pathway"),
+            (
+                "protein-pathway",
+                protein_parser.parse_protein_pathway,
+                "Protein-Pathway",
+            ),
             (
                 "protein-biological_process",
                 protein_parser.parse_protein_biological_process,
@@ -379,17 +396,12 @@ class RecordManager:
             global_seen_keys: set,
             first_record_written: bool,
     ) -> int:
-        """
-        Process a single batch: deduplicate and write records.
-
-        Returns:
-            Number of records written from this batch
-        """
+        """Process a single batch: standardize, deduplicate, and write records."""
         if not batch:
             return 0
 
-        # deduplicate within a batch
-        deduped_batch = deduplicate_and_merge(batch)
+        standardized_batch = [self._standardize_record(record) for record in batch]
+        deduped_batch = deduplicate_and_merge(standardized_batch)
 
         new_records_no_dup = []
         for record in deduped_batch:

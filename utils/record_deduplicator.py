@@ -80,9 +80,9 @@ def _merge_records(target_record: Dict, source_record: Dict) -> None:
     """
     # merge subject xrefs
     if (
-        "subject" in source_record
-        and "xrefs" in source_record["subject"]
-        and source_record["subject"]["xrefs"]
+            "subject" in source_record
+            and "xrefs" in source_record["subject"]
+            and source_record["subject"]["xrefs"]
     ):
 
         if "subject" not in target_record:
@@ -93,9 +93,9 @@ def _merge_records(target_record: Dict, source_record: Dict) -> None:
         _merge_xrefs(target_record["subject"]["xrefs"], source_record["subject"]["xrefs"])
 
     if (
-        "object" in source_record
-        and "xrefs" in source_record["object"]
-        and source_record["object"]["xrefs"]
+            "object" in source_record
+            and "xrefs" in source_record["object"]
+            and source_record["object"]["xrefs"]
     ):
 
         if "object" not in target_record:
@@ -147,7 +147,7 @@ def deduplicate_records_iterator(records: Iterator[Dict]) -> Iterator[Dict]:
 
 
 def deduplicate_records(
-    records: Union[List[Dict], Iterator[Dict]]
+        records: Union[List[Dict], Iterator[Dict]]
 ) -> Union[List[Dict], Iterator[Dict]]:
     """
     Smart deduplication that adapts to input type.
@@ -272,28 +272,28 @@ def test_hybrid_deduplication():
             "_id": "test1",
             "subject": {"id": "A", "name": "protein_a", "xrefs": {"uniprot": "P1"}},
             "object": {"id": "B", "name": "pathway_b", "xrefs": {"kegg": "K1"}},
-            "association": {"type": "participates_in"},
+            "association": {"category": "participates_in"},
         },
         # exact duplicate
         {
             "_id": "test1",
             "subject": {"id": "A", "name": "protein_a", "xrefs": {"uniprot": "P1"}},
             "object": {"id": "B", "name": "pathway_b", "xrefs": {"kegg": "K1"}},
-            "association": {"type": "participates_in"},
+            "association": {"category": "participates_in"},
         },
         # same relationship, additional xrefs
         {
             "_id": "test1",
             "subject": {"id": "A", "name": "protein_a", "xrefs": {"uniprot": "P1", "pdb": "1ABC"}},
             "object": {"id": "B", "name": "pathway_b", "xrefs": {"kegg": "K1", "smpdb": "S1"}},
-            "association": {"type": "participates_in"},
+            "association": {"category": "participates_in"},
         },
         # completely different record
         {
             "_id": "test2",
             "subject": {"id": "C", "name": "protein_c"},
             "object": {"id": "D", "name": "pathway_d"},
-            "association": {"type": "involved_in"},
+            "association": {"category": "involved_in"},
         },
     ]
 

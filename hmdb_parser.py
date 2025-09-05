@@ -5,11 +5,12 @@ This is the main entry point for the restructured HMDB parser that extracts
 biomedical associations from HMDB metabolite and protein XML files.
 """
 
+import argparse
 import logging
 import os
 import sys
 from pathlib import Path
-from typing import Dict, Iterator, Optional
+from typing import Dict, Iterator, Optional, Tuple
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "utils"))
 
@@ -45,20 +46,8 @@ def load_hmdb_data(data_dir: str = "downloads") -> Iterator[Dict]:
 
 def validate_environment_variables(
         email: Optional[str], umls_api_key: Optional[str]
-) -> tuple[str, str]:
-    """
-    Validate required environment variables.
-
-    Args:
-        email: Email address for NCBI Entrez API
-        umls_api_key: UMLS API key
-
-    Returns:
-        Tuple of validated (email, umls_api_key)
-
-    Raises:
-        ValueError: If required variables are missing
-    """
+) -> Tuple[str, str]:
+    """Validate required environment variables."""
     if not email:
         raise ValueError(
             "Email is required. Set EMAIL_ADDRESS environment variable or use --email argument."
@@ -72,25 +61,25 @@ def validate_environment_variables(
 
 def setup_argument_parser():
     """Set up and return the argument parser."""
-    import argparse
 
     parser = argparse.ArgumentParser(
-        description="HMDB v5 Parser - Extract biomedical associations from HMDB data",
+        description="HMDB Parser - Extract biomedical associations from HMDB data",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
+
 Usage Examples:
     # Show current cache status
     python hmdb_parser.py --status
 
-    # Cache reference data, then generate and export records to JSON (recommended workflow)
+    # Cache reference data, then generate and export records to JSONL (recommended workflow)
     python hmdb_parser.py --cache-reference-data
-    python hmdb_parser.py --export records.json --format json
+    python hmdb_parser.py --export hmdb_v5_parsed_records.jsonl --format jsonl
 
     # Do everything in one go (cache reference data and then export)
-    python hmdb_parser.py --cache-all --export records.json --format json
+    python hmdb_parser.py --cache-reference-data --export hmdb_v5_parsed_records.jsonl --format jsonl
 
-    # Export only specific formats (memory-efficient JSONL recommended for large datasets)
-    python hmdb_parser.py --export records.jsonl --format jsonl
+    # Export only specific formats
+    python hmdb_parser.py --export hmdb_v5_parsed_records.json --format json
 
     # Force refresh all cached data
     python hmdb_parser.py --cache-all --force-refresh
@@ -185,13 +174,8 @@ def main():
 
     data_path = Path(args.data_dir)
     if not data_path.exists():
-        logger.error(f"Data directory does not exist: {data_path}")
-        parser.error(f"Data directory does not exist: {data_path}")
-
-    if args.association_types:
-        logger.warning(
-            "--association-types filter is not supported in the memory-safe streaming export mode and will be ignored."
-        )
+        logger.error(f"!!! Data directory does not exist: {data_path}")
+        parser.error(f"!!! Data directory does not exist: {data_path}")
 
     try:
         if args.status:
@@ -222,9 +206,9 @@ def main():
                 record_manager.generate_and_export_streamed(
                     output_file=args.export, output_format=args.format
                 )
-                logger.info("Export completed successfully.")
+                logger.info("[DONE] Export completed successfully.")
             except Exception as e:
-                logger.error(f"Export failed: {e}")
+                logger.error(f"!!! Export failed: {e}")
                 if not args.quiet:
                     import traceback
 

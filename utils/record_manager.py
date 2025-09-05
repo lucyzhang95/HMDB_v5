@@ -416,13 +416,12 @@ class RecordManager:
                     pickle.dump(record, f)
             elif output_format == "jsonl":
                 for record in new_records_no_dup:
-                    record["association_type"] = key
+                    # record["association_type"] = key
                     json.dump(record, f, ensure_ascii=False)
                     f.write("\n")
             elif output_format == "json":
                 for i, record in enumerate(new_records_no_dup):
-                    record["association_type"] = key
-
+                    # record["association_type"] = key
                     if first_record_written or i > 0:
                         f.write(",\n")
 

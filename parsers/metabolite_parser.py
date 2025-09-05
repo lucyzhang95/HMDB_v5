@@ -196,8 +196,8 @@ class HMDBMetaboliteParser(XMLParseHelper):
                 references = self.reference_extractor.extract_references(description, microbes)
 
                 association_node = {
-                    "category": "biolink:OrganismTaxonToChemicalEntityAssociation",
-                    "predicate": "has_metabolic_interaction_with",
+                    "category": "biolink:OrganismTaxonToChemicalEntityAssociation",  # Need to add this to Biolink Model
+                    "predicate": "biolink:has_metabolic_interaction_with",  # Need to add this to Biolink Model
                     "primary_knowledge_source": "infores:hmdb_v5",
                     "has_evidence": "ECO:0000305" if references else "ECO:0000000",
                     "agent_type": "biolink:manual_agent",
@@ -227,7 +227,7 @@ class HMDBMetaboliteParser(XMLParseHelper):
 
                         _id = (
                             f"{subject_node['id'].split(':')[1]}"
-                            f"_{association_node['predicate']}"
+                            f"_{association_node['predicate'].split(':')[1]}"
                             f"_{object_node['id'].split(':')[1]}"
                             if object_node.get("id") and subject_node.get("id")
                             else str(uuid.uuid4())
@@ -279,11 +279,11 @@ class HMDBMetaboliteParser(XMLParseHelper):
 
                     # association node
                     association_node = {
-                        "id": "RO:0000087",  # has role
-                        "predicate": "biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation",
-                        "type": "has_role_in",
+                        "category": "biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation",
+                        "predicate": "biolink:associated_with",
                         "primary_knowledge_source": "infores:hmdb_v5",
-                        "evidence_type": "ECO:0000305" if references else "ECO:0000000",
+                        "has_evidence": "ECO:0000305" if references else "ECO:0000000",
+                        "agent_type": "biolink:manual_agent",
                         "publication": references if references else None,
                     }
                     association_node = self.remove_empty_none_values(association_node)
@@ -296,7 +296,9 @@ class HMDBMetaboliteParser(XMLParseHelper):
                             object_node = self.remove_empty_none_values(object_node)
 
                             _id = (
-                                f"{subject_node['id'].split(':')[1]}_has_role_in_{object_node['id'].split(':')[1]}"
+                                f"{subject_node['id'].split(':')[1]}"
+                                f"_{association_node['predicate'].split(':')[1]}"
+                                f"_{object_node['id'].split(':')[1]}"
                                 if object_node.get("id") and subject_node.get("id")
                                 else str(uuid.uuid4())
                             )
@@ -375,15 +377,17 @@ class HMDBMetaboliteParser(XMLParseHelper):
 
                     # association node
                     association_node = {
-                        "id": "RO:0002434",
-                        "predicate": "biolink:ChemicalGeneInteractionAssociation",
-                        "type": "interacts_with",
+                        "category": "biolink:ChemicalGeneInteractionAssociation",
+                        "predicate": "biolink:interacts_with",
                         "primary_knowledge_source": "infores:hmdb_v5",
-                        "evidence_type": "ECO:0000000",  # unknown evidence
+                        "has_evidence": "ECO:0000000",  # unknown evidence
+                        "agent_type": "biolink:manual_agent",
                     }
 
                     _id = (
-                        f"{subject_node['id'].split(':')[1]}_interacts_with_{object_node['id'].split(':')[1]}"
+                        f"{subject_node['id'].split(':')[1]}"
+                        f"_{association_node['predicate'].split(':')[1]}"
+                        f"_{object_node['id'].split(':')[1]}"
                         if object_node.get("id") and subject_node.get("id")
                         else str(uuid.uuid4())
                     )
@@ -456,16 +460,18 @@ class HMDBMetaboliteParser(XMLParseHelper):
 
                     # association node
                     association_node = {
-                        "id": "RO:0000056",
-                        "predicate": "biolink:ChemicalToPathwayAssociation",
-                        "type": "participates_in",
+                        "category": "biolink:ChemicalToPathwayAssociation",
+                        "predicate": "biolink:participates_in",
                         "primary_knowledge_source": "infores:hmdb_v5",
-                        "evidence_type": "ECO:0000000",  # unknown evidence
+                        "has_evidence": "ECO:0000000",  # unknown evidence
+                        "agent_type": "biolink:manual_agent",
                     }
 
                     # generate association ID
                     _id = (
-                        f"{subject_node['id'].split(':')[1]}_participates_in_{object_node['id'].split(':')[1]}"
+                        f"{subject_node['id'].split(':')[1]}"
+                        f"_{association_node['predicate'].split(':')[1]}"
+                        f"_{object_node['id'].split(':')[1]}"
                         if object_node.get("id") and subject_node.get("id")
                         else str(uuid.uuid4())
                     )

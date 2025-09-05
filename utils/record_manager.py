@@ -99,14 +99,12 @@ class RecordManager:
             self, metabolite_parser: HMDBMetaboliteParser, protein_parser: HMDBProteinParser
     ) -> List[Tuple[str, Any, str]]:
         """
-        Get list of parser tasks with their configurations.
+        Get a list of parser tasks with their configurations.
 
-        Args:
-            metabolite_parser: Metabolite parser instance
-            protein_parser: Protein parser instance
-
-        Returns:
-            List of (key, parser_function, description) tuples
+        :param metabolite_parser: Metabolite parser instance
+        :param protein_parser: Protein parser instance
+        
+        :return: List of (key, parser_function, description) tuples
         """
         return [
             (
@@ -138,18 +136,7 @@ class RecordManager:
         ]
 
     def _get_task_configs(self, tasks: List[Tuple[str, Any, str]]) -> List[Tuple[str, Any, str]]:
-        """
-        Return task configurations for lazy iterator creation.
-
-        Note: This doesn't create iterators yet - they're created on-demand
-        to ensure true streaming without memory buildup.
-
-        Args:
-            tasks: List of parser tasks
-
-        Returns:
-            List of tasks (same as input, validated)
-        """
+        """Return task configurations for lazy iterator creation."""
         return tasks
 
     def generate_and_export_streamed(self, output_file: str, output_format: str = "jsonl") -> None:
@@ -166,15 +153,15 @@ class RecordManager:
 
         if output_format not in SUPPORTED_FORMATS:
             raise ValueError(
-                f"Unsupported format '{output_format}'. Must be one of: {SUPPORTED_FORMATS}"
+                f"!! Unsupported format '{output_format}'. Must be one of: {SUPPORTED_FORMATS}"
             )
 
         overall_start_time = time.time()
         logger.info(
-            f"🚀 Starting generation and export to '{output_file}' (format: {output_format})"
+            f"\n>>> Starting generation and export to '{output_file}' (format: {output_format})"
         )
 
-        output_path = Path("cache") / Path(output_file).name
+        output_path = Path("records") / Path(output_file).name
         output_path.parent.mkdir(parents=True, exist_ok=True)
 
         # initialize parsers
@@ -184,9 +171,9 @@ class RecordManager:
             metabolite_parser = HMDBMetaboliteParser(metabolite_xml)
             protein_parser = HMDBProteinParser(protein_xml)
             setup_time = time.time() - setup_start
-            logger.info(f"⚙️ Parser setup completed in {setup_time:.2f} seconds")
+            logger.info(f"-> Parser setup completed in {setup_time:.2f} seconds")
         except Exception as e:
-            logger.error(f"‼️ Failed to prepare parsers: {e}")
+            logger.error(f"!!! Failed to prepare parsers: {e}")
             raise
 
         tasks = self._get_parser_tasks(metabolite_parser, protein_parser)
@@ -210,7 +197,7 @@ class RecordManager:
                 self._combine_json_files(output_path, processed_association_types)
 
         except Exception as e:
-            logger.error(f"❌ Failed to process records: {e}")
+            logger.error(f"!!! Failed to process records: {e}")
             raise
 
         # finalize statistics
@@ -241,7 +228,7 @@ class RecordManager:
 
             for task_index, (key, parser_func, desc) in enumerate(overall_pbar):
                 try:
-                    logger.info(f"🔄 Creating iterator for {desc}...")
+                    logger.info(f">>> Creating iterator for {desc}...")
                     record_iterator = parser_func()
 
                     if output_format == "json":
@@ -269,7 +256,7 @@ class RecordManager:
                         stats["association_types"][key] = {"count": total_deduped_count}
 
                 except Exception as e:
-                    logger.error(f"❌ Error processing {desc}: {e}")
+                    logger.error(f"!!! Error processing {desc}: {e}")
                     continue
 
         return processed_association_types
@@ -288,7 +275,7 @@ class RecordManager:
         """Process a single association type with streaming and batched processing."""
         association_start = time.time()
         overall_pbar.set_description(f"Processing {desc}")
-        logger.info(f"▶️ Processing: {desc}")
+        logger.info(f">>> Processing: {desc}")
 
         # process records with batched deduplication
         total_raw_count, total_deduped_count = self._process_records_streamed(
@@ -298,13 +285,13 @@ class RecordManager:
         processing_time = time.time() - association_start
 
         if total_deduped_count == 0:
-            logger.info(f"‼️ Skipping empty association type: {key}")
+            logger.info(f"!! Skipping empty association type: {key}")
             return 0, 0
 
         # log completion
         duplicates_removed = total_raw_count - total_deduped_count
         logger.info(
-            f"✅ {desc} completed: "
+            f"[DONE] {desc} completed: "
             f"{total_deduped_count:,} records ({duplicates_removed:,} duplicates removed) "
             f"in {processing_time:.2f}s (streamed processing)"
         )
@@ -418,8 +405,7 @@ class RecordManager:
             elif output_format == "jsonl":
                 for record in new_records_no_dup:
                     record["association_type"] = key
-                    flattened_record = self._flatten_dict(record)
-                    json.dump(flattened_record, f, ensure_ascii=False)
+                    json.dump(record, f, ensure_ascii=False)
                     f.write("\n")
             elif output_format == "json":
                 for i, record in enumerate(new_records_no_dup):
@@ -445,7 +431,7 @@ class RecordManager:
         :param output_path: Path to the output JSON file.
         :param association_types: List of association type keys that were processed
         """
-        logger.info("⚙️ Combining JSON files into final structure...")
+        logger.info("\n>>> Combining JSON files into final structure...")
 
         temp_final_path = output_path.with_suffix(".tmp")
 
@@ -474,7 +460,7 @@ class RecordManager:
             final_file.write("\n}")
 
         temp_final_path.replace(output_path)
-        logger.info(f"✅ Combined {written_types} association types into {output_path}")
+        logger.info(f"[DONE] Combined {written_types} association types into {output_path}")
 
     def _finalize_statistics(self, stats: dict, raw_counts: dict) -> None:
         """Calculate final statistics including percentages."""
@@ -493,9 +479,9 @@ class RecordManager:
             overall_time: float,
     ) -> None:
         """Print export summary statistics with detailed timing information."""
-        logger.info("🎉 Deduplication and export complete!")
+        logger.info("[DONE] Deduplication and export complete!")
 
-        logger.info("\n📋 Processing Summary:")
+        logger.info("\nProcessing Summary:")
         logger.info("-" * 80)
         for key in raw_counts:
             dedup_count = stats.get("association_types", {}).get(key, {}).get("count", 0)
@@ -513,7 +499,7 @@ class RecordManager:
             logger.info(f"-> Processing rate: {records_per_sec:>8,.1f} records/second")
 
         logger.info("-" * 80)
-        logger.info(f"🎉 Success! {total_records:,} records exported to {output_path}")
+        logger.info(f"\nSuccess! {total_records:,} records exported to {output_path}")
         logger.info(f"-> File size: {self._get_file_size(output_path)}")
 
     def _get_file_size(self, file_path: Path) -> str:
@@ -555,45 +541,45 @@ def cache_hmdb_database(
     """
     start_time = time.time()
 
-    logger.info("🚀 HMDB Reference Data Caching Pipeline")
+    logger.info("\nHMDB Reference Data Caching Pipeline")
     logger.info("=" * 50)
 
     try:
         cache_manager = CacheManager(email, umls_api_key)
 
         if force_refresh or not cache_manager.is_cache_complete():
-            logger.info("⚙️ Caching reference data (taxonomies, diseases, proteins)...")
+            logger.info(">>> Caching reference data (taxonomies, diseases, proteins)...")
 
             record_manager = RecordManager(data_dir)
             metabolite_xml, protein_xml = record_manager._prepare_xml_files()
 
             # cache reference data with progress tracking
             metabolite_start = time.time()
-            logger.info("▶️ Caching metabolite reference data...")
+            logger.info("️>>> Caching metabolite reference data...")
             cache_manager.cache_metabolite_data(metabolite_xml)
             metabolite_time = time.time() - metabolite_start
-            logger.info(f"✅ Metabolite data cached in {metabolite_time:.2f} seconds")
+            logger.info(f"[DONE] Metabolite data cached in {metabolite_time:.2f} seconds")
 
             protein_start = time.time()
-            logger.info("▶️ Caching protein reference data...")
+            logger.info(">>> Caching protein reference data...")
             cache_manager.cache_protein_data(protein_xml)
             protein_time = time.time() - protein_start
-            logger.info(f"✅ Protein data cached in {protein_time:.2f} seconds")
+            logger.info(f"[DONE] Protein data cached in {protein_time:.2f} seconds")
 
         else:
-            logger.info("✅ Reference data cache is complete, skipping...")
+            logger.info("[DONE] Reference data cache is complete, skipping...")
             metabolite_time = 0
             protein_time = 0
 
         duration = time.time() - start_time
 
         logger.info("=" * 50)
-        logger.info("🎉 HMDB Reference Data Caching Complete!")
-        logger.info(f"⏱️  Total time: {duration:.2f} seconds ({duration / 60:.2f} minutes)")
+        logger.info("[DONE] HMDB Reference Data Caching Complete!")
+        logger.info(f"-> Total time: {duration:.2f} seconds ({duration / 60:.2f} minutes)")
 
         if force_refresh or not cache_manager.is_cache_complete():
             logger.info(
-                f"📋 Breakdown: Metabolite: {metabolite_time:.2f}s, Protein: {protein_time:.2f}s"
+                f"-> Breakdown: Metabolite: {metabolite_time:.2f}s, Protein: {protein_time:.2f}s"
             )
 
         logger.info("\n Next steps:")
@@ -618,7 +604,7 @@ def cache_hmdb_database(
         }
 
     except Exception as e:
-        logger.error(f"❌ Reference data caching pipeline failed: {e}")
+        logger.error(f"!!! Reference data caching pipeline failed: {e}")
         return {
             "success": False,
             "error": str(e),

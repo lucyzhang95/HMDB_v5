@@ -101,7 +101,10 @@ class HMDBRecordStatsReporter:
         return data
 
     def _load_jsonl_data(self, in_f_path: str) -> Dict[str, List[Dict]]:
-        """Load JSONL data - expects flat records with association_type field."""
+        """
+        Load JSONL record data
+        expects flat records with the association_type field.
+        """
         records = []
         with open(in_f_path, "r", encoding="utf-8") as f:
             for line in f:
@@ -159,50 +162,51 @@ class HMDBRecordStatsReporter:
 
     def _count_xrefs(self, node: Dict[str, Any]) -> Dict[str, int]:
         """Count xref types in a node."""
-        xrefs = node.get("xrefs", {})
+        xrefs = node.get("xrefs", [])
         if not xrefs:
             return {}
 
         xref_counts = {}
-        for key, value in xrefs.items():
-            if value:  # only non-empty xrefs
-                if isinstance(value, list):
-                    xref_counts[key] = len(value)
-                else:
-                    xref_counts[key] = 1
+        for curie in xrefs:
+            if curie:
+                prefix = self._extract_curie_prefix(curie)
+                xref_counts[prefix] = xref_counts.get(prefix, 0) + 1
+
+        return xref_counts
+
+    def _count_xrefs(self, node: Dict[str, Any]) -> Dict[str, int]:
+        """Count xref types in a node."""
+        xrefs = node.get("xrefs", [])
+        if not xrefs:
+            return {}
+
+        xref_counts = {}
+        for curie in xrefs:
+            if curie:
+                prefix = self._extract_curie_prefix(curie)
+                xref_counts[prefix] = xref_counts.get(prefix, 0) + 1
+
         return xref_counts
 
     def _collect_unique_xrefs(self, node: Dict[str, Any]) -> Dict[str, set]:
         """Collect unique xref values by type from a node."""
-        xrefs = node.get("xrefs", {})
+        xrefs = node.get("xrefs", [])
         if not xrefs:
             return {}
 
         unique_xrefs = {}
-        for key, value in xrefs.items():
-            if value:  # only non-empty xrefs
-                if isinstance(value, list):
-                    processed_values = []
-                    for item in value:
-                        if isinstance(item, dict):
-                            if "id" in item:
-                                processed_values.append(item["id"])
-                            elif "name" in item:
-                                processed_values.append(item["name"])
-                            else:
-                                processed_values.append(str(item))
-                        else:
-                            processed_values.append(str(item))
-                    unique_xrefs[key] = set(processed_values)
-                elif isinstance(value, dict):
-                    if "id" in value:
-                        unique_xrefs[key] = {value["id"]}
-                    elif "name" in value:
-                        unique_xrefs[key] = {value["name"]}
-                    else:
-                        unique_xrefs[key] = {str(value)}
+        for curie in xrefs:
+            if curie:
+                prefix = self._extract_curie_prefix(curie)
+                if prefix not in unique_xrefs:
+                    unique_xrefs[prefix] = set()
+
+                if isinstance(curie, str) and ":" in curie:
+                    value = curie.split(":", 1)[1]
+                    unique_xrefs[prefix].add(value)
                 else:
-                    unique_xrefs[key] = {str(value)}
+                    unique_xrefs[prefix].add(str(curie))
+
         return unique_xrefs
 
     def _analyze_molecular_weight(self, nodes: List[Dict[str, Any]]) -> Dict[str, Any]:

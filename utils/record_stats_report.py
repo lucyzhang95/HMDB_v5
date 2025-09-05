@@ -174,20 +174,6 @@ class HMDBRecordStatsReporter:
 
         return xref_counts
 
-    def _count_xrefs(self, node: Dict[str, Any]) -> Dict[str, int]:
-        """Count xref types in a node."""
-        xrefs = node.get("xrefs", [])
-        if not xrefs:
-            return {}
-
-        xref_counts = {}
-        for curie in xrefs:
-            if curie:
-                prefix = self._extract_curie_prefix(curie)
-                xref_counts[prefix] = xref_counts.get(prefix, 0) + 1
-
-        return xref_counts
-
     def _collect_unique_xrefs(self, node: Dict[str, Any]) -> Dict[str, set]:
         """Collect unique xref values by type from a node."""
         xrefs = node.get("xrefs", [])

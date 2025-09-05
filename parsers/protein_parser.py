@@ -296,18 +296,20 @@ class HMDBProteinParser(XMLParseHelper):
 
                     # association node
                     association_node = {
-                        "id": "RO:0000056",
-                        "predicate": "biolink:GeneToPathwayAssociation",
-                        "type": "participates_in",
+                        "category": "biolink:GeneToPathwayAssociation",
+                        "predicate": "participates_in",
                         "primary_knowledge_source": "infores:hmdb_v5",
-                        "evidence_type": "ECO:0000305",  # manual assertion
+                        "has_evidence": "ECO:0000305",  # manual assertion
+                        "agent_type": "biolink:manual_agent",
                         "publication": publication if publication else None,
                     }
                     association_node = self.remove_empty_none_values(association_node)
 
                     # association ID
                     _id = (
-                        f"{subject_node['id'].split(':')[1]}_participates_in_{object_node['id'].split(':')[1]}"
+                        f"{subject_node['id'].split(':')[1]}"
+                        f"_{association_node['predicate'].split(':')[1]}"
+                        f"_{object_node['id'].split(':')[1]}"
                         if object_node.get("id") and subject_node.get("id")
                         else str(uuid.uuid4())
                     )
@@ -372,18 +374,20 @@ class HMDBProteinParser(XMLParseHelper):
 
                     # association node
                     association_node = {
-                        "id": "RO:0002331",
-                        "predicate": "biolink:MacromolecularMachineToBiologicalProcessAssociation",
-                        "type": "involved_in",
+                        "category": "biolink:MacromolecularMachineToBiologicalProcessAssociation",
+                        "predicate": "biolink:participates_in",
                         "primary_knowledge_source": "infores:hmdb_v5",
-                        "evidence_type": "ECO:0000305",  # manual assertion
+                        "has_evidence": "ECO:0000305",  # manual assertion
+                        "agent_type": "biolink:manual_agent",
                         "publication": publication if publication else None,
                     }
                     association_node = self.remove_empty_none_values(association_node)
 
                     # association ID
                     _id = (
-                        f"{subject_node['id'].split(':', 1)[1]}_involved_in_{object_node['id'].split(':', 1)[1]}"
+                        f"{subject_node['id'].split(':', 1)[1]}"
+                        f"_{association_node['predicate'].split(':')[1]}"
+                        f"_{object_node['id'].split(':', 1)[1]}"
                         if object_node.get("id") and subject_node.get("id")
                         else str(uuid.uuid4())
                     )

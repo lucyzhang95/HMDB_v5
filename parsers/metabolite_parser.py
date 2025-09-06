@@ -116,7 +116,10 @@ class HMDBMetaboliteParser(XMLParseHelper):
                             )
                         else:
                             output["anatomical_entity"].append(
-                                {"original_name": tissue_name, "category": "biolink:AnatomicalEntity"}
+                                {
+                                    "original_name": tissue_name,
+                                    "category": "biolink:AnatomicalEntity",
+                                }
                             )
 
         return output
@@ -229,8 +232,9 @@ class HMDBMetaboliteParser(XMLParseHelper):
                             f"{subject_node['id'].split(':')[1]}"
                             f"_{association_node['predicate'].split(':')[1]}"
                             f"_{object_node['id'].split(':')[1]}"
-                            if object_node.get("id") and subject_node.get("id")
-                            else str(uuid.uuid4())
+                            if object_node.get("id", f"uuid:{str(uuid.uuid4())}")
+                               and subject_node.get("id", f"uuid:{str(uuid.uuid4())}")
+                            else f"uuid:{str(uuid.uuid4())}"
                         )
 
                         yield {
@@ -299,8 +303,9 @@ class HMDBMetaboliteParser(XMLParseHelper):
                                 f"{subject_node['id'].split(':')[1]}"
                                 f"_{association_node['predicate'].split(':')[1]}"
                                 f"_{object_node['id'].split(':')[1]}"
-                                if object_node.get("id") and subject_node.get("id")
-                                else str(uuid.uuid4())
+                                if object_node.get("id", f"uuid:{str(uuid.uuid4())}")
+                                   and subject_node.get("id", f"uuid:{str(uuid.uuid4())}")
+                                else f"uuid:{str(uuid.uuid4())}"
                             )
 
                             yield {
@@ -388,8 +393,9 @@ class HMDBMetaboliteParser(XMLParseHelper):
                         f"{subject_node['id'].split(':')[1]}"
                         f"_{association_node['predicate'].split(':')[1]}"
                         f"_{object_node['id'].split(':')[1]}"
-                        if object_node.get("id") and subject_node.get("id")
-                        else str(uuid.uuid4())
+                        if object_node.get("id", f"uuid:{str(uuid.uuid4())}")
+                           and subject_node.get("id", f"uuid:{str(uuid.uuid4())}")
+                        else f"uuid:{str(uuid.uuid4())}"
                     )
 
                     yield {
@@ -472,8 +478,9 @@ class HMDBMetaboliteParser(XMLParseHelper):
                         f"{subject_node['id'].split(':')[1]}"
                         f"_{association_node['predicate'].split(':')[1]}"
                         f"_{object_node['id'].split(':')[1]}"
-                        if object_node.get("id") and subject_node.get("id")
-                        else str(uuid.uuid4())
+                        if object_node.get("id", f"uuid:{str(uuid.uuid4())}")
+                           and subject_node.get("id", f"uuid:{str(uuid.uuid4())}")
+                        else f"uuid:{str(uuid.uuid4())}"
                     )
 
                     yield {

@@ -19,25 +19,22 @@ class HMDBRecordStatsReporter:
         """
         Load data from JSONL format and group by association.category.
 
-        Returns:
-            Dictionary with relationship types as keys and lists of records as values
+        :return: Dictionary with relationship types as keys and lists of records as values
         """
         file_path = os.path.join("..", "records", filepath)
 
         if not os.path.exists(file_path):
-            print(f"File not found: {file_path}")
+            print(f"!!! File not found: {file_path}")
             return {}
 
         try:
             return self._load_jsonl_data(file_path)
         except Exception as e:
-            print(f"Error loading {file_path}: {e}")
+            print(f"!!!Error loading {file_path}: {e}")
             return {}
 
     def _load_jsonl_data(self, file_path: str) -> Dict[str, List[Dict]]:
-        """
-        Load JSONL record data and group by association.category.
-        """
+        """ Load JSONL record data and group by association.category."""
         records = []
         with open(file_path, "r", encoding="utf-8") as f:
             for line_num, line in enumerate(f, 1):
@@ -46,10 +43,10 @@ class HMDBRecordStatsReporter:
                         record = json.loads(line)
                         records.append(record)
                     except json.JSONDecodeError as e:
-                        print(f"Error parsing line {line_num}: {e}")
+                        print(f"!!! Error parsing line {line_num}: {e}")
                         continue
 
-        print(f"Loaded {len(records)} records from JSONL file")
+        print(f"-> Loaded {len(records)} records from JSONL file")
         return self._group_records_by_association_category(records)
 
     def _group_records_by_association_category(self, records: List[Dict]) -> Dict[str, List[Dict]]:
@@ -57,11 +54,10 @@ class HMDBRecordStatsReporter:
         grouped = defaultdict(list)
 
         for record in records:
-            # Get category from association.category
             category = record.get("association", {}).get("category", "unknown")
             grouped[category].append(record)
 
-        print(f"Grouped records into {len(grouped)} categories:")
+        print(f"\nGrouped records into {len(grouped)} categories:")
         for category, record_list in grouped.items():
             print(f"  {category}: {len(record_list)} records")
 
@@ -213,7 +209,7 @@ class HMDBRecordStatsReporter:
 
         combined_data = self._load_data(filepath)
         if not combined_data:
-            print("No data loaded from file.")
+            print("!!! No data loaded from file.")
             return {}
 
         all_records_with_type = []
@@ -223,9 +219,9 @@ class HMDBRecordStatsReporter:
                 record_copy["_relationship_type"] = category
                 all_records_with_type.append(record_copy)
 
-        print(f"Total records collected: {len(all_records_with_type)}")
+        print(f"-> Total records collected: {len(all_records_with_type)}")
 
-        # Use _id to find duplicates
+        # use _id for duplication check
         id_to_records = defaultdict(list)
         for record in all_records_with_type:
             record_id = record.get("_id")
@@ -249,11 +245,11 @@ class HMDBRecordStatsReporter:
                     "relationship_types": duplicate_records[record_id]["relationship_types"],
                 }
 
-        print(f"Found {len(duplicate_records)} duplicate IDs")
+        print(f"-> Found {len(duplicate_records)} duplicate IDs")
 
         duplicate_stats = self._generate_duplicate_statistics(duplicate_records)
 
-        # Random sample 3 duplicated records per count
+        # random sample 3 duplicated records per count
         records_by_count = defaultdict(list)
         for record_id, data in duplicate_records.items():
             count = data["count"]
@@ -293,7 +289,6 @@ class HMDBRecordStatsReporter:
         with open(export_path, "w") as f:
             json.dump(export_data, f, indent=2, sort_keys=True, default=str)
 
-        # Export sampled duplicates separately
         with open(
                 os.path.join(self.report_dir, f"{timestamp}_random_sampled_duplicate_records.json"), "w"
         ) as f:
@@ -366,7 +361,6 @@ class HMDBRecordStatsReporter:
         stats["metadata"]["total_records_analyzed"] = total_records
         stats["metadata"]["total_records_analyzed_by_relationship"] = relationship_counts
 
-        # Analyze each relationship type
         relationship_stats = {}
         for category, records in combined_data.items():
             if records:
@@ -381,7 +375,7 @@ class HMDBRecordStatsReporter:
 
         stats.update(self._calculate_overall_stats(all_records))
 
-        print(f"Generated comprehensive statistics for {total_records} total records.")
+        print(f"-> Generated comprehensive statistics for {total_records} total records.")
         return stats
 
     def _calculate_overall_stats(self, all_records: List[Dict]) -> Dict[str, Any]:
@@ -411,7 +405,7 @@ class HMDBRecordStatsReporter:
             sample_size = min(3, len(id_list))
             sampled_ids_by_count[count] = random.sample(id_list, sample_size)
 
-        # All CURIE analysis
+        # overall CURIE analysis
         overall_subject_curies = []
         overall_object_curies = []
         for record in all_records:
@@ -422,7 +416,7 @@ class HMDBRecordStatsReporter:
             if object_id:
                 overall_object_curies.append(self._extract_curie_prefix(object_id))
 
-        # All description analysis
+        # overall description analysis
         subject_desc_count = sum(
             1 for record in all_records if record.get("subject", {}).get("description")
         )
@@ -430,7 +424,7 @@ class HMDBRecordStatsReporter:
             1 for record in all_records if record.get("object", {}).get("description")
         )
 
-        # All xrefs analysis
+        # overall xrefs analysis
         overall_subject_xrefs = defaultdict(int)
         overall_object_xrefs = defaultdict(int)
         overall_subject_unique_xrefs = defaultdict(set)
@@ -452,7 +446,7 @@ class HMDBRecordStatsReporter:
             for xref_type, unique_values in object_unique_xrefs.items():
                 overall_object_unique_xrefs[xref_type].update(unique_values)
 
-        # All publication analysis
+        # overall publication analysis
         overall_pub_stats = self._count_publication_pmids(all_records)
 
         return {
@@ -491,7 +485,7 @@ class HMDBRecordStatsReporter:
 
     def _analyze_relationship(self, category: str, records: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Analyze statistics for a specific relationship category."""
-        print(f"-> Analyzing {category} relationship ({len(records)} records)...")
+        print(f"\n>>> Analyzing {category} relationship ({len(records)} records)...")
 
         rel_stats = {
             "record_count": len(records),
@@ -512,7 +506,7 @@ class HMDBRecordStatsReporter:
         object_curie_counter = Counter()
 
         for record in records:
-            # Evidence types
+            # evidence types
             evidence_type = record.get("association", {}).get("evidence_type")
             if evidence_type:
                 if isinstance(evidence_type, list):
@@ -520,7 +514,7 @@ class HMDBRecordStatsReporter:
                 else:
                     evidence_counter[evidence_type] += 1
 
-            # CURIE prefixes
+            # curie prefixes
             subject_id = record.get("subject", {}).get("id", "")
             object_id = record.get("object", {}).get("id", "")
 
@@ -529,13 +523,13 @@ class HMDBRecordStatsReporter:
             if object_id:
                 object_curie_counter[self._extract_curie_prefix(object_id)] += 1
 
-            # Descriptions
+            # descriptions
             if record.get("subject", {}).get("description"):
                 rel_stats["subject_description_count"] += 1
             if record.get("object", {}).get("description"):
                 rel_stats["object_description_count"] += 1
 
-            # Xrefs
+            # xrefs
             subject_xrefs = self._count_xrefs(record.get("subject", {}))
             object_xrefs = self._count_xrefs(record.get("object", {}))
             subject_unique_xrefs = self._collect_unique_xrefs(record.get("subject", {}))
@@ -563,10 +557,10 @@ class HMDBRecordStatsReporter:
             k: len(v) for k, v in rel_stats["object_unique_xref_stats"].items()
         }
 
-        # Publication
+        # publication
         rel_stats["publication_stats"] = self._count_publication_pmids(records)
 
-        # Relationship-specific analysis
+        # relationship-specific analysis
         if category == "microbe-metabolite":
             rel_stats.update(self._analyze_microbe_metabolite_specific(records))
         elif category == "metabolite-disease":
@@ -593,7 +587,7 @@ class HMDBRecordStatsReporter:
             object_node = record.get("object", {})
             object_nodes.append(object_node)
 
-            # Organism type and rank
+            # organism type and rank
             organism_type = subject.get("organism_type")
             if organism_type:
                 organism_types.append(organism_type)
@@ -602,7 +596,7 @@ class HMDBRecordStatsReporter:
             if rank:
                 ranks.append(rank)
 
-            # Object properties
+            # object properties
             logp = object_node.get("logp")
             if logp is not None:
                 logp_values.append(logp)
@@ -664,12 +658,12 @@ class HMDBRecordStatsReporter:
         for record in records:
             subject = record.get("subject", {})
 
-            # Protein function
+            # protein function
             function = subject.get("function")
             if function:
                 functions.append(function)
 
-            # Molecular weight
+            # molecular weight
             mw = subject.get("molecular_weight")
             if mw is not None:
                 molecular_weights.append(mw)

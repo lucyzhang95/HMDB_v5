@@ -99,7 +99,7 @@ class CacheManager:
 
         # step 5: cache Uberon anatomy terms (from tissue name to Uberon ID)
         if not skip_existing or not cache_exists("uberon_tissue_name2id.pkl"):
-            print("\n>>>️ Querying UBERON anatomy terms...")
+            print(">>>️ Querying UBERON anatomy terms...")
             anatomical_terms = get_all_anatomical_terms_from_hmdb(metabolite_xml)
             if not anatomical_terms:
                 print("!! No anatomical terms found in metabolite data")

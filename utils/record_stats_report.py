@@ -3,6 +3,7 @@ import os
 import random
 from collections import Counter, defaultdict
 from datetime import datetime
+from glob import glob
 from statistics import mean, median
 from typing import Any, Dict, List
 
@@ -34,7 +35,7 @@ class HMDBRecordStatsReporter:
             return {}
 
     def _load_jsonl_data(self, file_path: str) -> Dict[str, List[Dict]]:
-        """ Load JSONL record data and group by association.category."""
+        """Load JSONL record data and group by association.category."""
         records = []
         with open(file_path, "r", encoding="utf-8") as f:
             for line_num, line in enumerate(f, 1):
@@ -730,19 +731,6 @@ class HMDBRecordStatsReporter:
         print(f"Statistics report saved to: {report_path}")
         return report_path
 
-    def run_full_analysis(self, filepath: str = "hmdb_output.jsonl") -> Dict[str, Any]:
-        """Run complete statistical analysis and save report."""
-        print(f"Starting comprehensive HMDB record analysis for {filepath}...")
-
-        stats = self.generate_record_stats(filepath)
-        if stats:
-            self.save_stats_report(stats, filepath)
-            print("Analysis complete!")
-        else:
-            print("Analysis failed - no data found.")
-
-        return stats
-
     def run_full_analysis_with_duplicates(
             self, filepath: str = "hmdb_output.jsonl"
     ) -> Dict[str, Any]:
@@ -765,12 +753,42 @@ class HMDBRecordStatsReporter:
 
         return {"stats": stats, "duplicates": duplicate_data}
 
+    def load_cached_records(self, filename_base="hmdb_v5_parsed_records"):
+        """Load cached records from the most recent record JSONL file."""
+        jsonl_pattern = os.path.join("..", "records", f"{filename_base}_*.jsonl")
+        jsonl_files = glob.glob(jsonl_pattern)
+
+        if not jsonl_files:
+            print(f"!!! No JSONL files found matching pattern: {filename_base}_*.jsonl")
+            return None
+
+        most_recent_jsonl = max(jsonl_files, key=os.path.getmtime)
+        jsonl_filename = os.path.basename(most_recent_jsonl)
+
+        try:
+            records = self.rec_helper.load_jsonl(jsonl_filename)
+            print(f"-> Loaded {len(records)} records from JSONL: {jsonl_filename}")
+            return records
+        except Exception as e:
+            print(f"!!! Failed to load JSONL file {jsonl_filename}: {e}")
+            return None
+
 
 if __name__ == "__main__":
     import sys
 
-    in_f = sys.argv[1] if len(sys.argv) > 1 else "hmdb_v5_parsed_records.jsonl"
+    if len(sys.argv) > 1:
+        input_file = sys.argv[1]
+    else:
+        reporter = HMDBRecordStatsReporter()
+        records = reporter.load_cached_records()
+        if records is None:
+            sys.exit("!!! No records found!")
+        input_file = (
+            reporter.load_cached_records.__defaults__[0]
+            if hasattr(reporter.load_cached_records, "__defaults__")
+            else None
+        )
 
     reporter = HMDBRecordStatsReporter()
-    full_report = reporter.run_full_analysis_with_duplicates(in_f)
-    
+    full_report = reporter.run_full_analysis_with_duplicates(input_file)

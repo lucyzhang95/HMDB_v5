@@ -57,7 +57,7 @@ class CachePipeline:
             return {"success": False, "error": str(e)}
 
         if skip_existing and self.cache_manager.is_cache_complete():
-            print("✅ All cache files already exist. Skipping caching process.")
+            print("[DONE] All cache files already exist. Skipping caching process.")
             print("Use force_refresh=True to rebuild cache.")
             return {
                 "success": True,
@@ -67,7 +67,7 @@ class CachePipeline:
 
         missing_files = self.cache_manager.get_missing_cache_files()
         if missing_files:
-            print(f"Missing cache files: {len(missing_files)}")
+            print(f"!!! Missing cache files: {len(missing_files)}")
             for file in missing_files[:5]:
                 print(f"  - {file}")
             if len(missing_files) > 5:
@@ -78,19 +78,19 @@ class CachePipeline:
             if not self.cache_manager.cache_exists_for_file(metabolite_xml) or force_refresh:
                 self.cache_manager.cache_metabolite_data(metabolite_xml)
             else:
-                print("✅ Metabolite cache exists, skipping...")
+                print("[DONE] Metabolite cache exists, skipping...")
 
             # cache protein data
             if not self.cache_manager.cache_exists_for_file(protein_xml) or force_refresh:
                 self.cache_manager.cache_protein_data(protein_xml)
             else:
-                print("✅ Protein cache exists, skipping...")
+                print("[DONE] Protein cache exists, skipping...")
 
             duration = time.time() - start_time
 
             print("\n" + "=" * 50)
-            print("🎉 Cache Pipeline Complete!")
-            print(f"Total time: {duration / 60:.2f} minutes")
+            print("[DONE] Cache Pipeline Complete!")
+            print(f"-> Total time: {duration / 60:.2f} minutes")
 
             cache_info = get_cache_size()
             total_size_mb = sum(info["size_mb"] for info in cache_info.values())
@@ -105,12 +105,12 @@ class CachePipeline:
             }
 
         except Exception as e:
-            print(f"\nError during caching: {str(e)}")
+            print(f"\n!!! Error during caching: {str(e)}")
             return {"success": False, "error": str(e)}
 
     def validate_cache_integrity(self) -> dict:
         """Validate the integrity of cached data."""
-        print("⚙️Validating cache integrity...")
+        print("\n>>> Validating cache integrity...")
 
         status = self.cache_manager.get_cache_status()
         missing = [f for f, exists in status.items() if not exists]
@@ -138,7 +138,7 @@ class CachePipeline:
 
     def show_cache_summary(self) -> None:
         """Display a summary of the current cache state."""
-        print("📋 HMDB Cache Summary")
+        print("\nHMDB Cache Summary")
         print("=" * 30)
 
         status = self.cache_manager.get_cache_status()
@@ -150,9 +150,7 @@ class CachePipeline:
             total_size = sum(info["size_mb"] for info in cache_info.values())
             print(f"-> Total size: {total_size:.1f} MB")
 
-            largest_files = sorted(cache_info.items(), key=lambda x: x[1]["size_mb"], reverse=True)[
-                :5
-            ]
+            largest_files = sorted(cache_info.items(), key=lambda x: x[1]["size_mb"], reverse=True)[:5]
 
             print("\nLargest cache files:")
             for filename, info in largest_files:
@@ -160,7 +158,7 @@ class CachePipeline:
 
         missing = [f for f, exists in status.items() if not exists]
         if missing:
-            print(f"\n‼️Missing files ({len(missing)}):")
+            print(f"\n!!! Missing files ({len(missing)}):")
             for filename in missing[:5]:
                 print(f"  - {filename}")
             if len(missing) > 5:
@@ -168,17 +166,17 @@ class CachePipeline:
 
         # validate data if complete
         if not missing:
-            print("\n⚙️ Validating cache integrity...")
+            print("\n>>> Validating cache integrity...")
             try:
                 cached_data = self.cache_manager.load_cached_data()
-                print("✅ All cache files load successfully")
+                print("[DONE] All cache files load successfully")
                 print(f"  - Taxon mappings: {len(cached_data.get('taxon_info', {}))}")
                 print(f"  - Disease mappings: {len(cached_data.get('disease_info', {}))}")
                 print(
                     f"  - Pathway descriptions: {len(cached_data.get('pathway_descriptions', {}))}"
                 )
             except Exception as e:
-                print(f"❌ Cache validation failed: {e}")
+                print(f"!!! Cache validation failed: {e}")
 
 
 def run_cache_pipeline(

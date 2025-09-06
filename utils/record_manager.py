@@ -20,7 +20,7 @@ from .cache_manager import CacheManager
 from .reader import extract_file_from_zip
 from .record_deduplicator import _create_fingerprint, deduplicate_and_merge
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s %(message)s")
 logger = logging.getLogger(__name__)
 
 

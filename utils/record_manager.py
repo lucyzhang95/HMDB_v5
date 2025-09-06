@@ -395,6 +395,7 @@ class RecordManager:
             self,
             f,
             batch: list,
+            key: str,
             output_format: str,
             global_seen_keys: set,
             first_record_written: bool,

@@ -13,7 +13,9 @@ from .cache_helper import load_pickle, save_pickle
 from .ontology_services import (
     BiothingsServices,
     DiseaseServices,
+    GeneServices,
     NCITServices,
+    ProteinServices,
     TaxonServices,
     UMLSClient,
 )
@@ -76,14 +78,14 @@ class TaxonMapper:
         taxids = [taxon_data["taxid"] for taxon_data in mapped_taxons.values()]
 
         # step 2: get detailed taxon info from biothings
-        print("Enriching with detailed taxon information...")
+        print(">>> Enriching with detailed taxon information...")
         taxon_info = BiothingsServices.get_taxon_info_from_bt(taxids)
 
         # step 3: get scientific names for NCIT description lookup
         sci_names = [info["name"] for info in taxon_info.values() if "name" in info]
 
         # step 4: get NCIT descriptions
-        print("Fetching NCIT descriptions...")
+        print(">>> Fetching NCIT descriptions...")
         taxon_descr = NCITServices.get_ncit_taxon_description(sci_names)
 
         # step5: add descriptions to taxon info
@@ -168,7 +170,7 @@ class DiseaseMapper:
                 bt_ids.append(_id.split(":")[1])
 
         # step 2: get detailed disease info from biothings
-        print("Enriching with detailed disease information...")
+        print(">>> Enriching with detailed disease information...")
         bt_disease_info = BiothingsServices.bt_get_disease_info(bt_ids)
 
         # step 3: create enriched mapping
@@ -222,18 +224,17 @@ class ProteinMapper:
     @staticmethod
     def enrich_protein_mappings(protein2uniprot: Dict[str, str]) -> Dict:
         """Enrich protein mappings with function descriptions."""
-        from .ontology_services import ProteinServices
 
         # step 1: get UniProt IDs
         uniprot_ids = [uid for uid in protein2uniprot.values() if uid]
 
         # step 2/1: get protein functions
-        print("Fetching protein functions...")
+        print("\n>>> Fetching protein functions...")
         protein_functions = asyncio.run(ProteinServices.get_batch_protein_functions(uniprot_ids))
         save_pickle(protein_functions, "uniprot_protein_functions.pkl")
 
         # step 2/2: get gene mappings
-        print("Mapping UniProt to EntrezGene...")
+        print(">>> Mapping UniProt to EntrezGene...")
         uniprot2entrez = ProteinMapper.uniprot_id2entrezgene(uniprot_ids)
         save_pickle(uniprot2entrez, "bt_uniprot2entrezgene.pkl")
 
@@ -242,7 +243,6 @@ class ProteinMapper:
     @staticmethod
     def enrich_gene_info(uniprot2entrez: Dict) -> Dict:
         """Enrich gene mappings with summaries."""
-        from .ontology_services import GeneServices
 
         # step 1: extract Entrez gene IDs
         entrez_genes = [
@@ -252,7 +252,7 @@ class ProteinMapper:
         ]
 
         # step 2: get gene summaries
-        print("Fetching gene summaries...")
+        print(">>> Fetching gene summaries...")
         gene_summaries = asyncio.run(GeneServices.get_batch_gene_summaries(entrez_genes))
         save_pickle(gene_summaries, "entrezgene_summaries.pkl")
 

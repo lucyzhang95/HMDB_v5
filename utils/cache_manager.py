@@ -8,6 +8,8 @@ from typing import Dict, List
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
+from manual_annotations.anatomical_name2uberonid import apply_manual_anatomy_mappings
+
 from .cache_helper import cache_exists, load_pickle, save_pickle
 from .ontology_mapper import DiseaseMapper, ProteinMapper, TaxonMapper
 from .ontology_services import (
@@ -25,7 +27,6 @@ from .reader import (
     get_all_uniprot_ids_from_hmdb,
     get_all_uniprot_ids_from_hmdbp,
 )
-from manual_annotations.anatomical_name2uberonid import apply_manual_anatomy_mappings
 
 
 class CacheManager:
@@ -40,6 +41,7 @@ class CacheManager:
     def cache_metabolite_data(self, metabolite_xml: str, skip_existing: bool = True) -> None:
         """Cache all metabolite-related mappings and enrichments with selective skipping."""
         print("\n>>> Caching Metabolite Data...")
+        print("=" * 50)
 
         # step 1: cache taxon mappings
         if not skip_existing or not cache_exists("original_taxon_name2taxid.pkl"):
@@ -58,7 +60,7 @@ class CacheManager:
 
         # step 2: cache disease mappings
         if not skip_existing or not cache_exists("original_disease_name2id.pkl"):
-            print("\n>>>️ Processing disease names...")
+            print(">>>️ Processing disease names...")
             diseases = get_all_diseases(metabolite_xml)
             save_pickle(diseases, "hmdb_v5_diseases.pkl")
 
@@ -73,7 +75,7 @@ class CacheManager:
 
         # step 3: cache protein mappings
         if not skip_existing or not cache_exists("uniprot_protein_functions.pkl"):
-            print("\n>>>️ Processing protein mappings...")
+            print(">>>️ Processing protein mappings...")
             protein2uniprot = get_all_uniprot_ids_from_hmdb(metabolite_xml)
             save_pickle(protein2uniprot, "all_protein_name2uniprot.pkl")
 
@@ -81,7 +83,7 @@ class CacheManager:
             protein_enrichment = ProteinMapper.enrich_protein_mappings(protein2uniprot)
 
             # enrich gene information
-            gene_summaries = ProteinMapper.enrich_gene_info(protein_enrichment["uniprot2entrez"])
+            ProteinMapper.enrich_gene_info(protein_enrichment["uniprot2entrez"])
             print(f"[DONE] Processed {len(protein2uniprot)} protein mappings")
         else:
             print("[DONE] Protein mappings already cached, skipping...")
@@ -109,13 +111,14 @@ class CacheManager:
             save_pickle(corrected_uberon_terms, "uberon_tissue_name2id.pkl")
             print(f"-> Cached {len(corrected_uberon_terms)} UBERON anatomy terms")
         else:
-            print("UBERON anatomy terms already cached, skipping...")
+            print("[DONE] UBERON anatomy terms already cached, skipping...")
 
         print("\n[DONE] Metabolite Data Caching Complete!")
 
     def cache_protein_data(self, protein_xml: str, skip_existing: bool = True) -> None:
         """Cache all protein-related mappings and enrichments with selective skipping."""
         print("\n>>> Caching Protein Data...")
+        print("=" * 50)
 
         # step 1: cache HMDBP protein functions
         if not skip_existing or not cache_exists("hmdbp_uniprot_protein_functions.pkl"):
@@ -128,16 +131,16 @@ class CacheManager:
             )
             save_pickle(hmdbp_protein_functions, "hmdbp_uniprot_protein_functions.pkl")
         else:
-            print("HMDBP protein functions already cached, skipping...")
+            print("[DONE] HMDBP protein functions already cached, skipping...")
 
         # step 2: cache gene mappings and summaries
         if not skip_existing or not cache_exists("hmdbp_uniprot2entrezgene.pkl"):
-            print("\n>>> Mapping HMDBP UniProt to EntrezGene...")
+            print(">>> Mapping HMDBP UniProt to EntrezGene...")
             hmdbp_uniprot_ids = get_all_uniprot_ids_from_hmdbp(protein_xml)
             hmdbp_uniprot2entrez = ProteinMapper.uniprot_id2entrezgene(hmdbp_uniprot_ids)
             save_pickle(hmdbp_uniprot2entrez, "hmdbp_uniprot2entrezgene.pkl")
         else:
-            print("HMDBP UniProt to EntrezGene mappings already cached, skipping...")
+            print("[DONE] HMDBP UniProt to EntrezGene mappings already cached, skipping...")
             hmdbp_uniprot2entrez = load_pickle("hmdbp_uniprot2entrezgene.pkl")
 
         if not skip_existing or not cache_exists("hmdbp_entrezgene_summaries.pkl"):
@@ -152,7 +155,7 @@ class CacheManager:
             hmdbp_gene_summaries = asyncio.run(GeneServices.get_batch_gene_summaries(entrez_genes))
             save_pickle(hmdbp_gene_summaries, "hmdbp_entrezgene_summaries.pkl")
         else:
-            print("HMDBP gene summaries already cached, skipping...")
+            print("[DONE] HMDBP gene summaries already cached, skipping...")
 
         # step 3: cache GO terms and definitions
         if not skip_existing or not cache_exists("hmdbp_go_definitions.pkl"):
@@ -164,7 +167,7 @@ class CacheManager:
             save_pickle(go_definitions, "hmdbp_go_definitions.pkl")
             print(f"[DONE] Cached {len(go_definitions)} GO definitions")
         else:
-            print("GO definitions already cached, skipping...")
+            print("[DONE] GO definitions already cached, skipping...")
 
         print("\n[DONE] Protein Data Caching Complete!")
 

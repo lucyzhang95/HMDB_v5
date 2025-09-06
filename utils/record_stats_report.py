@@ -1,6 +1,5 @@
 import json
 import os
-import pickle
 import random
 from collections import Counter, defaultdict
 from datetime import datetime
@@ -18,112 +17,53 @@ class HMDBRecordStatsReporter:
 
     def _load_data(self, filepath: str) -> Dict[str, List[Dict]]:
         """
-        Load data from various formats and normalize to grouped structure.
-
-        For PKL format, if filepath points to a directory or base name,
-        look for individual relationship type files.
+        Load data from JSONL format and group by association.category.
 
         Returns:
             Dictionary with relationship types as keys and lists of records as values
         """
-        file_path = os.path.join("..", "cache", filepath)
+        file_path = os.path.join("..", "records", filepath)
 
-        if filepath.endswith(".pkl"):
-            base_name = filepath[:-4]
-            return self._load_multiple_pkl_files(base_name)
-        elif not os.path.exists(file_path):
+        if not os.path.exists(file_path):
             print(f"File not found: {file_path}")
             return {}
 
-        file_ext = filepath.split(".")[-1].lower()
-
         try:
-            if file_ext == "json":
-                return self._load_json_data(file_path)
-            elif file_ext == "jsonl":
-                return self._load_jsonl_data(file_path)
-            else:
-                print(f"Unsupported file format: {file_ext}")
-                return {}
+            return self._load_jsonl_data(file_path)
         except Exception as e:
             print(f"Error loading {file_path}: {e}")
             return {}
 
-    def _load_multiple_pkl_files(self, base_name: str) -> Dict[str, List[Dict]]:
-        """Load multiple PKL files for different relationship types."""
-        relationship_types = [
-            "microbe-metabolite",
-            "metabolite-disease",
-            "metabolite-protein",
-            "metabolite-pathway",
-            "protein-pathway",
-            "protein-biological_process",
-        ]
-
-        combined_data = {}
-        cache_dir = os.path.join("..", "cache")
-
-        for rel_type in relationship_types:
-            pkl_file = os.path.join(cache_dir, f"{rel_type}.pkl")
-
-            if os.path.exists(pkl_file):
-                try:
-                    with open(pkl_file, "rb") as f:
-                        records = []
-                        try:
-                            while True:
-                                record = pickle.load(f)
-                                records.append(record)
-                        except EOFError:
-                            pass
-
-                    if records:
-                        combined_data[rel_type] = records
-                        print(f"Loaded {len(records)} records from {rel_type}.pkl")
-
-                except Exception as e:
-                    print(f"Error loading {pkl_file}: {e}")
-                    continue
-            else:
-                print(f"PKL file not found: {pkl_file}")
-
-        total_records = sum(len(records) for records in combined_data.values())
-        print(f"Total records loaded from PKL files: {total_records}")
-        return combined_data
-
-    def _load_json_data(self, in_f_path: str) -> Dict[str, List[Dict]]:
-        """Load JSON data - expects grouped structure."""
-        with open(in_f_path, "r", encoding="utf-8") as f:
-            data = json.load(f)
-
-        total_records = sum(len(records) for records in data.values())
-        print(f"Loaded {total_records} records from JSON file")
-        return data
-
-    def _load_jsonl_data(self, in_f_path: str) -> Dict[str, List[Dict]]:
+    def _load_jsonl_data(self, file_path: str) -> Dict[str, List[Dict]]:
         """
-        Load JSONL record data
-        expects flat records with the association_type field.
+        Load JSONL record data and group by association.category.
         """
         records = []
-        with open(in_f_path, "r", encoding="utf-8") as f:
-            for line in f:
+        with open(file_path, "r", encoding="utf-8") as f:
+            for line_num, line in enumerate(f, 1):
                 if line.strip():
-                    record = json.loads(line)
-                    records.append(record)
+                    try:
+                        record = json.loads(line)
+                        records.append(record)
+                    except json.JSONDecodeError as e:
+                        print(f"Error parsing line {line_num}: {e}")
+                        continue
 
         print(f"Loaded {len(records)} records from JSONL file")
-        return self._group_records_by_association_type(records)
+        return self._group_records_by_association_category(records)
 
-    def _group_records_by_association_type(self, records: List[Dict]) -> Dict[str, List[Dict]]:
-        """Group flat list of records by association_type."""
+    def _group_records_by_association_category(self, records: List[Dict]) -> Dict[str, List[Dict]]:
+        """Group flat list of records by association.category."""
         grouped = defaultdict(list)
 
         for record in records:
-            assoc_type = (
-                    record.get("association_type") or record.get("_relationship_type") or "unknown"
-            )
-            grouped[assoc_type].append(record)
+            # Get category from association.category
+            category = record.get("association", {}).get("category", "unknown")
+            grouped[category].append(record)
+
+        print(f"Grouped records into {len(grouped)} categories:")
+        for category, record_list in grouped.items():
+            print(f"  {category}: {len(record_list)} records")
 
         return dict(grouped)
 
@@ -156,7 +96,7 @@ class HMDBRecordStatsReporter:
 
     def _extract_curie_prefix(self, curie: str) -> str:
         """Extract prefix from CURIE format ID."""
-        if ":" in curie:
+        if isinstance(curie, str) and ":" in curie:
             return curie.split(":", 1)[0]
         return "unknown"
 
@@ -267,7 +207,7 @@ class HMDBRecordStatsReporter:
 
         return {"record_count": records_with_field, "unique_count": len(set(all_items))}
 
-    def export_duplicate_records(self, filepath: str = "hmdb_output.pkl") -> Dict[str, Any]:
+    def export_duplicate_records(self, filepath: str = "hmdb_output.jsonl") -> Dict[str, Any]:
         """Export complete duplicate records to JSON file for investigation."""
         print("\nIdentifying and exporting duplicate records...")
 
@@ -277,15 +217,15 @@ class HMDBRecordStatsReporter:
             return {}
 
         all_records_with_type = []
-        for rel_type, records in combined_data.items():
+        for category, records in combined_data.items():
             for record in records:
                 record_copy = record.copy()
-                record_copy["_relationship_type"] = rel_type
+                record_copy["_relationship_type"] = category
                 all_records_with_type.append(record_copy)
 
         print(f"Total records collected: {len(all_records_with_type)}")
 
-        # use _id to find duplicates
+        # Use _id to find duplicates
         id_to_records = defaultdict(list)
         for record in all_records_with_type:
             record_id = record.get("_id")
@@ -313,7 +253,7 @@ class HMDBRecordStatsReporter:
 
         duplicate_stats = self._generate_duplicate_statistics(duplicate_records)
 
-        # random sample 3 duplicated records per count
+        # Random sample 3 duplicated records per count
         records_by_count = defaultdict(list)
         for record_id, data in duplicate_records.items():
             count = data["count"]
@@ -353,25 +293,7 @@ class HMDBRecordStatsReporter:
         with open(export_path, "w") as f:
             json.dump(export_data, f, indent=2, sort_keys=True, default=str)
 
-        # random sample 3 duplicated records per count
-        records_by_count = defaultdict(list)
-        for record_id, data in duplicate_records.items():
-            count = data["count"]
-            records_by_count[count].append((record_id, data))
-
-        sampled_by_count = {}
-        for count, record_list in records_by_count.items():
-            sample_size = min(3, len(record_list))
-            sampled_records = random.sample(record_list, sample_size)
-            sampled_by_count[count] = [
-                {
-                    "record_id": record_id,
-                    "relationship_types": data["relationship_types"],
-                    "sample_records": random.sample(data["records"], min(3, len(data["records"]))),
-                }
-                for record_id, data in sampled_records
-            ]
-
+        # Export sampled duplicates separately
         with open(
                 os.path.join(self.report_dir, f"{timestamp}_random_sampled_duplicate_records.json"), "w"
         ) as f:
@@ -415,7 +337,7 @@ class HMDBRecordStatsReporter:
             "total_duplicate_groups": len(duplicate_records),
         }
 
-    def generate_record_stats(self, filepath: str = "hmdb_output.pkl") -> Dict[str, Any]:
+    def generate_record_stats(self, filepath: str = "hmdb_output.jsonl") -> Dict[str, Any]:
         """Generate comprehensive statistics for HMDB records."""
         print("\nGenerating HMDB record statistics...")
 
@@ -436,20 +358,20 @@ class HMDBRecordStatsReporter:
 
         total_records = 0
         relationship_counts = {}
-        for rel_type, records in combined_data.items():
+        for category, records in combined_data.items():
             count = len(records)
-            relationship_counts[rel_type] = count
+            relationship_counts[category] = count
             total_records += count
 
         stats["metadata"]["total_records_analyzed"] = total_records
         stats["metadata"]["total_records_analyzed_by_relationship"] = relationship_counts
 
-        # analyze each relationship type
+        # Analyze each relationship type
         relationship_stats = {}
-        for rel_type, records in combined_data.items():
+        for category, records in combined_data.items():
             if records:
-                rel_stats = self._analyze_relationship(rel_type, records)
-                relationship_stats[rel_type] = rel_stats
+                rel_stats = self._analyze_relationship(category, records)
+                relationship_stats[category] = rel_stats
 
         stats["relationship_analysis"] = relationship_stats
 
@@ -489,7 +411,7 @@ class HMDBRecordStatsReporter:
             sample_size = min(3, len(id_list))
             sampled_ids_by_count[count] = random.sample(id_list, sample_size)
 
-        # all CURIE analysis
+        # All CURIE analysis
         overall_subject_curies = []
         overall_object_curies = []
         for record in all_records:
@@ -500,7 +422,7 @@ class HMDBRecordStatsReporter:
             if object_id:
                 overall_object_curies.append(self._extract_curie_prefix(object_id))
 
-        # all description analysis
+        # All description analysis
         subject_desc_count = sum(
             1 for record in all_records if record.get("subject", {}).get("description")
         )
@@ -508,7 +430,7 @@ class HMDBRecordStatsReporter:
             1 for record in all_records if record.get("object", {}).get("description")
         )
 
-        # all xrefs analysis
+        # All xrefs analysis
         overall_subject_xrefs = defaultdict(int)
         overall_object_xrefs = defaultdict(int)
         overall_subject_unique_xrefs = defaultdict(set)
@@ -530,7 +452,7 @@ class HMDBRecordStatsReporter:
             for xref_type, unique_values in object_unique_xrefs.items():
                 overall_object_unique_xrefs[xref_type].update(unique_values)
 
-        # all publication analysis
+        # All publication analysis
         overall_pub_stats = self._count_publication_pmids(all_records)
 
         return {
@@ -567,9 +489,9 @@ class HMDBRecordStatsReporter:
             "overall_publication_stats": overall_pub_stats,
         }
 
-    def _analyze_relationship(self, rel_type: str, records: List[Dict[str, Any]]) -> Dict[str, Any]:
-        """Analyze statistics for a specific relationship type."""
-        print(f"-> Analyzing {rel_type} relationship ({len(records)} records)...")
+    def _analyze_relationship(self, category: str, records: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """Analyze statistics for a specific relationship category."""
+        print(f"-> Analyzing {category} relationship ({len(records)} records)...")
 
         rel_stats = {
             "record_count": len(records),
@@ -590,7 +512,7 @@ class HMDBRecordStatsReporter:
         object_curie_counter = Counter()
 
         for record in records:
-            # evidence types
+            # Evidence types
             evidence_type = record.get("association", {}).get("evidence_type")
             if evidence_type:
                 if isinstance(evidence_type, list):
@@ -607,13 +529,13 @@ class HMDBRecordStatsReporter:
             if object_id:
                 object_curie_counter[self._extract_curie_prefix(object_id)] += 1
 
-            # descriptions
+            # Descriptions
             if record.get("subject", {}).get("description"):
                 rel_stats["subject_description_count"] += 1
             if record.get("object", {}).get("description"):
                 rel_stats["object_description_count"] += 1
 
-            # xrefs
+            # Xrefs
             subject_xrefs = self._count_xrefs(record.get("subject", {}))
             object_xrefs = self._count_xrefs(record.get("object", {}))
             subject_unique_xrefs = self._collect_unique_xrefs(record.get("subject", {}))
@@ -641,19 +563,19 @@ class HMDBRecordStatsReporter:
             k: len(v) for k, v in rel_stats["object_unique_xref_stats"].items()
         }
 
-        # publication
+        # Publication
         rel_stats["publication_stats"] = self._count_publication_pmids(records)
 
-        # relationship-specific analysis
-        if rel_type == "microbe-metabolite":
+        # Relationship-specific analysis
+        if category == "microbe-metabolite":
             rel_stats.update(self._analyze_microbe_metabolite_specific(records))
-        elif rel_type == "metabolite-disease":
+        elif category == "metabolite-disease":
             rel_stats.update(self._analyze_metabolite_disease_specific(records))
-        elif rel_type == "metabolite-protein":
+        elif category == "metabolite-protein":
             rel_stats.update(self._analyze_metabolite_protein_specific(records))
-        elif rel_type == "protein-pathway":
+        elif category == "protein-pathway":
             rel_stats.update(self._analyze_protein_pathway_specific(records))
-        elif rel_type == "protein-biological_process":
+        elif category == "protein-biological_process":
             rel_stats.update(self._analyze_protein_biological_process_specific(records))
 
         return rel_stats
@@ -671,7 +593,7 @@ class HMDBRecordStatsReporter:
             object_node = record.get("object", {})
             object_nodes.append(object_node)
 
-            # organism type and rank
+            # Organism type and rank
             organism_type = subject.get("organism_type")
             if organism_type:
                 organism_types.append(organism_type)
@@ -680,7 +602,7 @@ class HMDBRecordStatsReporter:
             if rank:
                 ranks.append(rank)
 
-            # object properties
+            # Object properties
             logp = object_node.get("logp")
             if logp is not None:
                 logp_values.append(logp)
@@ -742,12 +664,12 @@ class HMDBRecordStatsReporter:
         for record in records:
             subject = record.get("subject", {})
 
-            # protein function
+            # Protein function
             function = subject.get("function")
             if function:
                 functions.append(function)
 
-            # molecular weight
+            # Molecular weight
             mw = subject.get("molecular_weight")
             if mw is not None:
                 molecular_weights.append(mw)
@@ -814,7 +736,7 @@ class HMDBRecordStatsReporter:
         print(f"Statistics report saved to: {report_path}")
         return report_path
 
-    def run_full_analysis(self, filepath: str = "hmdb_output.pkl") -> Dict[str, Any]:
+    def run_full_analysis(self, filepath: str = "hmdb_output.jsonl") -> Dict[str, Any]:
         """Run complete statistical analysis and save report."""
         print(f"Starting comprehensive HMDB record analysis for {filepath}...")
 
@@ -828,7 +750,7 @@ class HMDBRecordStatsReporter:
         return stats
 
     def run_full_analysis_with_duplicates(
-            self, filepath: str = "hmdb_output.pkl"
+            self, filepath: str = "hmdb_output.jsonl"
     ) -> Dict[str, Any]:
         """Run complete statistical analysis and export duplicate records."""
         print(
@@ -853,7 +775,8 @@ class HMDBRecordStatsReporter:
 if __name__ == "__main__":
     import sys
 
-    in_f = sys.argv[1] if len(sys.argv) > 1 else "hmdb_v5_parsed_records.pkl"
+    in_f = sys.argv[1] if len(sys.argv) > 1 else "hmdb_v5_parsed_records.jsonl"
 
     reporter = HMDBRecordStatsReporter()
     full_report = reporter.run_full_analysis_with_duplicates(in_f)
+    

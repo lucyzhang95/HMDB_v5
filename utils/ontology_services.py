@@ -32,7 +32,7 @@ class TaxonServices:
 
         ncbi = NCBITaxa()
 
-        with tqdm(desc="ETE3 taxon mapping", unit="names") as pbar:
+        with tqdm(desc="---ETE3 taxon mapping", unit="names") as pbar:
             ete3_name2taxid = ncbi.get_name_translator(taxon_names)
             for name, taxid in ete3_name2taxid.items():
                 if taxid:
@@ -53,7 +53,7 @@ class TaxonServices:
         Entrez.email = email
         entrez_mapped = {}
 
-        with tqdm(desc="Entrez taxon mapping", total=len(set(taxon_names)), unit="names") as pbar:
+        with tqdm(desc="---Entrez taxon mapping", total=len(set(taxon_names)), unit="names") as pbar:
             for name in set(taxon_names):
                 delay = 5
                 for attempt in range(retries):
@@ -67,13 +67,13 @@ class TaxonServices:
                         break
                     except Exception as e:
                         tqdm.write(
-                            f"Entrez query failed for '{name}' on attempt {attempt + 1}/{retries}: {e}"
+                            f"!! Entrez query failed for '{name}' on attempt {attempt + 1}/{retries}: {e}"
                         )
                         if attempt < retries - 1:
                             time.sleep(delay)
                             delay *= backoff_factor
                         else:
-                            tqdm.write(f"All retry attempts failed for '{name}'.")
+                            tqdm.write(f"!!! All retry attempts failed for '{name}'.")
                 time.sleep(sleep)
                 pbar.update(1)
 
@@ -83,7 +83,7 @@ class TaxonServices:
     def text2term_taxon_name2taxid(taxon_names: list[str], min_score=0.8) -> dict:
         """Map taxonomy names using text2term."""
         if not text2term.cache_exists("NCBITaxon"):
-            print("Caching NCBITaxon ontology...")
+            print(">>> Caching NCBITaxon ontology...")
             text2term.cache_ontology(
                 ontology_url="http://purl.obolibrary.org/obo/ncbitaxon.owl",
                 ontology_acronym="NCBITaxon",
@@ -91,7 +91,7 @@ class TaxonServices:
 
         taxon_names = list(set(taxon_names))
 
-        with tqdm(desc="Text2term taxon mapping", unit="batch") as pbar:
+        with tqdm(desc="---Text2term taxon mapping", unit="batch") as pbar:
             df_cached = text2term.map_terms(
                 source_terms=taxon_names,
                 target_ontology="NCBITaxon",
@@ -122,10 +122,10 @@ class DiseaseServices:
     ) -> dict:
         """Map disease names using text2term."""
         if not text2term.cache_exists(ontology):
-            print(f"Caching {ontology} ontology...")
+            print(f">>> Caching {ontology} ontology...")
             text2term.cache_ontology(ontology_url=ontology_url, ontology_acronym=ontology)
 
-        with tqdm(desc=f"Text2term {ontology} mapping", unit="batch") as pbar:
+        with tqdm(desc=f"---Text2term {ontology} mapping", unit="batch") as pbar:
             core_disease_map_df = text2term.map_terms(
                 source_terms=list(set(disease_names)),
                 target_ontology=ontology,
@@ -173,7 +173,7 @@ class ProteinServices:
                                 return {uniprot_id: {"description": texts[0]["value"]}}
                 return None
         except Exception as e:
-            tqdm.write(f"Error fetching {uniprot_id}: {str(e)}")
+            tqdm.write(f"!! Error fetching {uniprot_id}: {str(e)}")
             return None
 
     @staticmethod
@@ -187,7 +187,7 @@ class ProteinServices:
 
         async with aiohttp.ClientSession(connector=connector) as session:
             with tqdm(
-                    desc="Fetching protein functions", total=len(uniprot_ids), unit="proteins"
+                    desc="---Fetching protein functions", total=len(uniprot_ids), unit="proteins"
             ) as pbar:
                 for i in range(0, len(uniprot_ids), batch_size):
                     batch = uniprot_ids[i: i + batch_size]
@@ -227,7 +227,7 @@ class GeneServices:
                     return {gene_id: {"description": summary}}
                 return None
         except Exception as e:
-            tqdm.write(f"Error fetching gene {gene_id}: {str(e)}")
+            tqdm.write(f"!! Error fetching gene {gene_id}: {str(e)}")
             return None
 
     @staticmethod
@@ -239,7 +239,7 @@ class GeneServices:
         connector = aiohttp.TCPConnector(limit=batch_size)
 
         async with aiohttp.ClientSession(connector=connector) as session:
-            with tqdm(desc="Fetching gene summaries", total=len(gene_ids), unit="genes") as pbar:
+            with tqdm(desc="---Fetching gene summaries...", total=len(gene_ids), unit="genes") as pbar:
                 for i in range(0, len(gene_ids), batch_size):
                     batch = gene_ids[i: i + batch_size]
                     tasks = [GeneServices.get_gene_summary(session, gid) for gid in batch]
@@ -285,7 +285,7 @@ class GOServices:
 
         go_chunks = list(chunks(go_ids, batch_size))
         async with aiohttp.ClientSession(timeout=timeout) as session:
-            with tqdm(desc="Fetching GO definitions", total=len(go_chunks), unit="batches") as pbar:
+            with tqdm(desc="---Fetching GO definitions", total=len(go_chunks), unit="batches") as pbar:
                 for group in go_chunks:
                     batch_results = await query(session, group)
                     results.update(batch_results)
@@ -333,7 +333,7 @@ class UMLSClient:
                     results = data["result"]["results"]
                     return f"UMLS:{results[0]['ui']}" if results else ""
             except Exception as e:
-                tqdm.write(f"Failed for {term}: {e}")
+                tqdm.write(f"!! Failed for {term}: {e}")
                 return None
 
     async def query_cuis(self, terms: List[str]) -> Dict[str, dict]:
@@ -343,7 +343,7 @@ class UMLSClient:
             if not self.tgt_url:
                 await self.get_tgt(session)
 
-            with tqdm(desc="UMLS CUI mapping", total=len(terms), unit="terms") as pbar:
+            with tqdm(desc="---UMLS CUI mapping", total=len(terms), unit="terms") as pbar:
                 tasks = [self.get_cui(session, term) for term in terms]
                 cuis = await asyncio.gather(*tasks)
 
@@ -365,7 +365,7 @@ class NCITServices:
         taxon_names = set(taxon_names)
         mapping_result = {}
 
-        with tqdm(desc="NCIT taxon descriptions", total=len(taxon_names), unit="names") as pbar:
+        with tqdm(desc="---NCIT taxon descriptions", total=len(taxon_names), unit="names") as pbar:
             for name in taxon_names:
                 params = {
                     "q": name,
@@ -401,7 +401,7 @@ class BiothingsServices:
         taxids = set(taxids)
         get_taxon = bt.get_client("taxon")
 
-        with tqdm(desc="Fetching taxon info", unit="batch") as pbar:
+        with tqdm(desc="---Fetching taxon info", unit="batch") as pbar:
             taxon_info = get_taxon.gettaxa(
                 taxids, fields=["scientific_name", "parent_taxid", "lineage", "rank"]
             )
@@ -431,7 +431,7 @@ class BiothingsServices:
         ids = set(ids)
         get_disease = bt.get_client("disease")
 
-        with tqdm(desc="Fetching disease info", unit="batch") as pbar:
+        with tqdm(desc="---Fetching disease info", unit="batch") as pbar:
             d_queried = get_disease.querymany(
                 ids,
                 scopes=[
@@ -501,7 +501,7 @@ class PathwayServices:
         zip_path = os.path.join("downloads", "smpdb_pathways.csv.zip")
         smpdb_csv = extract_file_from_zip(zip_path, "smpdb_pathways.csv")
 
-        with tqdm(desc="Loading SMPDB pathways", unit="file") as pbar:
+        with tqdm(desc="---Loading SMPDB pathways", unit="file") as pbar:
             smpdb_df = pd.read_csv(smpdb_csv, usecols=["SMPDB ID", "Name", "Description"])
             pbar.update(1)
 
@@ -535,7 +535,6 @@ class UberonService:
         """
         Query a single anatomical term against the UBERON ontology.
 
-        Args:
         :param session: Active aiohttp session
         :param term: Anatomical term to query
         :param url: API endpoint URL
@@ -577,9 +576,9 @@ class UberonService:
                         }
 
         except aiohttp.ClientError as e:
-            print(f"❗️ Error fetching term '{term}': {e}")
+            print(f"!! Error fetching term '{term}': {e}")
         except Exception as e:
-            print(f"❗️ Unexpected error for term '{term}': {e}")
+            print(f"!!! Unexpected error for term '{term}': {e}")
 
         return term, None
 
@@ -594,14 +593,12 @@ class UberonService:
         """
         Asynchronously query multiple anatomical terms against UBERON ontology.
 
-        Args:
-            terms: List of anatomical terms to query
-            match_type: Type of matching ('exact', 'partial', or 'fuzzy')
-            base_url: Base URL for the OLS API
-            ontology: Ontology to search
+        :param terms: List of anatomical terms to query
+        :param match_type: Type of matching ('exact', 'partial', or 'fuzzy')
+        :param base_url: Base URL for the OLS API
+        :param ontology: Ontology to search
 
-        Returns:
-            Dictionary mapping terms to their UBERON information
+        :return: Dictionary mapping terms to their UBERON information
         """
         if not terms:
             return {}
@@ -618,7 +615,7 @@ class UberonService:
                 for term in terms
             ]
 
-            results = await atqdm.gather(*tasks, desc="Querying UBERON IDs")
+            results = await atqdm.gather(*tasks, desc="---Querying UBERON IDs")
 
             return {term: info for term, info in results if info is not None}
 
@@ -629,20 +626,18 @@ class UberonService:
         """
         Synchronous wrapper for querying anatomical terms.
 
-        Args:
-            terms: List of anatomical terms to query
-            match_type: Type of matching ('exact', 'partial', or 'fuzzy')
-            base_url: Base URL for the OLS API
+        :param terms: List of anatomical terms to query
+        :param match_type: Type of matching ('exact', 'partial', or 'fuzzy')
+        :param base_url: Base URL for the OLS API
 
-        Returns:
-            Dictionary mapping terms to their UBERON information
+        :return:Dictionary mapping terms to their UBERON information
         """
         try:
             results = asyncio.run(
                 cls.query_terms_async(terms=terms, match_type=match_type, base_url=base_url)
             )
-            print(f"🎉 UBERON ID mapping completed! Found {len(results)} matches.")
+            print(f"[DONE] UBERON ID mapping completed! Found {len(results)} matches.")
             return results
         except Exception as e:
-            print(f"❗️ Error during UBERON ID mapping: {e}")
+            print(f"!! Error during UBERON ID mapping: {e}")
             return {}

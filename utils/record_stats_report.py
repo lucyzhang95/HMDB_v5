@@ -8,6 +8,7 @@ from statistics import mean, median
 from typing import Any, Dict, List
 
 
+# TODO: need to rewrite everything for comprehensive analysis
 class HMDBRecordStatsReporter:
     """Generates comprehensive statistics for HMDB parsed records."""
 

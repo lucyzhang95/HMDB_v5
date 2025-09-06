@@ -104,6 +104,10 @@ class RecordManager:
                 entity = clean_record[entity_key].copy()
                 if "xrefs" in entity and isinstance(entity["xrefs"], dict):
                     entity["xrefs"] = [v for k, v in entity["xrefs"].items() if v]
+                elif "xrefs" in entity and isinstance(entity["xrefs"], list):
+                    entity["xrefs"] = [v for v in entity["xrefs"] if v]
+                elif "xrefs" in entity and isinstance(entity["xrefs"], str):
+                    entity["xrefs"] = [entity["xrefs"]]
                 clean_record[entity_key] = entity
 
         return clean_record
@@ -391,7 +395,6 @@ class RecordManager:
             self,
             f,
             batch: list,
-            key: str,
             output_format: str,
             global_seen_keys: set,
             first_record_written: bool,
@@ -400,11 +403,11 @@ class RecordManager:
         if not batch:
             return 0
 
-        standardized_batch = [self._standardize_record(record) for record in batch]
-        deduped_batch = deduplicate_and_merge(standardized_batch)
+        deduped_batch = deduplicate_and_merge(batch)
+        standardized_batch = [self._standardize_record(record) for record in deduped_batch]
 
         new_records_no_dup = []
-        for record in deduped_batch:
+        for record in standardized_batch:
             record_fingerprint = _create_fingerprint(record)
             if record_fingerprint not in global_seen_keys:
                 global_seen_keys.add(record_fingerprint)

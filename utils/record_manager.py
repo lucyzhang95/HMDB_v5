@@ -594,10 +594,8 @@ def cache_hmdb_database(
             )
 
         logger.info("\n Next steps:")
-        logger.info("   Use generate_and_export_streamed() to create association records")
         logger.info(
-            "   Example: record_manager.generate_and_export_streamed('output.jsonl', 'jsonl')"
-        )
+            "   Use \npython hmdb_parser.py --export hmdb_v5_parsed_records.jsonl --format jsonl \nto export records")
 
         return {
             "success": True,

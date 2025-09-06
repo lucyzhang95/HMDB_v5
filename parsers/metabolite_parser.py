@@ -232,8 +232,7 @@ class HMDBMetaboliteParser(XMLParseHelper):
                             f"{subject_node['id'].split(':')[1]}"
                             f"_{association_node['predicate'].split(':')[1]}"
                             f"_{object_node['id'].split(':')[1]}"
-                            if object_node.get("id", f"uuid:{str(uuid.uuid4())}")
-                               and subject_node.get("id", f"uuid:{str(uuid.uuid4())}")
+                            if "id" in object_node and "id" in subject_node
                             else f"uuid:{str(uuid.uuid4())}"
                         )
 
@@ -303,8 +302,7 @@ class HMDBMetaboliteParser(XMLParseHelper):
                                 f"{subject_node['id'].split(':')[1]}"
                                 f"_{association_node['predicate'].split(':')[1]}"
                                 f"_{object_node['id'].split(':')[1]}"
-                                if object_node.get("id", f"uuid:{str(uuid.uuid4())}")
-                                   and subject_node.get("id", f"uuid:{str(uuid.uuid4())}")
+                                if "id" in object_node and "id" in subject_node
                                 else f"uuid:{str(uuid.uuid4())}"
                             )
 
@@ -393,8 +391,7 @@ class HMDBMetaboliteParser(XMLParseHelper):
                         f"{subject_node['id'].split(':')[1]}"
                         f"_{association_node['predicate'].split(':')[1]}"
                         f"_{object_node['id'].split(':')[1]}"
-                        if object_node.get("id", f"uuid:{str(uuid.uuid4())}")
-                           and subject_node.get("id", f"uuid:{str(uuid.uuid4())}")
+                        if "id" in object_node and "id" in subject_node
                         else f"uuid:{str(uuid.uuid4())}"
                     )
 
@@ -478,8 +475,7 @@ class HMDBMetaboliteParser(XMLParseHelper):
                         f"{subject_node['id'].split(':')[1]}"
                         f"_{association_node['predicate'].split(':')[1]}"
                         f"_{object_node['id'].split(':')[1]}"
-                        if object_node.get("id", f"uuid:{str(uuid.uuid4())}")
-                           and subject_node.get("id", f"uuid:{str(uuid.uuid4())}")
+                        if "id" in object_node and "id" in subject_node
                         else f"uuid:{str(uuid.uuid4())}"
                     )
 

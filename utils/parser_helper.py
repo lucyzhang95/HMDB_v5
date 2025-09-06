@@ -181,7 +181,7 @@ class IDHierarchy:
         id_hierarchy = [
             ("pubchem_compound_id", "PUBCHEM.COMPOUND"),
             ("inchikey", "INCHIKEY"),
-            ("smiles", None),
+            ("smiles", "smiles"),
             ("drugbank_id", "DRUGBANK"),
             ("chebi_id", "CHEBI"),
             ("chembl_id", "CHEMBL.COMPOUND"),
@@ -215,7 +215,7 @@ class IDHierarchy:
             if tag == "kegg_id":
                 prefix = classify_kegg(val)
             elif tag == "smiles":
-                prefix = ""
+                prefix = "smiles"
 
             curie = f"{prefix}:{val}"
 
@@ -227,7 +227,7 @@ class IDHierarchy:
             elif prefix == "METLIN":
                 key = "metlin"
             else:
-                key = prefix.lower().split(".")[0] if prefix else "smiles"
+                key = prefix.lower().split(".")[0] if "." in prefix else prefix.lower()
 
             if primary_id is None:
                 primary_id = curie

@@ -234,7 +234,7 @@ class ProteinMapper:
 
         # step 2/2: get gene mappings
         print("Mapping UniProt to EntrezGene...")
-        uniprot2entrez = ProteinServices.uniprot_id2entrezgene(uniprot_ids)
+        uniprot2entrez = ProteinMapper.uniprot_id2entrezgene(uniprot_ids)
         save_pickle(uniprot2entrez, "bt_uniprot2entrezgene.pkl")
 
         return {"protein_functions": protein_functions, "uniprot2entrez": uniprot2entrez}

@@ -50,7 +50,7 @@ class HMDBRecordStatsReporter:
         return self._group_records_by_association_category(records)
 
     def _group_records_by_association_category(self, records: List[Dict]) -> Dict[str, List[Dict]]:
-        """Group flat list of records by association.category."""
+        """Group a flat list of records by association.category."""
         grouped = defaultdict(list)
 
         for record in records:

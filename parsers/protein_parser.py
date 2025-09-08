@@ -196,7 +196,7 @@ class HMDBProteinParser(XMLParseHelper):
         pdb_elem = protein.find("hmdb:pdb_ids", self.namespace)
         pdbs = self.get_list(pdb_elem, "pdb_id") if pdb_elem is not None else []
         if pdbs:
-            xrefs["pdb"] = pdbs
+            xrefs["pdb"] = [f"PDB:{pdb}" for pdb in pdbs]
 
         # protein and gene properties
         prot_props = self.get_protein_properties(protein)

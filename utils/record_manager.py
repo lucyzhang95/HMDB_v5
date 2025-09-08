@@ -117,7 +117,7 @@ class RecordManager:
                     flattened_xrefs = []
                     for key, value in entity["xrefs"].items():
                         if isinstance(value, dict) and "id" in value:
-                            flattened_xrefs.append(value.get("id").strip())
+                            flattened_xrefs.append(value.get("id"))
                         elif isinstance(value, list):
                             flattened_xrefs.extend([_id.strip() for _id in value if _id])
                         elif isinstance(value, str):

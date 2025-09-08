@@ -152,7 +152,12 @@ class HMDBProteinParser(XMLParseHelper):
         return {}
 
     def lookup_uniprot_data(self, uniprot_id: str) -> Tuple[str, str]:
-        """Lookup UniProt description and Entrez gene mapping."""
+        """
+        Lookup UniProt description and Entrez gene mapping.
+        entrez uniprot2entrezgene example:
+        ----------------------------------
+        {'O60494': {'gene_id': 'NCBIGene:8029', 'mapping_tool': 'bt'},...}
+        """
         description = self.protein_functions.get(uniprot_id, {}).get("description")
         entrez_map = self.uniprot2entrezgene.get(uniprot_id, {})
         entrez_curie = entrez_map.get("gene_id")
@@ -196,7 +201,7 @@ class HMDBProteinParser(XMLParseHelper):
         pdb_elem = protein.find("hmdb:pdb_ids", self.namespace)
         pdbs = self.get_list(pdb_elem, "pdb_id") if pdb_elem is not None else []
         if pdbs:
-            xrefs["pdb"] = [f"PDB:{pdb}" for pdb in pdbs]
+            xrefs["pdb"] = [f"PDB:{pdb.strip()}" for pdb in pdbs]
 
         # protein and gene properties
         prot_props = self.get_protein_properties(protein)

@@ -96,18 +96,38 @@ class RecordManager:
         return dict(items)
 
     def _standardize_record(self, record: Dict[str, Any]) -> Dict[str, Any]:
-        """Standardizes a record by cleaning up empty values and formatting xrefs into a list."""
+        """
+        Standardizes a record by cleaning up empty values and formatting xrefs into a list.
+
+        Protein parsers xrefs example:
+        --------------------------------
+        "xrefs": {
+            "pfam": {"id": "PFAM:PF00002", "name": "7tm_2"},
+            "pdb": ["PDB:3c59", "PDB:3c5t", "PDB:3iol", ...],
+            "uniprot": "UniProtKB:P43220",
+            "hmdbp": "HMDBP:HMDBP14647"
+        }
+        """
         clean_record = record.copy()
 
         for entity_key in ["subject", "object"]:
-            if entity_key in clean_record and isinstance(clean_record[entity_key], dict):
+            if entity_key in clean_record:
                 entity = clean_record[entity_key].copy()
                 if "xrefs" in entity and isinstance(entity["xrefs"], dict):
-                    entity["xrefs"] = [v for k, v in entity["xrefs"].items() if v]
+                    flattened_xrefs = []
+                    for key, value in entity["xrefs"].items():
+                        if isinstance(value, dict) and "id" in value:
+                            flattened_xrefs.append(value.get("id").strip())
+                        elif isinstance(value, list):
+                            flattened_xrefs.extend([_id.strip() for _id in value if _id])
+                        elif isinstance(value, str):
+                            flattened_xrefs.append(value)
+                    entity["xrefs"] = flattened_xrefs
                 elif "xrefs" in entity and isinstance(entity["xrefs"], list):
                     entity["xrefs"] = [v for v in entity["xrefs"] if v]
                 elif "xrefs" in entity and isinstance(entity["xrefs"], str):
                     entity["xrefs"] = [entity["xrefs"]]
+
                 clean_record[entity_key] = entity
 
         return clean_record

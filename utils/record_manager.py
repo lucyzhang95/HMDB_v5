@@ -102,7 +102,7 @@ class RecordManager:
         Protein parsers xrefs example:
         --------------------------------
         "xrefs": {
-            "pfam": {"id": "PFAM:PF00002", "name": "7tm_2"},
+            "pfam": [{"id": "PFAM:PF00002", "name": "7tm_2"},...]
             "pdb": ["PDB:3c59", "PDB:3c5t", "PDB:3iol", ...],
             "uniprot": "UniProtKB:P43220",
             "hmdbp": "HMDBP:HMDBP14647"
@@ -116,15 +116,29 @@ class RecordManager:
                 if "xrefs" in entity and isinstance(entity["xrefs"], dict):
                     flattened_xrefs = []
                     for key, value in entity["xrefs"].items():
-                        if isinstance(value, dict) and "id" in value:
-                            flattened_xrefs.append(value.get("id"))
-                        elif isinstance(value, list):
-                            flattened_xrefs.extend([_id.strip() for _id in value if _id])
+                        if isinstance(value, list):
+                            for v_id in value:
+                                if v_id:
+                                    if isinstance(v_id, str):
+                                        flattened_xrefs.append(v_id.strip())
+                                    elif isinstance(v_id, dict) and "id" in v_id:
+                                        flattened_xrefs.append(v_id.get("id"))
+                                    else:
+                                        flattened_xrefs.append(str(v_id))
                         elif isinstance(value, str):
                             flattened_xrefs.append(value)
                     entity["xrefs"] = flattened_xrefs
                 elif "xrefs" in entity and isinstance(entity["xrefs"], list):
-                    entity["xrefs"] = [v for v in entity["xrefs"] if v]
+                    cleaned_xrefs = []
+                    for v in entity["xrefs"]:
+                        if v:
+                            if isinstance(v, str):
+                                cleaned_xrefs.append(v.strip())
+                            elif isinstance(v, dict) and "id" in v:
+                                cleaned_xrefs.append(v.get("id"))
+                            else:
+                                cleaned_xrefs.append(str(v))
+                    entity["xrefs"] = cleaned_xrefs
                 elif "xrefs" in entity and isinstance(entity["xrefs"], str):
                     entity["xrefs"] = [entity["xrefs"]]
 

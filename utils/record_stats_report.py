@@ -1,795 +1,398 @@
+import glob
 import json
 import os
 import random
 from collections import Counter, defaultdict
 from datetime import datetime
-from glob import glob
-from statistics import mean, median
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional, Set
 
 
-# TODO: need to rewrite everything for comprehensive analysis
 class HMDBRecordStatsReporter:
     """Generates comprehensive statistics for HMDB parsed records."""
 
-    def __init__(self, report_dir="../reports"):
-        self.report_dir = report_dir
+    def __init__(self):
+        self.report_dir = os.path.join("..", "reports")
         os.makedirs(self.report_dir, exist_ok=True)
         print("HMDBRecordStatsReporter initialized.")
 
-    def _load_data(self, filepath: str) -> Dict[str, List[Dict]]:
-        """
-        Load data from JSONL format and group by association.category.
+        self.all_subject_properties = set()
+        self.all_object_properties = set()
+        self.all_association_properties = set()
 
-        :return: Dictionary with relationship types as keys and lists of records as values
-        """
-        file_path = os.path.join("..", "records", filepath)
+    def _find_latest_jsonl_file(self, base_path: str = "hmdb_v5_parsed_records") -> Optional[str]:
+        """Find the most recent timestamped JSONL file."""
+        pattern = os.path.join("..", "records", f"{base_path}_*.jsonl")
+        files = glob.glob(pattern)
 
-        if not os.path.exists(file_path):
-            print(f"!!! File not found: {file_path}")
-            return {}
+        if not files:
+            print(f"No JSONL files found matching pattern: {pattern}")
+            return None
 
-        try:
-            return self._load_jsonl_data(file_path)
-        except Exception as e:
-            print(f"!!!Error loading {file_path}: {e}")
-            return {}
+        latest_file = max(files, key=os.path.getmtime)
+        print(f"Found latest JSONL file: {latest_file}")
+        return latest_file
 
-    def _load_jsonl_data(self, file_path: str) -> Dict[str, List[Dict]]:
-        """Load JSONL record data and group by association.category."""
-        records = []
+    def _load_jsonl_records(self, file_path: str):
+        """Generator to load records one by one from JSONL file."""
+        print(f"Loading records from: {file_path}")
+
+        record_count = 0
         with open(file_path, "r", encoding="utf-8") as f:
             for line_num, line in enumerate(f, 1):
                 if line.strip():
                     try:
                         record = json.loads(line)
-                        records.append(record)
+                        record_count += 1
+                        yield record
                     except json.JSONDecodeError as e:
-                        print(f"!!! Error parsing line {line_num}: {e}")
+                        print(f"Error parsing line {line_num}: {e}")
                         continue
 
-        print(f"-> Loaded {len(records)} records from JSONL file")
-        return self._group_records_by_association_category(records)
+        print(f"Total records processed: {record_count}")
 
-    def _group_records_by_association_category(self, records: List[Dict]) -> Dict[str, List[Dict]]:
-        """Group a flat list of records by association.category."""
-        grouped = defaultdict(list)
+    def _extract_all_properties(self, data: Dict[str, Any], prefix: str = "") -> Set[str]:
+        """Recursively extract all property paths from a dictionary."""
+        properties = set()
+
+        if not isinstance(data, dict):
+            return properties
+
+        for key, value in data.items():
+            current_path = f"{prefix}.{key}" if prefix else key
+            properties.add(current_path)
+
+            if isinstance(value, dict):
+                nested_props = self._extract_all_properties(value, current_path)
+                properties.update(nested_props)
+            elif isinstance(value, list) and value and isinstance(value[0], dict):
+                nested_props = self._extract_all_properties(value[0], current_path)
+                properties.update(nested_props)
+
+        return properties
+
+    def _count_property_stats(
+            self, records: List[Dict[str, Any]], property_path: str
+    ) -> Dict[str, Any]:
+        """Count statistics for a specific property path."""
+        values = []
+        non_null_count = 0
 
         for record in records:
-            category = record.get("association", {}).get("category", "unknown")
-            grouped[category].append(record)
-
-        print(f"\nGrouped records into {len(grouped)} categories:")
-        for category, record_list in grouped.items():
-            print(f"  {category}: {len(record_list)} records")
-
-        return dict(grouped)
-
-    def _safe_get_numeric_stats(self, values: List[Any]) -> Dict[str, Any]:
-        """Safely calculate numeric statistics for a list of values."""
-        numeric_values = []
-        for v in values:
-            if v is not None:
-                try:
-                    if isinstance(v, dict):
-                        if "average_molecular_weight" in v:
-                            numeric_values.append(float(v["average_molecular_weight"]))
-                        elif "monoisotopic_molecular_weight" in v:
-                            numeric_values.append(float(v["monoisotopic_molecular_weight"]))
-                    else:
-                        numeric_values.append(float(v))
-                except (ValueError, TypeError):
-                    continue
-
-        if not numeric_values:
-            return {"count": 0, "min": None, "max": None, "mean": None, "median": None}
-
-        return {
-            "count": len(numeric_values),
-            "min": min(numeric_values),
-            "max": max(numeric_values),
-            "mean": round(mean(numeric_values), 3),
-            "median": round(median(numeric_values), 3),
-        }
-
-    def _extract_curie_prefix(self, curie: str) -> str:
-        """Extract prefix from CURIE format ID."""
-        if isinstance(curie, str) and ":" in curie:
-            return curie.split(":", 1)[0]
-        return "unknown"
-
-    def _count_xrefs(self, node: Dict[str, Any]) -> Dict[str, int]:
-        """Count xref types in a node."""
-        xrefs = node.get("xrefs", [])
-        if not xrefs:
-            return {}
-
-        xref_counts = {}
-        for curie in xrefs:
-            if curie:
-                prefix = self._extract_curie_prefix(curie)
-                xref_counts[prefix] = xref_counts.get(prefix, 0) + 1
-
-        return xref_counts
-
-    def _collect_unique_xrefs(self, node: Dict[str, Any]) -> Dict[str, set]:
-        """Collect unique xref values by type from a node."""
-        xrefs = node.get("xrefs", [])
-        if not xrefs:
-            return {}
-
-        unique_xrefs = {}
-        for curie in xrefs:
-            if curie:
-                prefix = self._extract_curie_prefix(curie)
-                if prefix not in unique_xrefs:
-                    unique_xrefs[prefix] = set()
-
-                if isinstance(curie, str) and ":" in curie:
-                    value = curie.split(":", 1)[1]
-                    unique_xrefs[prefix].add(value)
+            value = self._get_nested_value(record, property_path)
+            if value is not None:
+                non_null_count += 1
+                if isinstance(value, list):
+                    values.extend([str(v) for v in value if v is not None])
                 else:
-                    unique_xrefs[prefix].add(str(curie))
+                    values.append(str(value))
 
-        return unique_xrefs
-
-    def _analyze_molecular_weight(self, nodes: List[Dict[str, Any]]) -> Dict[str, Any]:
-        """Analyze molecular weight data from nodes."""
-        mw_data = {"average": [], "monoisotopic": []}
-
-        for node in nodes:
-            mw = node.get("molecular_weight", {})
-            if isinstance(mw, dict):
-                if "average_molecular_weight" in mw and mw["average_molecular_weight"] is not None:
-                    mw_data["average"].append(mw["average_molecular_weight"])
-                if (
-                        "monoisotopic_molecular_weight" in mw
-                        and mw["monoisotopic_molecular_weight"] is not None
-                ):
-                    mw_data["monoisotopic"].append(mw["monoisotopic_molecular_weight"])
+        unique_values = set(values)
+        total_records = len(records)
 
         return {
-            "average": self._safe_get_numeric_stats(mw_data["average"]),
-            "monoisotopic": self._safe_get_numeric_stats(mw_data["monoisotopic"]),
+            "raw_count": len(values),
+            "record_count": non_null_count,
+            "unique_count": len(unique_values),
+            "percentage": round((non_null_count / total_records) * 100, 2)
+            if total_records > 0
+            else 0,
+            "sample_values": list(unique_values)[:10],  # First 10 unique values as sample
         }
 
-    def _count_publication_pmids(self, records: List[Dict[str, Any]]) -> Dict[str, Any]:
-        """Count publication records and unique PMIDs."""
-        records_with_pub = 0
-        all_pmids = []
+    def _get_nested_value(self, data: Dict[str, Any], path: str) -> Any:
+        """Get value from nested dictionary using dot notation path."""
+        keys = path.split(".")
+        current = data
 
-        for record in records:
-            pub = record.get("association", {}).get("publication", {})
-            if pub and pub.get("pmid"):
-                records_with_pub += 1
-                pmid = pub["pmid"]
-                if isinstance(pmid, list):
-                    all_pmids.extend(pmid)
-                else:
-                    all_pmids.append(pmid)
+        for key in keys:
+            if isinstance(current, dict) and key in current:
+                current = current[key]
+            else:
+                return None
 
-        unique_pmids = len(set(all_pmids))
+        return current
 
-        return {
-            "records_with_publication": records_with_pub,
-            "unique_pmid_count": unique_pmids,
-            "total_pmid_count": len(all_pmids),
-        }
+    def _analyze_duplicates(self, records: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """Analyze duplicate records by _id and export samples."""
+        print("Analyzing duplicate records...")
 
-    def _count_unique_items_in_list_field(
-            self, records: List[Dict[str, Any]], field_path: List[str]
-    ) -> Dict[str, int]:
-        """Count records with field and unique items in list fields."""
-        records_with_field = 0
-        all_items = []
-
-        for record in records:
-            current = record
-            for path_part in field_path:
-                current = current.get(path_part, {})
-                if not current:
-                    break
-
-            if current and isinstance(current, list) and len(current) > 0:
-                records_with_field += 1
-                for item in current:
-                    if isinstance(item, dict):
-                        if "id" in item:
-                            all_items.append(item["id"])
-                        elif "original_name" in item:
-                            all_items.append(item["original_name"])
-                        else:
-                            all_items.append(str(item))
-                    else:
-                        all_items.append(item)
-
-        return {"record_count": records_with_field, "unique_count": len(set(all_items))}
-
-    def export_duplicate_records(self, filepath: str = "hmdb_output.jsonl") -> Dict[str, Any]:
-        """Export complete duplicate records to JSON file for investigation."""
-        print("\nIdentifying and exporting duplicate records...")
-
-        combined_data = self._load_data(filepath)
-        if not combined_data:
-            print("!!! No data loaded from file.")
-            return {}
-
-        all_records_with_type = []
-        for category, records in combined_data.items():
-            for record in records:
-                record_copy = record.copy()
-                record_copy["_relationship_type"] = category
-                all_records_with_type.append(record_copy)
-
-        print(f"-> Total records collected: {len(all_records_with_type)}")
-
-        # use _id for duplication check
         id_to_records = defaultdict(list)
-        for record in all_records_with_type:
+        for record in records:
             record_id = record.get("_id")
             if record_id:
                 id_to_records[record_id].append(record)
 
-        duplicate_records = {}
-        duplicate_summary = {}
+        duplicate_groups = {}
+        duplicate_count_distribution = Counter()
 
-        for record_id, records in id_to_records.items():
-            if len(records) > 1:
-                duplicate_records[record_id] = {
-                    "count": len(records),
-                    "relationship_types": list(
-                        set(r.get("_relationship_type", "unknown") for r in records)
-                    ),
-                    "records": records,
-                }
-                duplicate_summary[record_id] = {
-                    "count": len(records),
-                    "relationship_types": duplicate_records[record_id]["relationship_types"],
-                }
+        for record_id, record_list in id_to_records.items():
+            if len(record_list) > 1:
+                duplicate_groups[record_id] = record_list
+                duplicate_count_distribution[len(record_list)] += 1
 
-        print(f"-> Found {len(duplicate_records)} duplicate IDs")
+        sampled_duplicates = {}
+        for count, _ in duplicate_count_distribution.items():
+            ids_with_count = [rid for rid, rlist in duplicate_groups.items() if len(rlist) == count]
 
-        duplicate_stats = self._generate_duplicate_statistics(duplicate_records)
+            sample_size = min(3, len(ids_with_count))
+            sampled_ids = random.sample(ids_with_count, sample_size)
 
-        # random sample 3 duplicated records per count
-        records_by_count = defaultdict(list)
-        for record_id, data in duplicate_records.items():
-            count = data["count"]
-            records_by_count[count].append((record_id, data))
+            sampled_duplicates[count] = {}
+            for record_id in sampled_ids:
+                sampled_duplicates[count][record_id] = duplicate_groups[record_id]
 
-        sampled_by_count = {}
-        for count, record_list in records_by_count.items():
-            sample_size = min(3, len(record_list))
-            sampled_records = random.sample(record_list, sample_size)
-            sampled_by_count[count] = [
-                {
-                    "record_id": record_id,
-                    "relationship_types": data["relationship_types"],
-                    "sample_records": random.sample(data["records"], min(3, len(data["records"]))),
-                }
-                for record_id, data in sampled_records
-            ]
+        self._export_duplicate_records(duplicate_groups, sampled_duplicates)
 
-        export_data = {
+        duplicate_stats = {
+            "total_duplicate_groups": len(duplicate_groups),
+            "total_duplicate_records": sum(len(rlist) for rlist in duplicate_groups.values()),
+            "duplication_count_distribution": dict(duplicate_count_distribution),
+            "max_duplicates_for_single_id": max(duplicate_count_distribution.keys())
+            if duplicate_count_distribution
+            else 0,
+            "sampled_duplicates_by_count": {
+                count: list(group_data.keys()) for count, group_data in sampled_duplicates.items()
+            },
+        }
+
+        return duplicate_stats
+
+    def _export_duplicate_records(
+            self,
+            all_duplicates: Dict[str, List[Dict]],
+            sampled_duplicates: Dict[int, Dict[str, List[Dict]]],
+    ) -> str:
+        """Export duplicate records to JSON files."""
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+
+        sampled_export_path = os.path.join(
+            self.report_dir, f"sampled_duplicate_records_{timestamp}.json"
+        )
+        sampled_export_data = {
             "metadata": {
                 "export_date": datetime.now().isoformat(),
-                "total_duplicate_ids": len(duplicate_records),
-                "total_duplicate_records": sum(
-                    data["count"] for data in duplicate_records.values()
-                ),
-                "source_file": filepath,
-                "relationship_types_analyzed": list(combined_data.keys()),
+                "description": "Randomly sampled duplicate records (max 3 per duplication count)",
+                "total_sampled_groups": sum(len(groups) for groups in sampled_duplicates.values()),
             },
-            "duplicate_summary": duplicate_summary,
-            "duplicate_records": duplicate_records,
-            "statistics": duplicate_stats,
+            "duplicates_by_count": sampled_duplicates,
         }
 
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        export_path = os.path.join(self.report_dir, f"{timestamp}_duplicate_records.json")
+        with open(sampled_export_path, "w", encoding="utf-8") as f:
+            json.dump(sampled_export_data, f, indent=2, sort_keys=True, default=str)
 
-        with open(export_path, "w") as f:
-            json.dump(export_data, f, indent=2, sort_keys=True, default=str)
-
-        with open(
-                os.path.join(self.report_dir, f"{timestamp}_random_sampled_duplicate_records.json"), "w"
-        ) as f:
-            json.dump(sampled_by_count, f, indent=2, sort_keys=True, default=str)
-
-        print(f"Duplicate records exported to: {export_path}")
-        print(f"Exported {len(duplicate_records)} duplicate record groups")
-
-        return export_data
-
-    def _generate_duplicate_statistics(self, duplicate_records: Dict[str, Any]) -> Dict[str, Any]:
-        """Generate statistics about the duplicate records."""
-        if not duplicate_records:
-            return {}
-
-        count_distribution = Counter()
-        relationship_type_pairs = Counter()
-        cross_relationship_duplicates = 0
-
-        for _, data in duplicate_records.items():
-            count = data["count"]
-            rel_types = data["relationship_types"]
-
-            count_distribution[count] += 1
-
-            if len(rel_types) > 1:
-                cross_relationship_duplicates += 1
-                rel_types_sorted = tuple(sorted(rel_types))
-                relationship_type_pairs[rel_types_sorted] += 1
-
-        most_common_counts = dict(count_distribution.most_common(10))
-        most_common_rel_pairs = dict(relationship_type_pairs.most_common(10))
-
-        return {
-            "count_distribution": most_common_counts,
-            "cross_relationship_duplicates": cross_relationship_duplicates,
-            "relationship_type_pairs": most_common_rel_pairs,
-            "max_duplicates_for_single_id": max(count_distribution.keys())
-            if count_distribution
-            else 0,
-            "total_duplicate_groups": len(duplicate_records),
-        }
-
-    def generate_record_stats(self, filepath: str = "hmdb_output.jsonl") -> Dict[str, Any]:
-        """Generate comprehensive statistics for HMDB records."""
-        print("\nGenerating HMDB record statistics...")
-
-        combined_data = self._load_data(filepath)
-        if not combined_data:
-            return {}
-
-        stats = {
-            "data_source": "HMDB",
-            "total_relationships": len(combined_data),
-            "relationship_types": list(combined_data.keys()),
+        all_export_path = os.path.join(self.report_dir, f"{timestamp}_all_duplicate_records.json")
+        all_export_data = {
             "metadata": {
-                "report_version": "1.0",
-                "analysis_date": datetime.now().isoformat(),
-                "source_file": filepath,
+                "export_date": datetime.now().isoformat(),
+                "description": "All duplicate records found",
+                "total_duplicate_groups": len(all_duplicates),
+                "total_duplicate_records": sum(len(rlist) for rlist in all_duplicates.values()),
             },
+            "duplicate_records": all_duplicates,
         }
 
-        total_records = 0
-        relationship_counts = {}
-        for category, records in combined_data.items():
-            count = len(records)
-            relationship_counts[category] = count
-            total_records += count
+        with open(all_export_path, "w", encoding="utf-8") as f:
+            json.dump(all_export_data, f, indent=2, sort_keys=True, default=str)
 
-        stats["metadata"]["total_records_analyzed"] = total_records
-        stats["metadata"]["total_records_analyzed_by_relationship"] = relationship_counts
+        print(f"Sampled duplicate records exported to: {sampled_export_path}")
+        print(f"All duplicate records exported to: {all_export_path}")
 
-        relationship_stats = {}
-        for category, records in combined_data.items():
-            if records:
-                rel_stats = self._analyze_relationship(category, records)
-                relationship_stats[category] = rel_stats
+        return sampled_export_path
 
-        stats["relationship_analysis"] = relationship_stats
+    def _analyze_overall_properties(self, records: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """Analyze the specific overall properties requested."""
+        print("Analyzing overall properties...")
 
-        all_records = []
-        for records in combined_data.values():
-            all_records.extend(records)
+        stats = {}
 
-        stats.update(self._calculate_overall_stats(all_records))
+        # _id analysis
+        all_ids = [record.get("_id") for record in records if record.get("_id")]
+        stats["_id"] = {
+            "raw_count": len(all_ids),
+            "unique_count": len(set(all_ids)),
+            "duplicate_count": len(all_ids) - len(set(all_ids)),
+        }
 
-        print(f"-> Generated comprehensive statistics for {total_records} total records.")
+        # subject.id analysis
+        subject_ids = [
+            record.get("subject", {}).get("id")
+            for record in records
+            if record.get("subject", {}).get("id")
+        ]
+        stats["subject_id"] = {"raw_count": len(subject_ids), "unique_count": len(set(subject_ids))}
+
+        # object.id analysis
+        object_ids = [
+            record.get("object", {}).get("id")
+            for record in records
+            if record.get("object", {}).get("id")
+        ]
+        stats["object_id"] = {"raw_count": len(object_ids), "unique_count": len(set(object_ids))}
+
+        # subject.description analysis
+        stats["subject_description"] = self._count_property_stats(records, "subject.description")
+
+        # object.description analysis
+        stats["object_description"] = self._count_property_stats(records, "object.description")
+
+        # subject.xrefs analysis
+        stats["subject_xrefs"] = self._count_property_stats(records, "subject.xrefs")
+
+        # object.xrefs analysis
+        stats["object_xrefs"] = self._count_property_stats(records, "object.xrefs")
+
+        # association.publication analysis
+        stats["association_publication"] = self._count_property_stats(
+            records, "association.publication"
+        )
+
         return stats
 
-    def _calculate_overall_stats(self, all_records: List[Dict]) -> Dict[str, Any]:
-        """Calculate overall statistics across all relationships."""
-
-        evidence_counter = Counter()
-        for record in all_records:
-            evidence_type = record.get("association", {}).get("evidence_type")
-            if evidence_type:
-                if isinstance(evidence_type, list):
-                    evidence_counter.update(evidence_type)
-                else:
-                    evidence_counter[evidence_type] += 1
-
-        # ID duplication analysis
-        all_record_ids = [record.get("_id") for record in all_records]
-        id_counter = Counter(all_record_ids)
-        duplicates = {id_val: count for id_val, count in id_counter.items() if count > 1}
-
-        count_groups = defaultdict(list)
-        for id_val, count in id_counter.items():
-            if count > 1:
-                count_groups[count].append(id_val)
-
-        sampled_ids_by_count = {}
-        for count, id_list in count_groups.items():
-            sample_size = min(3, len(id_list))
-            sampled_ids_by_count[count] = random.sample(id_list, sample_size)
-
-        # overall CURIE analysis
-        overall_subject_curies = []
-        overall_object_curies = []
-        for record in all_records:
-            subject_id = record.get("subject", {}).get("id", "")
-            object_id = record.get("object", {}).get("id", "")
-            if subject_id:
-                overall_subject_curies.append(self._extract_curie_prefix(subject_id))
-            if object_id:
-                overall_object_curies.append(self._extract_curie_prefix(object_id))
-
-        # overall description analysis
-        subject_desc_count = sum(
-            1 for record in all_records if record.get("subject", {}).get("description")
-        )
-        object_desc_count = sum(
-            1 for record in all_records if record.get("object", {}).get("description")
-        )
-
-        # overall xrefs analysis
-        overall_subject_xrefs = defaultdict(int)
-        overall_object_xrefs = defaultdict(int)
-        overall_subject_unique_xrefs = defaultdict(set)
-        overall_object_unique_xrefs = defaultdict(set)
-
-        for record in all_records:
-            subject_xrefs = self._count_xrefs(record.get("subject", {}))
-            object_xrefs = self._count_xrefs(record.get("object", {}))
-            subject_unique_xrefs = self._collect_unique_xrefs(record.get("subject", {}))
-            object_unique_xrefs = self._collect_unique_xrefs(record.get("object", {}))
-
-            for xref_type, count in subject_xrefs.items():
-                overall_subject_xrefs[xref_type] += count
-            for xref_type, count in object_xrefs.items():
-                overall_object_xrefs[xref_type] += count
-
-            for xref_type, unique_values in subject_unique_xrefs.items():
-                overall_subject_unique_xrefs[xref_type].update(unique_values)
-            for xref_type, unique_values in object_unique_xrefs.items():
-                overall_object_unique_xrefs[xref_type].update(unique_values)
-
-        # overall publication analysis
-        overall_pub_stats = self._count_publication_pmids(all_records)
-
-        return {
-            "overall_evidence_types": dict(evidence_counter),
-            "overall_id_analysis": {
-                "total_ids": len(all_record_ids),
-                "unique_ids": len(id_counter),
-                "duplicate_count": len(duplicates),
-                "duplicates": sampled_ids_by_count,
-                "duplicates_distribution": dict(Counter(k for k in id_counter.values() if k > 1)),
-            },
-            "overall_subject_curie_stats": dict(Counter(overall_subject_curies)),
-            "overall_unique_subject_curie_count": len(set(overall_subject_curies)),
-            "overall_object_curie_stats": dict(Counter(overall_object_curies)),
-            "overall_unique_object_curie_count": len(set(overall_object_curies)),
-            "overall_description_stats": {
-                "subject_descriptions": subject_desc_count,
-                "subject_description_percentage": round(
-                    (subject_desc_count / len(all_records)) * 100, 2
-                ),
-                "object_descriptions": object_desc_count,
-                "object_description_percentage": round(
-                    (object_desc_count / len(all_records)) * 100, 2
-                ),
-            },
-            "overall_xref_stats": {
-                "subject_xrefs": dict(overall_subject_xrefs),
-                "object_xrefs": dict(overall_object_xrefs),
-                "subject_unique_xrefs": {
-                    k: len(v) for k, v in overall_subject_unique_xrefs.items()
-                },
-                "object_unique_xrefs": {k: len(v) for k, v in overall_object_unique_xrefs.items()},
-            },
-            "overall_publication_stats": overall_pub_stats,
-        }
-
-    def _analyze_relationship(self, category: str, records: List[Dict[str, Any]]) -> Dict[str, Any]:
-        """Analyze statistics for a specific relationship category."""
-        print(f"\n>>> Analyzing {category} relationship ({len(records)} records)...")
-
-        rel_stats = {
-            "record_count": len(records),
-            "evidence_types": {},
-            "subject_curie_stats": {},
-            "object_curie_stats": {},
-            "subject_description_count": 0,
-            "object_description_count": 0,
-            "subject_xref_stats": defaultdict(int),
-            "object_xref_stats": defaultdict(int),
-            "subject_unique_xref_stats": defaultdict(set),
-            "object_unique_xref_stats": defaultdict(set),
-            "publication_stats": {},
-        }
-
-        evidence_counter = Counter()
-        subject_curie_counter = Counter()
-        object_curie_counter = Counter()
-
-        for record in records:
-            # evidence types
-            evidence_type = record.get("association", {}).get("evidence_type")
-            if evidence_type:
-                if isinstance(evidence_type, list):
-                    evidence_counter.update(evidence_type)
-                else:
-                    evidence_counter[evidence_type] += 1
-
-            # curie prefixes
-            subject_id = record.get("subject", {}).get("id", "")
-            object_id = record.get("object", {}).get("id", "")
-
-            if subject_id:
-                subject_curie_counter[self._extract_curie_prefix(subject_id)] += 1
-            if object_id:
-                object_curie_counter[self._extract_curie_prefix(object_id)] += 1
-
-            # descriptions
-            if record.get("subject", {}).get("description"):
-                rel_stats["subject_description_count"] += 1
-            if record.get("object", {}).get("description"):
-                rel_stats["object_description_count"] += 1
-
-            # xrefs
-            subject_xrefs = self._count_xrefs(record.get("subject", {}))
-            object_xrefs = self._count_xrefs(record.get("object", {}))
-            subject_unique_xrefs = self._collect_unique_xrefs(record.get("subject", {}))
-            object_unique_xrefs = self._collect_unique_xrefs(record.get("object", {}))
-
-            for xref_type, count in subject_xrefs.items():
-                rel_stats["subject_xref_stats"][xref_type] += count
-            for xref_type, count in object_xrefs.items():
-                rel_stats["object_xref_stats"][xref_type] += count
-
-            for xref_type, unique_values in subject_unique_xrefs.items():
-                rel_stats["subject_unique_xref_stats"][xref_type].update(unique_values)
-            for xref_type, unique_values in object_unique_xrefs.items():
-                rel_stats["object_unique_xref_stats"][xref_type].update(unique_values)
-
-        rel_stats["evidence_types"] = dict(evidence_counter)
-        rel_stats["subject_curie_stats"] = dict(subject_curie_counter)
-        rel_stats["object_curie_stats"] = dict(object_curie_counter)
-        rel_stats["subject_xref_stats"] = dict(rel_stats["subject_xref_stats"])
-        rel_stats["object_xref_stats"] = dict(rel_stats["object_xref_stats"])
-        rel_stats["subject_unique_xref_stats"] = {
-            k: len(v) for k, v in rel_stats["subject_unique_xref_stats"].items()
-        }
-        rel_stats["object_unique_xref_stats"] = {
-            k: len(v) for k, v in rel_stats["object_unique_xref_stats"].items()
-        }
-
-        # publication
-        rel_stats["publication_stats"] = self._count_publication_pmids(records)
-
-        # relationship-specific analysis
-        if category == "microbe-metabolite":
-            rel_stats.update(self._analyze_microbe_metabolite_specific(records))
-        elif category == "metabolite-disease":
-            rel_stats.update(self._analyze_metabolite_disease_specific(records))
-        elif category == "metabolite-protein":
-            rel_stats.update(self._analyze_metabolite_protein_specific(records))
-        elif category == "protein-pathway":
-            rel_stats.update(self._analyze_protein_pathway_specific(records))
-        elif category == "protein-biological_process":
-            rel_stats.update(self._analyze_protein_biological_process_specific(records))
-
-        return rel_stats
-
-    def _analyze_microbe_metabolite_specific(self, records: List[Dict[str, Any]]) -> Dict[str, Any]:
-        """Analyze microbe-metabolite specific statistics."""
-        organism_types = []
-        ranks = []
-        object_nodes = []
-        logp_values = []
-        melting_point_count = 0
-
-        for record in records:
-            subject = record.get("subject", {})
-            object_node = record.get("object", {})
-            object_nodes.append(object_node)
-
-            # organism type and rank
-            organism_type = subject.get("organism_type")
-            if organism_type:
-                organism_types.append(organism_type)
-
-            rank = subject.get("rank")
-            if rank:
-                ranks.append(rank)
-
-            # object properties
-            logp = object_node.get("logp")
-            if logp is not None:
-                logp_values.append(logp)
-
-            if object_node.get("melting_point"):
-                melting_point_count += 1
-
-        return {
-            "organism_types": dict(Counter(organism_types)),
-            "ranks": dict(Counter(ranks)),
-            "object_molecular_weight_stats": self._analyze_molecular_weight(object_nodes),
-            "object_logp_stats": self._safe_get_numeric_stats(logp_values),
-            "melting_point_count": melting_point_count,
-            "cellular_component_stats": self._count_unique_items_in_list_field(
-                records, ["object", "cellular_component"]
-            ),
-            "biosample_stats": self._count_unique_items_in_list_field(
-                records, ["object", "biosample"]
-            ),
-            "anatomical_entity_stats": self._count_unique_items_in_list_field(
-                records, ["object", "anatomical_entity"]
-            ),
-        }
-
-    def _analyze_metabolite_disease_specific(self, records: List[Dict[str, Any]]) -> Dict[str, Any]:
-        """Analyze metabolite-disease specific statistics."""
-        return {}
-
-    def _analyze_metabolite_protein_specific(self, records: List[Dict[str, Any]]) -> Dict[str, Any]:
-        """Analyze metabolite-protein specific statistics."""
-        protein_types = []
-
-        for record in records:
-            object_node = record.get("object", {})
-            protein_type = object_node.get("protein_type")
-            if protein_type:
-                protein_types.append(protein_type)
-
-        return {
-            "metabolite_protein_object_protein_type_stats": {
-                "record_count": len(protein_types),
-                "unique_count": len(set(protein_types)),
-                "distribution": dict(Counter(protein_types)),
-            }
-        }
-
-    def _analyze_protein_pathway_specific(self, records: List[Dict[str, Any]]) -> Dict[str, Any]:
-        """Analyze protein-pathway specific statistics."""
-        functions = []
-        molecular_weights = []
-        transmembrane_count = 0
-        signal_region_count = 0
-        protein_seq_count = 0
-        chromosomal_location_count = 0
-        locus_count = 0
-        gene_seq_count = 0
-        gene_description_count = 0
-
-        for record in records:
-            subject = record.get("subject", {})
-
-            # protein function
-            function = subject.get("function")
-            if function:
-                functions.append(function)
-
-            # molecular weight
-            mw = subject.get("molecular_weight")
-            if mw is not None:
-                molecular_weights.append(mw)
-
-            if subject.get("transmembrane_region"):
-                transmembrane_count += 1
-            if subject.get("signal_region"):
-                signal_region_count += 1
-            if subject.get("protein_seq"):
-                protein_seq_count += 1
-            if subject.get("chromosomal_location"):
-                chromosomal_location_count += 1
-            if subject.get("locus"):
-                locus_count += 1
-            if subject.get("gene_seq"):
-                gene_seq_count += 1
-            if subject.get("gene_description"):
-                gene_description_count += 1
-
-        total_records = len(records)
-
-        return {
-            "function_stats": {
-                "record_count": len(functions),
-                "unique_count": len(set(functions)),
-                "percentage": round((len(functions) / total_records) * 100, 2)
-                if total_records > 0
-                else 0,
-            },
-            "molecular_weight_stats": self._safe_get_numeric_stats(molecular_weights),
-            "transmembrane_region_count": transmembrane_count,
-            "signal_region_count": signal_region_count,
-            "protein_seq_count": protein_seq_count,
-            "chromosomal_location_count": chromosomal_location_count,
-            "locus_count": locus_count,
-            "gene_seq_count": gene_seq_count,
-            "gene_description_stats": {
-                "record_count": gene_description_count,
-                "percentage": round((gene_description_count / total_records) * 100, 2)
-                if total_records > 0
-                else 0,
-            },
-            "cellular_component_stats": self._count_unique_items_in_list_field(
-                records, ["subject", "cellular_component"]
-            ),
-        }
-
-    def _analyze_protein_biological_process_specific(
-            self, records: List[Dict[str, Any]]
+    def _analyze_relationship_type_properties(
+            self, records: List[Dict[str, Any]], relationship_type: str
     ) -> Dict[str, Any]:
-        """Analyze protein-biological process specific statistics."""
-        return {}
+        """Analyze all properties for a specific relationship type."""
+        print(f"Analyzing properties for {relationship_type}...")
 
-    def save_stats_report(self, stats: Dict[str, Any], filepath: str = "hmdb_output") -> str:
+        if not records:
+            return {}
+
+        subject_props = set()
+        object_props = set()
+        association_props = set()
+
+        for record in records:
+            if record.get("subject"):
+                subject_props.update(self._extract_all_properties(record["subject"]))
+            if record.get("object"):
+                object_props.update(self._extract_all_properties(record["object"]))
+            if record.get("association"):
+                association_props.update(self._extract_all_properties(record["association"]))
+
+        self.all_subject_properties.update(subject_props)
+        self.all_object_properties.update(object_props)
+        self.all_association_properties.update(association_props)
+
+        stats = {
+            "record_count": len(records),
+            "subject_properties": {},
+            "object_properties": {},
+            "association_properties": {},
+        }
+
+        for prop in sorted(subject_props):
+            stats["subject_properties"][prop] = self._count_property_stats(
+                records, f"subject.{prop}"
+            )
+
+        for prop in sorted(object_props):
+            stats["object_properties"][prop] = self._count_property_stats(records, f"object.{prop}")
+
+        for prop in sorted(association_props):
+            stats["association_properties"][prop] = self._count_property_stats(
+                records, f"association.{prop}"
+            )
+
+        return stats
+
+    def generate_comprehensive_stats(self, file_path: Optional[str] = None) -> Dict[str, Any]:
+        """Generate comprehensive statistics for all records."""
+        if file_path is None:
+            file_path = self._find_latest_jsonl_file()
+            if file_path is None:
+                return {}
+
+        print(f"Starting comprehensive analysis of: {file_path}")
+
+        relationship_groups = defaultdict(list)
+        all_records = []
+
+        for record in self._load_jsonl_records(file_path):
+            all_records.append(record)
+            relationship_type = record.get("association", {}).get("category")
+            if relationship_type:
+                relationship_groups[relationship_type].append(record)
+
+        if not all_records:
+            print("No records found!")
+            return {}
+
+        print(f"Loaded {len(all_records)} total records")
+        print(f"Found {len(relationship_groups)} relationship types:")
+        for rel_type, records in relationship_groups.items():
+            print(f"  - {rel_type}: {len(records)} records")
+
+        overall_stats = self._analyze_overall_properties(all_records)
+
+        relationship_stats = {}
+        for rel_type, records in relationship_groups.items():
+            relationship_stats[rel_type] = self._analyze_relationship_type_properties(
+                records, rel_type
+            )
+
+        stats_report = {
+            "metadata": {
+                "analysis_date": datetime.now().isoformat(),
+                "source_file": file_path,
+                "total_records": len(all_records),
+                "relationship_types": list(relationship_groups.keys()),
+                "relationship_type_counts": {
+                    rel_type: len(records) for rel_type, records in relationship_groups.items()
+                },
+            },
+            "overall_statistics": overall_stats,
+            "relationship_type_analysis": relationship_stats,
+            "property_summary": {
+                "all_subject_properties": sorted(list(self.all_subject_properties)),
+                "all_object_properties": sorted(list(self.all_object_properties)),
+                "all_association_properties": sorted(list(self.all_association_properties)),
+            },
+        }
+
+        return stats_report
+
+    def save_stats_report(
+            self, stats: Dict[str, Any], output_filename: Optional[str] = None
+    ) -> str:
         """Save the statistics report to JSON file."""
-        file_ext = filepath.split(".")[-1] if "." in filepath else "unknown"
-        report_path = os.path.join(
-            self.report_dir,
-            f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_record_stats_{file_ext}_input.json",
-        )
-        with open(report_path, "w") as f:
-            json.dump(stats, f, indent=2, sort_keys=True)
+        if output_filename is None:
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            output_filename = f"{timestamp}_hmdb_comprehensive_stats.json"
+
+        report_path = os.path.join(self.report_dir, output_filename)
+
+        with open(report_path, "w", encoding="utf-8") as f:
+            json.dump(stats, f, indent=2, sort_keys=True, default=str)
 
         print(f"Statistics report saved to: {report_path}")
         return report_path
 
-    def run_full_analysis_with_duplicates(
-            self, filepath: str = "hmdb_output.jsonl"
-    ) -> Dict[str, Any]:
-        """Run complete statistical analysis and export duplicate records."""
-        print(
-            f"Starting comprehensive HMDB record analysis with duplicate export for {filepath}..."
-        )
+    def run_full_analysis(self, file_path: Optional[str] = None) -> Dict[str, Any]:
+        """Run the complete analysis and save the report."""
+        print("Starting full HMDB record analysis...")
 
-        stats = self.generate_record_stats(filepath)
+        stats = self.generate_comprehensive_stats(file_path)
+
         if stats:
-            self.save_stats_report(stats, filepath)
+            report_path = self.save_stats_report(stats)
+            print(f"Analysis complete! Report saved to: {report_path}")
 
-        duplicate_data = self.export_duplicate_records(filepath)
-        if stats and duplicate_data:
-            print("Analysis and duplicate export complete!")
-        elif stats:
-            print("Analysis complete, but duplicate export failed.")
+            metadata = stats.get("metadata", {})
+            print("\nSummary:")
+            print(f"Total records analyzed: {metadata.get('total_records', 0)}")
+            print(f"Relationship types found: {len(metadata.get('relationship_types', []))}")
+            for rel_type, count in metadata.get("relationship_type_counts", {}).items():
+                print(f"  - {rel_type}: {count}")
         else:
             print("Analysis failed - no data found.")
 
-        return {"stats": stats, "duplicates": duplicate_data}
-
-    def load_cached_records(self, filename_base="hmdb_v5_parsed_records"):
-        """Load cached records from the most recent record JSONL file."""
-        jsonl_pattern = os.path.join("..", "records", f"{filename_base}_*.jsonl")
-        jsonl_files = glob.glob(jsonl_pattern)
-
-        if not jsonl_files:
-            print(f"!!! No JSONL files found matching pattern: {filename_base}_*.jsonl")
-            return None
-
-        most_recent_jsonl = max(jsonl_files, key=os.path.getmtime)
-        jsonl_filename = os.path.basename(most_recent_jsonl)
-
-        try:
-            records = self.rec_helper.load_jsonl(jsonl_filename)
-            print(f"-> Loaded {len(records)} records from JSONL: {jsonl_filename}")
-            return records
-        except Exception as e:
-            print(f"!!! Failed to load JSONL file {jsonl_filename}: {e}")
-            return None
+        return stats
 
 
 if __name__ == "__main__":
     import sys
 
-    if len(sys.argv) > 1:
-        input_file = sys.argv[1]
-    else:
-        reporter = HMDBRecordStatsReporter()
-        records = reporter.load_cached_records()
-        if records is None:
-            sys.exit("!!! No records found!")
-        input_file = (
-            reporter.load_cached_records.__defaults__[0]
-            if hasattr(reporter.load_cached_records, "__defaults__")
-            else None
-        )
+    file_path = sys.argv[1] if len(sys.argv) > 1 else None
 
     reporter = HMDBRecordStatsReporter()
-    full_report = reporter.run_full_analysis_with_duplicates(input_file)
+    results = reporter.run_full_analysis(file_path)

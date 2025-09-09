@@ -181,11 +181,11 @@ class IDHierarchy:
         id_hierarchy = [
             ("pubchem_compound_id", "PUBCHEM.COMPOUND"),
             ("inchikey", "INCHIKEY"),
-            ("smiles", ""),
+            ("accession", "HMDB"),
             ("drugbank_id", "DRUGBANK"),
             ("chebi_id", "CHEBI"),
             ("chembl_id", "CHEMBL.COMPOUND"),
-            ("accession", "HMDB"),
+            ("smiles", ""),
             ("cas_registry_number", "CAS"),
             ("kegg_id", None),
             ("metlin_id", "METLIN"),
@@ -217,7 +217,7 @@ class IDHierarchy:
             elif tag == "smiles":
                 prefix = ""
 
-            curie = f"{prefix}:{val}"
+            curie = f"{prefix}:{val}" if prefix != "" else val
 
             # determine xref key
             if prefix == "PUBCHEM.COMPOUND":
@@ -226,6 +226,8 @@ class IDHierarchy:
                 key = "hmdb"
             elif prefix == "METLIN":
                 key = "metlin"
+            elif prefix == "":
+                key = "smiles"
             else:
                 key = prefix.lower().split(".")[0] if "." in prefix else prefix.lower()
 
@@ -241,12 +243,12 @@ class IDHierarchy:
         """Extract primary ID and xrefs for protein with hierarchy."""
         id_hierarchy = [
             ("uniprot_id", "UniProtKB"),
+            ("accession", "HMDBP"),
             ("hgnc_id", ""),
             ("genbank_protein_id", "GBP"),
             ("genbank_gene_id", "GBG"),
             ("genecard_id", "GENECARD"),
             ("geneatlas_id", "GENEATLAS"),
-            ("accession", "HMDBP"),
         ]
 
         xrefs, primary_id = {}, None
@@ -259,7 +261,7 @@ class IDHierarchy:
             if tag == "hgnc_id":
                 prefix = ""
 
-            curie = f"{prefix}:{val}"
+            curie = f"{prefix}:{val}" if prefix != "" else val
 
             # determine xref key
             if prefix == "GBP":
@@ -268,7 +270,7 @@ class IDHierarchy:
                 key = "hmdbp"
             elif prefix == "GBG":
                 key = "genbank_gene"
-            elif prefix == "HGNC":
+            elif prefix == "":
                 key = "hgnc"
             else:
                 key = prefix.lower()

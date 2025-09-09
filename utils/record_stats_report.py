@@ -9,7 +9,7 @@ from typing import Any, Dict, Iterator, List, Optional, Set
 
 
 class HMDBRecordStatsReporter:
-    """Generates comprehensive statistics for HMDB parsed records."""
+    """Generates comprehensive statistics for HMDfB parsed records."""
 
     def __init__(self):
         self.report_dir = os.path.join("..", "reports")

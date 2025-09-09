@@ -197,11 +197,11 @@ class IDHierarchy:
         ]
 
         def classify_kegg(val: str) -> str:
-            if val.startswith("C"):
+            if val.startswith("C") or val.startswith("c"):
                 return "KEGG.COMPOUND"
-            elif val.startswith("G"):
+            elif val.startswith("G") or val.startswith("g"):
                 return "KEGG.GLYCAN"
-            elif val.startswith("D"):
+            elif val.startswith("D") or val.startswith("d"):
                 return "KEGG.DRUG"
             return "KEGG"
 
@@ -213,7 +213,7 @@ class IDHierarchy:
                 continue
 
             if tag == "kegg_id":
-                prefix = classify_kegg(val)
+                prefix = classify_kegg(val.upper())
             elif tag == "smiles":
                 prefix = ""
 

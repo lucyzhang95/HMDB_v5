@@ -350,7 +350,7 @@ class HMDBRecordStatsReporter:
                 )
                 if total_records > 0
                 else 0,
-                "sample_values": list(self.overall_counters["subject_description"].keys())[:10],
+                "sample_values": list(self.overall_counters["subject_description"].keys())[:1],
             },
             "object_description": {
                 "raw_count": sum(self.overall_counters["object_description"].values()),
@@ -361,17 +361,17 @@ class HMDBRecordStatsReporter:
                 )
                 if total_records > 0
                 else 0,
-                "sample_values": list(self.overall_counters["object_description"].keys())[:10],
+                "sample_values": list(self.overall_counters["object_description"].keys())[:1],
             },
             "subject_xrefs": {
                 "raw_count": sum(self.overall_counters["subject_xrefs"].values()),
                 "unique_count": len(self.overall_counters["subject_xrefs"]),
-                "sample_values": list(self.overall_counters["subject_xrefs"].keys())[:10],
+                "sample_values": list(self.overall_counters["subject_xrefs"].keys())[:5],
             },
             "object_xrefs": {
                 "raw_count": sum(self.overall_counters["object_xrefs"].values()),
                 "unique_count": len(self.overall_counters["object_xrefs"]),
-                "sample_values": list(self.overall_counters["object_xrefs"].keys())[:10],
+                "sample_values": list(self.overall_counters["object_xrefs"].keys())[:5],
             },
             "association_publication": {
                 "raw_count": sum(self.overall_counters["association_publication"].values()),
@@ -382,7 +382,7 @@ class HMDBRecordStatsReporter:
                 )
                 if total_records > 0
                 else 0,
-                "sample_values": list(self.overall_counters["association_publication"].keys())[:10],
+                "sample_values": list(self.overall_counters["association_publication"].keys())[:1],
             },
         }
 
@@ -409,7 +409,7 @@ class HMDBRecordStatsReporter:
                     "percentage": round((len(counter) / rel_data["record_count"]) * 100, 2)
                     if rel_data["record_count"] > 0
                     else 0,
-                    "sample_values": list(counter.keys())[:10],
+                    "sample_values": list(counter.keys())[:1],
                 }
 
             # object properties
@@ -421,7 +421,7 @@ class HMDBRecordStatsReporter:
                     "percentage": round((len(counter) / rel_data["record_count"]) * 100, 2)
                     if rel_data["record_count"] > 0
                     else 0,
-                    "sample_values": list(counter.keys())[:10],
+                    "sample_values": list(counter.keys())[:1],
                 }
 
             # association properties
@@ -433,7 +433,7 @@ class HMDBRecordStatsReporter:
                     "percentage": round((len(counter) / rel_data["record_count"]) * 100, 2)
                     if rel_data["record_count"] > 0
                     else 0,
-                    "sample_values": list(counter.keys())[:10],
+                    "sample_values": list(counter.keys())[:1],
                 }
 
             relationship_stats[rel_type] = stats

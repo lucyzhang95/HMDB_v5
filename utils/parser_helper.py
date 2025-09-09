@@ -181,7 +181,7 @@ class IDHierarchy:
         id_hierarchy = [
             ("pubchem_compound_id", "PUBCHEM.COMPOUND"),
             ("inchikey", "INCHIKEY"),
-            ("smiles", "smiles"),
+            ("smiles", ""),
             ("drugbank_id", "DRUGBANK"),
             ("chebi_id", "CHEBI"),
             ("chembl_id", "CHEMBL.COMPOUND"),
@@ -215,7 +215,7 @@ class IDHierarchy:
             if tag == "kegg_id":
                 prefix = classify_kegg(val)
             elif tag == "smiles":
-                prefix = "smiles"
+                prefix = ""
 
             curie = f"{prefix}:{val}"
 
@@ -241,7 +241,7 @@ class IDHierarchy:
         """Extract primary ID and xrefs for protein with hierarchy."""
         id_hierarchy = [
             ("uniprot_id", "UniProtKB"),
-            ("hgnc_id", "HGNC"),
+            ("hgnc_id", ""),
             ("genbank_protein_id", "GBP"),
             ("genbank_gene_id", "GBG"),
             ("genecard_id", "GENECARD"),
@@ -256,6 +256,9 @@ class IDHierarchy:
             if not val:
                 continue
 
+            if tag == "hgnc_id":
+                prefix = ""
+
             curie = f"{prefix}:{val}"
 
             # determine xref key
@@ -265,6 +268,8 @@ class IDHierarchy:
                 key = "hmdbp"
             elif prefix == "GBG":
                 key = "genbank_gene"
+            elif prefix == "HGNC":
+                key = "hgnc"
             else:
                 key = prefix.lower()
 

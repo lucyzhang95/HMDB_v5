@@ -226,6 +226,8 @@ class HMDBMetaboliteParser(XMLParseHelper):
                         subject_node["organism_type"] = OrganismClassifier.get_organism_type(
                             subject_node
                         )
+                        if "mapping_tool" in subject_node:
+                            del subject_node["mapping_tool"]
                         subject_node = self.remove_empty_none_values(subject_node)
 
                         _id = (
@@ -296,6 +298,8 @@ class HMDBMetaboliteParser(XMLParseHelper):
                         disease_key = disease.strip().lower()
                         if disease_key in self.cached_disease_info:
                             object_node = self.cached_disease_info[disease_key].copy()
+                            if "mapping_tool" in object_node:
+                                del object_node["mapping_tool"]
                             object_node = self.remove_empty_none_values(object_node)
 
                             _id = (
@@ -375,6 +379,8 @@ class HMDBMetaboliteParser(XMLParseHelper):
                             ]
                     elif prot_accession:
                         object_node["id"] = f"HMDBP:{prot_accession}"
+                    else:
+                        object_node["id"] = f"uuid:{str(uuid.uuid4())}"
 
                     object_node = self.remove_empty_none_values(object_node)
 
@@ -450,7 +456,7 @@ class HMDBMetaboliteParser(XMLParseHelper):
 
                     # pathway node
                     object_node = {
-                        "id": smpdb_id or (f"KEGG:{kegg_map}" if kegg_map else None),
+                        "id": smpdb_id or (f"KEGG:{kegg_map}" if kegg_map else str(uuid.uuid4())),
                         "name": pw_name.lower(),
                         "description": description,
                         "category": "biolink:Pathway",

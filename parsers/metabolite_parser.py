@@ -456,7 +456,7 @@ class HMDBMetaboliteParser(XMLParseHelper):
 
                     # pathway node
                     object_node = {
-                        "id": smpdb_id or (f"KEGG:{kegg_map}" if kegg_map else str(uuid.uuid4())),
+                        "id": smpdb_id or (f"KEGG:{kegg_map}" if kegg_map else f"uuid:{str(uuid.uuid4())}"),
                         "name": pw_name.lower(),
                         "description": description,
                         "category": "biolink:Pathway",

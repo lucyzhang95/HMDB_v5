@@ -288,7 +288,7 @@ class HMDBProteinParser(XMLParseHelper):
 
                     # pathway node
                     object_node = {
-                        "id": smpdb_id or (f"KEGG:{kegg_map}" if kegg_map else str(uuid.uuid4())),
+                        "id": smpdb_id or (f"KEGG:{kegg_map}" if kegg_map else f"uuid:{str(uuid.uuid4())}"),
                         "name": pw_name.lower(),
                         "description": description,
                         "category": "biolink:Pathway",
@@ -369,7 +369,7 @@ class HMDBProteinParser(XMLParseHelper):
 
                     # biological process node
                     object_node = {
-                        "id": go_id if go_id else str(uuid.uuid4()),
+                        "id": go_id if go_id else f"uuid:{str(uuid.uuid4())}",
                         "name": go_name.lower() if go_name else None,
                         "description": go_description,
                         "category": "biolink:BiologicalProcess",

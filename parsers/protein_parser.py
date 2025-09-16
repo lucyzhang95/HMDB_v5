@@ -224,10 +224,21 @@ class HMDBProteinParser(XMLParseHelper):
 
         # chromosomal_location
         chromosomal_location = gene_props.get("chromosomal_location")
-        if "," in chromosomal_location:
-            chromosomal_location = chromosomal_location.split(",")
+        if chromosomal_location:
+            if "," in chromosomal_location:
+                chromosomal_location = chromosomal_location.split(",")
+                chromosomal_location = [
+                    int(loc).strip() if loc not in ["X", "Y"] else loc.strip()
+                    for loc in chromosomal_location
+                ]
+            else:
+                chromosomal_location = [
+                    int(chromosomal_location).strip()
+                    if chromosomal_location not in ["X", "Y"]
+                    else chromosomal_location.strip()
+                ]
         else:
-            chromosomal_location = [chromosomal_location]
+            chromosomal_location = []
 
         # complete protein node
         protein_node = {
@@ -295,7 +306,8 @@ class HMDBProteinParser(XMLParseHelper):
 
                     # pathway node
                     object_node = {
-                        "id": smpdb_id or (f"KEGG:{kegg_map}" if kegg_map else f"uuid:{str(uuid.uuid4())}"),
+                        "id": smpdb_id
+                              or (f"KEGG:{kegg_map}" if kegg_map else f"uuid:{str(uuid.uuid4())}"),
                         "name": pw_name.lower(),
                         "description": description,
                         "category": "biolink:Pathway",

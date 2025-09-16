@@ -228,6 +228,10 @@ class HMDBMetaboliteParser(XMLParseHelper):
                         )
                         if "mapping_tool" in subject_node:
                             del subject_node["mapping_tool"]
+                        if "matched_name" in subject_node:
+                            del subject_node["matched_name"]
+                        if "score" in subject_node:
+                            del subject_node["score"]
                         subject_node = self.remove_empty_none_values(subject_node)
 
                         _id = (

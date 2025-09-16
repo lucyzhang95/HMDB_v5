@@ -1,7 +1,7 @@
 """
-Record deduplicator to remove duplicate records
-from a list or iterator of records. It merges xrefs from duplicates
-while preserving other fields from the first occurrence.
+Two-stage record deduplicator:
+1. Merge xrefs when non-xref fields are identical
+2. Remove exact duplicates after merging
 """
 
 import copy
@@ -13,7 +13,6 @@ def _merge_xrefs(target_xrefs: Dict, source_xrefs: Dict) -> None:
     """
     Merges source_xrefs into target_xrefs in-place, combining values
     and ensuring no duplicates are created.
-    Enhanced version with better type handling.
     """
     for key, source_value in source_xrefs.items():
         if key not in target_xrefs:
@@ -53,11 +52,10 @@ def _merge_xrefs(target_xrefs: Dict, source_xrefs: Dict) -> None:
             target_xrefs[key] = unique_items
 
 
-def _create_fingerprint(record: Dict) -> str:
+def _create_merge_fingerprint(record: Dict) -> str:
     """
-    Creates a unique, hashable fingerprint for a record by serializing its
-    subject, object, and association nodes, excluding 'xrefs'.
-    Enhanced to handle edge cases and provide more stable fingerprints.
+    Creates fingerprint for merging records with same non-xref fields.
+    Excludes xrefs from subject/object and pmid from association.publication.
     """
     fingerprint_data = {}
 
@@ -65,18 +63,48 @@ def _create_fingerprint(record: Dict) -> str:
         if key in record:
             node_copy = copy.deepcopy(record[key])
 
+            # Remove xrefs for fingerprint calculation
             if key in ["subject", "object"] and isinstance(node_copy, dict):
                 node_copy.pop("xrefs", None)
+
+            # Remove pmid from association.publication for fingerprint calculation
+            elif key == "association" and isinstance(node_copy, dict):
+                if "publication" in node_copy and isinstance(node_copy["publication"], dict):
+                    publication_copy = node_copy["publication"].copy()
+                    publication_copy.pop("pmid", None)
+                    node_copy["publication"] = publication_copy
 
             fingerprint_data[key] = node_copy
 
     return json.dumps(fingerprint_data, sort_keys=True, default=str)
 
 
+def _create_exact_fingerprint(record: Dict) -> str:
+    """
+    Creates fingerprint for exact duplicate detection.
+    Includes ALL fields including merged xrefs.
+    """
+    return json.dumps(record, sort_keys=True, default=str)
+
+
+def _merge_pmids(target_pmids: List, source_pmids: List) -> List:
+    """Merge two lists of PMIDs, removing duplicates while preserving order."""
+    combined_pmids = target_pmids + source_pmids
+    unique_pmids = []
+    seen = set()
+
+    for pmid in combined_pmids:
+        if pmid not in seen:
+            unique_pmids.append(pmid)
+            seen.add(pmid)
+
+    return unique_pmids
+
+
 def _merge_records(target_record: Dict, source_record: Dict) -> None:
     """
     Merge source_record into target_record in-place.
-    Focuses on merging xrefs while preserving other fields from target.
+    Focuses on merging xrefs and pmids while preserving other fields from target.
     """
     # merge subject xrefs
     if (
@@ -84,7 +112,6 @@ def _merge_records(target_record: Dict, source_record: Dict) -> None:
             and "xrefs" in source_record["subject"]
             and source_record["subject"]["xrefs"]
     ):
-
         if "subject" not in target_record:
             target_record["subject"] = {}
         if "xrefs" not in target_record["subject"]:
@@ -92,12 +119,12 @@ def _merge_records(target_record: Dict, source_record: Dict) -> None:
 
         _merge_xrefs(target_record["subject"]["xrefs"], source_record["subject"]["xrefs"])
 
+    # merge object xrefs
     if (
             "object" in source_record
             and "xrefs" in source_record["object"]
             and source_record["object"]["xrefs"]
     ):
-
         if "object" not in target_record:
             target_record["object"] = {}
         if "xrefs" not in target_record["object"]:
@@ -105,84 +132,103 @@ def _merge_records(target_record: Dict, source_record: Dict) -> None:
 
         _merge_xrefs(target_record["object"]["xrefs"], source_record["object"]["xrefs"])
 
+    # merge association publication pmids
+    if (
+            "association" in source_record
+            and "publication" in source_record["association"]
+            and isinstance(source_record["association"]["publication"], dict)
+            and "pmid" in source_record["association"]["publication"]
+    ):
+        if "association" not in target_record:
+            target_record["association"] = {}
+        if "publication" not in target_record["association"]:
+            target_record["association"]["publication"] = {}
 
-def deduplicate_records_list(records: List[Dict]) -> List[Dict]:
+        source_pub = source_record["association"]["publication"]
+        target_pub = target_record["association"]["publication"]
+
+        # check if the rest of field of publication match excluding pmid field
+        source_pub_key = {k: v for k, v in source_pub.items() if k != "pmid"}
+        target_pub_key = {k: v for k, v in target_pub.items() if k != "pmid"}
+
+        if source_pub_key == target_pub_key or not target_pub_key:
+            # Publications match or target is empty, merge pmids
+            source_pmids = source_pub["pmid"]
+            target_pmids = target_pub.get("pmid", [])
+
+            # normalize pmid to lists
+            if isinstance(source_pmids, str):
+                source_pmids = [source_pmids]
+            if isinstance(target_pmids, str):
+                target_pmids = [target_pmids]
+            elif not isinstance(target_pmids, list):
+                target_pmids = []
+
+            # merge pmids
+            merged_pmids = _merge_pmids(target_pmids, source_pmids)
+
+            target_pub.update(source_pub_key)
+            target_pub["pmid"] = merged_pmids
+
+
+def deduplicate_records(records: Union[List[Dict], Iterator[Dict]]) -> List[Dict]:
     """
-    Deduplicates a list of records (your original approach).
-    Most memory-efficient for batch processing.
+    Two-stage deduplication:
+    1. Merge xrefs for records with identical non-xref fields
+    2. Remove exact duplicates after merging
+
+    Args:
+        records: List or iterator of record dictionaries
+
+    Returns:
+        List of deduplicated records
     """
+    if not isinstance(records, list):
+        records = list(records)
+
     if not records:
         return []
 
-    processed_records: Dict[str, Dict] = {}
+    # merge records with same non-xref fields
+    merge_groups = {}
 
     for record in records:
-        fingerprint = _create_fingerprint(record)
+        merge_fingerprint = _create_merge_fingerprint(record)
 
-        if fingerprint not in processed_records:
-            processed_records[fingerprint] = json.loads(json.dumps(record))
+        if merge_fingerprint not in merge_groups:
+            merge_groups[merge_fingerprint] = json.loads(json.dumps(record))
         else:
-            _merge_records(processed_records[fingerprint], record)
+            _merge_records(merge_groups[merge_fingerprint], record)
 
-    return list(processed_records.values())
+    merged_records = list(merge_groups.values())
 
+    # remove exact duplicates from merged records
+    exact_fingerprints = set()
+    final_records = []
 
-def deduplicate_records_iterator(records: Iterator[Dict]) -> Iterator[Dict]:
-    """
-    Deduplicates records from an iterator (streaming approach).
-    Memory usage grows with unique records, but processes one at a time.
-    """
-    processed_records: Dict[str, Dict] = {}
+    for record in merged_records:
+        exact_fingerprint = _create_exact_fingerprint(record)
 
-    for record in records:
-        fingerprint = _create_fingerprint(record)
+        if exact_fingerprint not in exact_fingerprints:
+            exact_fingerprints.add(exact_fingerprint)
+            final_records.append(record)
 
-        if fingerprint not in processed_records:
-            processed_records[fingerprint] = json.loads(json.dumps(record))
-        else:
-            _merge_records(processed_records[fingerprint], record)
-
-    for record in processed_records.values():
-        yield record
-
-
-def deduplicate_records(
-        records: Union[List[Dict], Iterator[Dict]]
-) -> Union[List[Dict], Iterator[Dict]]:
-    """
-    Smart deduplication that adapts to input type.
-
-    Args:
-        records: Either a list or iterator of record dictionaries
-
-    Returns:
-        Deduplicated records in the same format as input
-
-    Examples:
-        # List input -> List output
-        clean_records = deduplicate_records(record_list)
-
-        # Iterator input -> Iterator output
-        clean_records = deduplicate_records(parser.parse_associations())
-    """
-    if isinstance(records, list):
-        return deduplicate_records_list(records)
-    else:
-        return deduplicate_records_iterator(records)
+    return final_records
 
 
 def deduplicate_with_stats(records: Union[List[Dict], Iterator[Dict]]) -> Dict:
     """
-    Deduplicates records and returns detailed statistics about the process.
+    Two-stage deduplication with statistics.
 
     Returns:
         {
             'deduplicated_records': List[Dict],
             'stats': {
                 'original_count': int,
-                'deduplicated_count': int,
-                'duplicates_removed': int,
-                'records_with_merged_xrefs': int,
+                'after_merge_count': int,
+                'final_count': int,
+                'records_merged': int,
+                'exact_duplicates_removed': int,
                 'duplicate_rate': float
             }
         }
@@ -191,126 +237,158 @@ def deduplicate_with_stats(records: Union[List[Dict], Iterator[Dict]]) -> Dict:
         records = list(records)
 
     original_count = len(records)
-    processed_records: Dict[str, Dict] = {}
-    records_with_merged_xrefs = 0
+
+    if not records:
+        return {
+            "deduplicated_records": [],
+            "stats": {
+                "original_count": 0,
+                "after_merge_count": 0,
+                "final_count": 0,
+                "records_merged": 0,
+                "exact_duplicates_removed": 0,
+                "duplicate_rate": 0.0,
+            },
+        }
+
+    # merge records with same non-xref fields
+    merge_groups = {}
+    records_merged = 0
 
     for record in records:
-        fingerprint = _create_fingerprint(record)
+        merge_fingerprint = _create_merge_fingerprint(record)
 
-        if fingerprint not in processed_records:
-            processed_records[fingerprint] = json.loads(json.dumps(record))
+        if merge_fingerprint not in merge_groups:
+            merge_groups[merge_fingerprint] = json.loads(json.dumps(record))
         else:
-            existing_record = processed_records[fingerprint]
+            _merge_records(merge_groups[merge_fingerprint], record)
+            records_merged += 1
 
-            will_merge_xrefs = False
-            for node_key in ["subject", "object"]:
-                if node_key in record and "xrefs" in record[node_key] and record[node_key]["xrefs"]:
-                    will_merge_xrefs = True
-                    break
+    merged_records = list(merge_groups.values())
+    after_merge_count = len(merged_records)
 
-            if will_merge_xrefs:
-                records_with_merged_xrefs += 1
+    # remove exact duplicates from merged records
+    exact_fingerprints = set()
+    final_records = []
+    exact_duplicates_removed = 0
 
-            _merge_records(existing_record, record)
+    for record in merged_records:
+        exact_fingerprint = _create_exact_fingerprint(record)
 
-    deduplicated_records = list(processed_records.values())
-    deduplicated_count = len(deduplicated_records)
+        if exact_fingerprint not in exact_fingerprints:
+            exact_fingerprints.add(exact_fingerprint)
+            final_records.append(record)
+        else:
+            exact_duplicates_removed += 1
 
-    return {
-        "deduplicated_records": deduplicated_records,
-        "stats": {
-            "original_count": original_count,
-            "deduplicated_count": deduplicated_count,
-            "duplicates_removed": original_count - deduplicated_count,
-            "records_with_merged_xrefs": records_with_merged_xrefs,
-            "duplicate_rate": (original_count - deduplicated_count) / original_count * 100
-            if original_count > 0
-            else 0.0,
-        },
+    final_count = len(final_records)
+
+    stats = {
+        "original_count": original_count,
+        "after_merge_count": after_merge_count,
+        "final_count": final_count,
+        "records_merged": records_merged,
+        "exact_duplicates_removed": exact_duplicates_removed,
+        "duplicate_rate": (original_count - final_count) / original_count * 100
+        if original_count > 0
+        else 0.0,
     }
 
-
-def deduplicate_and_merge(records: List[Dict]) -> List[Dict]:
-    """Backwards compatible alias for your existing code."""
-    return deduplicate_records_list(records)
+    return {"deduplicated_records": final_records, "stats": stats}
 
 
-class DeduplicationIntegrationExamples:
-    """Examples of how to integrate into existing systems."""
-
-    @staticmethod
-    def record_manager_batch_approach(metabolite_parser):
-        """Batch processing - good for smaller datasets."""
-        raw_records = list(metabolite_parser.parse_microbe_metabolite())
-        return deduplicate_records(raw_records)
-
-    @staticmethod
-    def record_manager_streaming_approach(metabolite_parser):
-        """Streaming approach - memory efficient for large datasets."""
-        return list(deduplicate_records(metabolite_parser.parse_microbe_metabolite()))
-
-    @staticmethod
-    def record_manager_with_stats(metabolite_parser):
-        """Get deduplication statistics for monitoring."""
-        raw_records = list(metabolite_parser.parse_microbe_metabolite())
-        result = deduplicate_with_stats(raw_records)
-
-        print(
-            f"Deduplicated {result['stats']['duplicates_removed']} duplicates "
-            f"({result['stats']['duplicate_rate']:.1f}% duplicate rate)"
-        )
-
-        return result["deduplicated_records"]
-
-
-def test_hybrid_deduplication():
-    """Test the hybrid deduplication with various scenarios."""
+def test_two_stage_deduplication():
+    """Test the deduplication process."""
 
     test_records = [
-        # exact duplicate
+        # Records 1-2: same non-xref fields, different subject and object xrefs as well as different pmid
         {
-            "_id": "test1",
+            "_id": "A_participates_in_B",
             "subject": {"id": "A", "name": "protein_a", "xrefs": {"uniprot": "P1"}},
             "object": {"id": "B", "name": "pathway_b", "xrefs": {"kegg": "K1"}},
-            "association": {"category": "participates_in"},
+            "association": {
+                "category": "participates_in",
+                "publication": {
+                    "category": "biolink:Publication",
+                    "pmid": ["PMID:12345", "PMID:67890"],
+                },
+            },
         },
-        # exact duplicate
         {
-            "_id": "test1",
-            "subject": {"id": "A", "name": "protein_a", "xrefs": {"uniprot": "P1"}},
-            "object": {"id": "B", "name": "pathway_b", "xrefs": {"kegg": "K1"}},
-            "association": {"category": "participates_in"},
+            "_id": "A_participates_in_B",
+            "subject": {"id": "A", "name": "protein_a", "xrefs": {"pdb": "1ABC"}},
+            "object": {"id": "B", "name": "pathway_b", "xrefs": {"smpdb": "S1"}},
+            "association": {
+                "category": "participates_in",
+                "publication": {"category": "biolink:Publication", "pmid": "PMID:11111"},
+            },
         },
-        # same relationship, additional xrefs
+        # Record 3: Exact duplicate after merging -> should be removed in stage 2
         {
-            "_id": "test1",
+            "_id": "A_participates_in_B",
             "subject": {"id": "A", "name": "protein_a", "xrefs": {"uniprot": "P1", "pdb": "1ABC"}},
             "object": {"id": "B", "name": "pathway_b", "xrefs": {"kegg": "K1", "smpdb": "S1"}},
-            "association": {"category": "participates_in"},
+            "association": {
+                "category": "participates_in",
+                "publication": {
+                    "category": "biolink:Publication",
+                    "pmid": ["PMID:12345", "PMID:67890", "PMID:11111"],
+                },
+            },
         },
-        # completely different record
+        # Record 4: completely different -> should remain separate
         {
-            "_id": "test2",
+            "_id": "C_involved_in_D",
             "subject": {"id": "C", "name": "protein_c"},
             "object": {"id": "D", "name": "pathway_d"},
             "association": {"category": "involved_in"},
         },
     ]
 
-    # test batch deduplication
+    print("=== TWO-STAGE DEDUPLICATION TEST ===")
+    print(f"Original records: {len(test_records)}")
+
     result = deduplicate_with_stats(test_records)
+    stats = result["stats"]
+    records = result["deduplicated_records"]
 
-    assert len(result["deduplicated_records"]) == 2, "Should have 2 unique records"
-    assert result["stats"]["duplicates_removed"] == 2, "Should remove 2 duplicates"
+    print(f"After merge stage: {stats['after_merge_count']}")
+    print(f"Records merged in stage 1: {stats['records_merged']}")
+    print(f"Exact duplicates removed in stage 2: {stats['exact_duplicates_removed']}")
+    print(f"Final unique records: {stats['final_count']}")
+    print(f"Overall duplicate rate: {stats['duplicate_rate']:.1f}%")
 
-    # check that xrefs were properly merged
-    merged_record = next(r for r in result["deduplicated_records"] if r["_id"] == "test1")
-    assert "pdb" in merged_record["subject"]["xrefs"], "Should have merged PDB xref"
-    assert "smpdb" in merged_record["object"]["xrefs"], "Should have merged SMPDB xref"
+    # Verify the merged record has all xrefs and pmids
+    test1_record = next(r for r in records if r["_id"] == "A_participates_in_B")
+    subject_xrefs = test1_record["subject"]["xrefs"]
+    object_xrefs = test1_record["object"]["xrefs"]
 
-    print("Deduplication test passed!")
-    return True
+    print(f"\nMerged subject xrefs: {list(subject_xrefs.keys())}")
+    print(f"Merged object xrefs: {list(object_xrefs.keys())}")
+
+    # check merged pmids
+    if "association" in test1_record and "publication" in test1_record["association"]:
+        pub = test1_record["association"]["publication"]
+        if "pmid" in pub:
+            print(f"Merged pmids: {pub['pmid']}")
+
+    expected_subject_xrefs = {"uniprot", "pdb"}
+    expected_object_xrefs = {"kegg", "smpdb"}
+    expected_pmids = ["PMID:12345", "PMID:67890", "PMID:11111"]
+
+    assert set(subject_xrefs.keys()) == expected_subject_xrefs
+    assert set(object_xrefs.keys()) == expected_object_xrefs
+    assert len(records) == 2
+
+    # Check pmids were merged correctly
+    if "association" in test1_record and "publication" in test1_record["association"]:
+        pub = test1_record["association"]["publication"]
+        assert "pmid" in pub, "Should have pmid field"
+        assert pub["pmid"] == expected_pmids, f"Expected {expected_pmids}, got {pub['pmid']}"
+
+    print("\n✅ Two-stage deduplication with PMID merging test passed!")
+    return records
 
 
 if __name__ == "__main__":
-    test_hybrid_deduplication()
+    test_two_stage_deduplication()

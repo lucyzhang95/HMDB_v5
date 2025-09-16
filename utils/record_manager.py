@@ -18,7 +18,7 @@ from tqdm.auto import tqdm
 
 from .cache_manager import CacheManager
 from .reader import extract_file_from_zip
-from .record_deduplicator import _create_fingerprint, deduplicate_and_merge
+from .record_deduplicator import _create_merge_fingerprint, deduplicate_records
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s %(message)s")
 logger = logging.getLogger(__name__)
@@ -438,12 +438,12 @@ class RecordManager:
         if not batch:
             return 0
 
-        deduped_batch = deduplicate_and_merge(batch)
+        deduped_batch = deduplicate_records(batch)
         standardized_batch = [self._standardize_record(record) for record in deduped_batch]
 
         new_records_no_dup = []
         for record in standardized_batch:
-            record_fingerprint = _create_fingerprint(record)
+            record_fingerprint = _create_merge_fingerprint(record)
             if record_fingerprint not in global_seen_keys:
                 global_seen_keys.add(record_fingerprint)
                 new_records_no_dup.append(record)

@@ -222,6 +222,13 @@ class HMDBProteinParser(XMLParseHelper):
                 if entrez_id:
                     xrefs["entrezgene"] = f"NCBIGene:{entrez_id}"
 
+        # chromosomal_location
+        chromosomal_location = gene_props.get("chromosomal_location")
+        if "," in chromosomal_location:
+            chromosomal_location = chromosomal_location.split(",")
+        else:
+            chromosomal_location = [chromosomal_location]
+
         # complete protein node
         protein_node = {
             "id": primary_id,
@@ -237,7 +244,7 @@ class HMDBProteinParser(XMLParseHelper):
             "transmembrane_region": prot_props.get("transmembrane_region"),
             "signal_region": prot_props.get("signal_region"),
             "protein_seq": prot_props.get("protein_seq"),
-            "chromosomal_location": gene_props.get("chromosomal_location"),
+            "chromosomal_location": chromosomal_location,
             "locus": gene_props.get("locus"),
             "gene_seq": gene_props.get("gene_sequence"),
             "gene_description": gene_description,

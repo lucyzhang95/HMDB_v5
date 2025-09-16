@@ -233,3 +233,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    # use "python hmdb_parser.py --export hmdb_v5_parsed_records.jsonl --format jsonl"

@@ -101,11 +101,39 @@ def _merge_pmids(target_pmids: List, source_pmids: List) -> List:
     return unique_pmids
 
 
+def _has_better_evidence(record: Dict) -> bool:
+    """
+    Check if a record has better evidence quality.
+    Returns True if record has publication and non-zero evidence code.
+    """
+    has_publication = (
+            "association" in record
+            and "publication" in record["association"]
+            and record["association"]["publication"] is not None
+    )
+    has_good_evidence = (
+            "association" in record
+            and "has_evidence" in record["association"]
+            and record["association"]["has_evidence"] != "ECO:0000000"
+    )
+
+    return has_publication and has_good_evidence
+
+
 def _merge_records(target_record: Dict, source_record: Dict) -> None:
     """
     Merge source_record into target_record in-place.
     Focuses on merging xrefs and pmids while preserving other fields from target.
+    If source has better evidence (publication + non-zero ECO), replace target entirely.
     """
+    if _has_better_evidence(source_record) and not _has_better_evidence(target_record):
+        # replace target with source (source has better evidence)
+        target_record.clear()
+        target_record.update(copy.deepcopy(source_record))
+        return
+    elif _has_better_evidence(target_record) and not _has_better_evidence(source_record):
+        return
+
     # merge subject xrefs
     if (
             "subject" in source_record
@@ -147,16 +175,14 @@ def _merge_records(target_record: Dict, source_record: Dict) -> None:
         source_pub = source_record["association"]["publication"]
         target_pub = target_record["association"]["publication"]
 
-        # check if the rest of field of publication match excluding pmid field
+        # check if publications match (excluding pmid field)
         source_pub_key = {k: v for k, v in source_pub.items() if k != "pmid"}
         target_pub_key = {k: v for k, v in target_pub.items() if k != "pmid"}
 
         if source_pub_key == target_pub_key or not target_pub_key:
-            # Publications match or target is empty, merge pmids
             source_pmids = source_pub["pmid"]
             target_pmids = target_pub.get("pmid", [])
 
-            # normalize pmid to lists
             if isinstance(source_pmids, str):
                 source_pmids = [source_pmids]
             if isinstance(target_pmids, str):
@@ -247,8 +273,8 @@ def deduplicate_with_stats(records: Union[List[Dict], Iterator[Dict]]) -> Dict:
                 "final_count": 0,
                 "records_merged": 0,
                 "exact_duplicates_removed": 0,
-                "duplicate_rate": 0.0,
-            },
+                "duplicate_rate": 0.0
+            }
         }
 
     # merge records with same non-xref fields
@@ -289,12 +315,13 @@ def deduplicate_with_stats(records: Union[List[Dict], Iterator[Dict]]) -> Dict:
         "final_count": final_count,
         "records_merged": records_merged,
         "exact_duplicates_removed": exact_duplicates_removed,
-        "duplicate_rate": (original_count - final_count) / original_count * 100
-        if original_count > 0
-        else 0.0,
+        "duplicate_rate": (original_count - final_count) / original_count * 100 if original_count > 0 else 0.0
     }
 
-    return {"deduplicated_records": final_records, "stats": stats}
+    return {
+        "deduplicated_records": final_records,
+        "stats": stats
+    }
 
 
 def test_two_stage_deduplication():

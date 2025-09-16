@@ -228,13 +228,13 @@ class HMDBProteinParser(XMLParseHelper):
             if "," in chromosomal_location:
                 chromosomal_location = chromosomal_location.split(",")
                 chromosomal_location = [
-                    int(loc).strip() if loc not in ["X", "Y"] else loc.strip()
+                    int(loc.strip()) if loc.strip() not in ["X", "Y"] else loc.strip()
                     for loc in chromosomal_location
                 ]
             else:
                 chromosomal_location = [
-                    int(chromosomal_location).strip()
-                    if chromosomal_location not in ["X", "Y"]
+                    int(chromosomal_location.strip())
+                    if chromosomal_location.strip() not in ["X", "Y"]
                     else chromosomal_location.strip()
                 ]
         else:

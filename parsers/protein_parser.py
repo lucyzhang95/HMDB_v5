@@ -119,10 +119,17 @@ class HMDBProteinParser(XMLParseHelper):
         chrom_loc = None
         if chrom_loc_raw:
             candidate = chrom_loc_raw.split(":", 1)[-1] if ":" in chrom_loc_raw else chrom_loc_raw
-            try:
-                chrom_loc = int(candidate)
-            except ValueError:
-                chrom_loc = candidate.strip()
+            locations = [loc.strip() for loc in candidate.split(",")]
+
+            chrom_loc = []
+            for loc in locations:
+                if loc.upper() in ["X", "Y"]:
+                    chrom_loc.append(loc.upper())
+                else:
+                    try:
+                        chrom_loc.append(int(loc))
+                    except ValueError:
+                        chrom_loc.append(loc)
 
         return self.remove_empty_none_values(
             {
@@ -222,24 +229,6 @@ class HMDBProteinParser(XMLParseHelper):
                 if entrez_id:
                     xrefs["entrezgene"] = f"NCBIGene:{entrez_id}"
 
-        # chromosomal_location
-        chromosomal_location = gene_props.get("chromosomal_location")
-        if chromosomal_location:
-            if "," in chromosomal_location:
-                chromosomal_location = chromosomal_location.split(",")
-                chromosomal_location = [
-                    int(loc.strip()) if loc.strip() not in ["X", "Y"] else loc.strip()
-                    for loc in chromosomal_location
-                ]
-            else:
-                chromosomal_location = [
-                    int(chromosomal_location.strip())
-                    if chromosomal_location.strip() not in ["X", "Y"]
-                    else chromosomal_location.strip()
-                ]
-        else:
-            chromosomal_location = []
-
         # complete protein node
         protein_node = {
             "id": primary_id,
@@ -255,7 +244,7 @@ class HMDBProteinParser(XMLParseHelper):
             "transmembrane_region": prot_props.get("transmembrane_region"),
             "signal_region": prot_props.get("signal_region"),
             "protein_seq": prot_props.get("protein_seq"),
-            "chromosomal_location": chromosomal_location,
+            "chromosomal_location": prot_props.get("chromosomal_location"),
             "locus": gene_props.get("locus"),
             "gene_seq": gene_props.get("gene_sequence"),
             "gene_description": gene_description,

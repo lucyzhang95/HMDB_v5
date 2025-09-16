@@ -185,7 +185,7 @@ class IDHierarchy:
             ("drugbank_id", "DRUGBANK"),
             ("chebi_id", "CHEBI"),
             ("chembl_id", "CHEMBL.COMPOUND"),
-            ("smiles", ""),
+            ("smiles", "smiles"),
             ("cas_registry_number", "CAS"),
             ("kegg_id", None),
             ("metlin_id", "METLIN"),
@@ -215,7 +215,7 @@ class IDHierarchy:
             if tag == "kegg_id":
                 prefix = classify_kegg(val.upper())
             elif tag == "smiles":
-                prefix = ""
+                prefix = "smiles"
 
             curie = f"{prefix}:{val}" if prefix != "" else val
 
